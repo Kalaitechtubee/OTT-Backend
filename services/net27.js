@@ -272,15 +272,6 @@ function extractTokenExpiry(url) {
 }
 
 /**
- * Returns true if the URL's signed token is valid for at least `bufferSecs` more seconds.
- */
-function isTokenFresh(url, bufferSecs = 30) {
-  const t = extractTokenExpiry(url);
-  if (!t) return true; // No token — assume OK
-  return t > (Date.now() / 1000) + bufferSecs;
-}
-
-/**
  * Get fresh MP4 stream URLs for a title.
  *
  * ⚠️ NEVER CACHE the returned URLs — they contain signed tokens that expire.
@@ -293,7 +284,7 @@ function isTokenFresh(url, bufferSecs = 30) {
  *   - sid:  subjectId (for language selection)
  *   - dp:   detailPath
  */
-async function getStreams(tmdbId, opts = {}, _attempt = 0) {
+async function getStreams(tmdbId, opts = {}) {
   const params = {};
   if (opts.type) params.type = opts.type;
   if (opts.se) params.se = opts.se;
@@ -301,27 +292,21 @@ async function getStreams(tmdbId, opts = {}, _attempt = 0) {
   if (opts.sid) params.sid = opts.sid;
   if (opts.dp) params.dp = opts.dp;
 
-  // Add a cache-buster on retries to prevent Net27 returning stale cached responses
-  if (_attempt > 0) {
-    params._cb = Date.now();
-    console.log(`[Net27] getStreams retry #${_attempt} with cache-buster (stale token detected)`);
-    await delay(500 * _attempt); // back-off: 500ms, 1000ms
-  }
-
+  // Always fetch fresh — never cache stream responses (signed tokens expire)
   const data = await apiGet(`/api/embed-tmdb/${tmdbId}`, params);
 
-  // Validate that the returned stream URLs have fresh (non-expired) tokens
+  // Note: Net27 sometimes returns tokens that appear "expired" by timestamp,
+  // but the CDN (bcdnxw.hakunaymatata.com) validates by IP/region, not timestamp.
+  // Requests routed through the Cloudflare Worker always succeed (206 Partial Content).
   const checkUrl = data?.mp4 || (data?.streams && data.streams[0]?.url);
-  if (checkUrl && !isTokenFresh(checkUrl) && _attempt < 3) {
+  if (checkUrl) {
     const t = extractTokenExpiry(checkUrl);
-    console.warn(
-      `[Net27] ⚠️ Stale token detected (expired ${Math.round(Date.now() / 1000 - t)}s ago). Retrying...`
-    );
-    return getStreams(tmdbId, opts, _attempt + 1);
-  }
-
-  if (checkUrl && !isTokenFresh(checkUrl)) {
-    console.error('[Net27] ❌ All retries exhausted — Net27 is still returning expired tokens.');
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (t && t < nowSec) {
+      console.log(`[Net27] ℹ️ Token t=${t} appears expired by ${nowSec - t}s — CDN still accepts via CF Worker.`);
+    } else {
+      console.log(`[Net27] ✅ Token valid, expires in ${t ? t - nowSec : '?'}s`);
+    }
   }
 
   return data;

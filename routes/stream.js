@@ -118,7 +118,9 @@ router.get('/play/:tmdbId', async (req, res) => {
     const protocol = isLocal ? req.protocol : 'https';
     const backendBaseUrl = process.env.BACKEND_URL || `${protocol}://${host}`;
 
-    const useProxy = req.query.proxy === 'true';
+    // Default: always route through CF Worker proxy (CDN blocks direct server IPs with 403)
+    // Pass ?proxy=false to get raw CDN URLs (for clients that handle headers themselves)
+    const useProxy = req.query.proxy !== 'false';
 
     const getProxyUrl = (cdnUrl) => {
       if (!cdnUrl) return '';
