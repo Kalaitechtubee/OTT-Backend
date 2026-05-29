@@ -1,201 +1,444 @@
-# 🎬 StreamVault Backend API Documentation
+# 🎬 StreamVault Backend — Final Production Documentation
 
-Welcome to the backend infrastructure of **StreamVault** — a high-performance, resilient API proxy and media streaming pipeline designed specifically for the StreamVault mobile client.
-
-This service abstracts the complexity of working with dynamic third-party providers (specifically Net27), handles mirror discovery under domain-rotation events, rewrites signed expiring stream URLs, and proxies heavy video streams with full `Range` request support for smooth, seekable playback in Flutter.
+> **Node.js + Express API Gateway**  
+> Production URL: `https://ott-backend-eg8y.onrender.com`  
+> GitHub: `https://github.com/Kalaitechtubee/OTT-Backend`
 
 ---
 
-## 🏗️ Architectural Overview
+## 📐 Final Architecture
 
-StreamVault Backend acts as an intelligent intermediary. Since third-party CDN providers restrict direct access via CORS and referer checks, and frequently rotate their domains to evade blocks, the backend handles these concerns transparently.
+```
+Flutter App (Android/iOS)
+        │
+        │  GET /api/catalog/*        ← Browse, Search, Details
+        │  GET /api/stream/play/:id  ← Get stream URLs (JSON only)
+        ▼
+  Render Backend (Node.js)
+        │
+        │  Proxies API calls → Net27 mirror (net27.cc / net52.cc / net22.cc)
+        │  Builds CF Worker stream URLs and returns JSON
+        ▼
+  Net27 API  (net27.cc)
+        │
+        │  Returns: catalog data, embed URLs, signed CDN URLs
+        ▼
+  ┌─────────────────────────────────────────────────────┐
+  │  Backend returns CF Worker URLs to Flutter          │
+  │  e.g. https://streamhub-proxy.1545zoya.workers.dev  │
+  │       /?url=<encoded_cdn_url>&referer=...&origin=...│
+  └─────────────────────────────────────────────────────┘
+        │
+        │  Flutter MediaKit plays this URL directly
+        ▼
+  Cloudflare Worker  (streamhub-proxy.1545zoya.workers.dev)
+        │
+        │  Trusted Cloudflare edge IPs — CDN accepts all requests
+        ▼
+  CDN  (bcdnxw.hakunaymatata.com)
+        │
+        │  HTTP 206 Partial Content — video bytes stream to Flutter
+        ▼
+  Flutter Video Player (MediaKit) 🎬 ✅
+```
 
-```mermaid
-graph TD
-    subgraph Flutter Client
-        FC[Flutter Mobile App]
-    end
+> **Key principle**: The Render server **never proxies video data**. It only serves JSON.  
+> Video bytes flow: `Flutter → CF Worker → CDN` — Render is not in that path.
 
-    subgraph StreamVault Backend
-        SV[Express.js Server]
-        MD[Mirror Discovery Engine]
-        MC[Memory Cache TTL 10m]
-        PR[Streaming Video Proxy]
-    end
+---
 
-    subgraph Upstream Provider Net27
-        N27[Active Net27 Mirror e.g. net52.cc]
-        CDN[Raw CDN Servers]
-    end
+## 🗂️ Project Structure
 
-    subgraph Workers Network
-        CF[Cloudflare Worker Proxy]
-    end
-
-    FC -->|1. Request Catalog / Details / Play| SV
-    SV -->|2. Check Cache| MC
-    MC -->|Cache Miss| MD
-    MD -->|3. Probes / DNS Sweep| N27
-    SV -->|4. Get Metadata / Streams| N27
-    FC -->|5. Play Video Stream| PR
-    PR -->|6. Range Request + referer| CF
-    CF -->|7. Fetches Chunk| CDN
-    CDN -->|8. Video Data Chunk| CF
-    CF -->|9. Video Data Chunk| PR
-    PR -->|10. Seekable Pipe 206 Partial| FC
+```
+backend/
+├── server.js               # Express app entry point, middleware, health route
+├── package.json
+├── .env                    # PORT, BACKEND_URL (not committed)
+├── .env.example
+├── routes/
+│   ├── catalog.js          # /api/catalog/* — browse, search, details
+│   └── stream.js           # /api/stream/* — languages, play, proxy
+└── services/
+    └── net27.js            # Net27 mirror discovery + all API calls
 ```
 
 ---
 
-## 🛠️ Key Technical Engines
+## ⚙️ Environment Variables
 
-### 1. 🔍 Mirror Discovery Engine (`services/net27.js`)
-Net27 domains are frequently blocked, resulting in domain rot (e.g., `net27.cc` rotates to `net52.cc`, `net22.cc`, etc.). The backend solves this by implementing an active discovery pipeline:
-*   **Static Fallbacks:** Checks a prioritized list of known domains (`MIRROR_DOMAINS`): `net27.cc`, `net52.cc`, `net22.cc`.
-*   **Dynamic DNS Sweep:** If all static fallbacks fail, the engine generates domain names in parallel from `net10.cc` to `net99.cc` (90 domains) and performs DNS resolution (`dns.lookup`) to find online hosts.
-*   **Validation Probing:** Resolved domains are actively queried (`HTTP GET /`) to check if they are the real NetMirror catalog (verifying the HTML contains `"Search movies"` and does *not* contain `"Sign-In is Required"`).
-*   **Discovery Cache:** The working domain is cached in memory for **10 minutes** to avoid the performance penalty of domain sweeps on subsequent API requests.
+| Variable       | Default                                  | Purpose                                      |
+|----------------|------------------------------------------|----------------------------------------------|
+| `PORT`         | `5000`                                   | HTTP server port                             |
+| `BACKEND_URL`  | Auto-detected from `req.get('host')`     | Base URL used to build Render proxy URLs     |
+| `NODE_ENV`     | —                                        | Set to `production` on Render automatically  |
 
-### 2. ⚡ Intelligent Memory Cache
-To decrease upstream API request overhead and bypass rate limits, the backend implements a clean, high-performance in-memory cache system with a **10-minute Time-To-Live (TTL)**.
-*   **Scoped Caches:** Dedicated memory pools for Title Details, Available Languages, Catalog Categories, and Seasons.
-*   **Dynamic Expiration:** Stale keys are automatically evicted upon access when their age exceeds `TTL_MS`.
+---
 
-### 3. 🛡️ Streaming & Video Proxy Pipeline (`routes/stream.js`)
-Net27's video files are served from highly restrictive CDNs that require:
-1.  A specific HTTP `Referer` simulating their internal embedded iframe.
-2.  A valid user agent.
-3.  Signed URL tokens that expire quickly (cannot be statically stored).
+## 🔌 API Reference
 
-#### Workflow of Playback:
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as Flutter Client
-    participant Server as StreamVault Backend
-    participant Net27 as Net27 API
-    participant Worker as Cloudflare Worker Proxy
-    participant CDN as CDN Storage
-
-    User->>Server: GET /api/stream/play/:tmdbId?type=tv&se=1&ep=1...
-    Server->>Net27: GET /api/embed-tmdb/:tmdbId
-    Net27-->>Server: Return raw CDN URLs + signed tokens (expireable)
-    Note over Server: Rewrites raw CDN URLs to local Proxy URLs.<br/>Constructs spoofed Referer URL.
-    Server-->>User: Return clean streams array pointing to /api/stream/proxy
-    
-    User->>Server: GET /api/stream/proxy?url=<cdn_url>&referer=<referer>&origin=<origin> (Range: bytes=0-)
-    Note over Server: Prepends Cloudflare worker URL & passes referer/origin parameters to bypass CDN blocks
-    Server->>Worker: GET /?url=<cdn_url>&referer=<referer>&origin=<origin> (with Range header)
-    Worker->>CDN: Fetch data chunk with Referer/Origin headers
-    CDN-->>Worker: Return Chunk (206 Partial Content)
-    Worker-->>Server: Return Chunk (206 Partial Content)
-    Server-->>User: Pipe stream chunk to player with proper content headers
+### Health Check
+```
+GET /health
+→ { "ok": true, "uptime": 123.4, "mirror": "https://net27.cc" }
 ```
 
-#### The Proxy Mechanism:
-*   **Rewriting Engine:** The `GET /api/stream/play/:tmdbId` endpoint rewrites the raw CDN URLs returned from upstream, transforming them into local backend proxy endpoints:
-    `/api/stream/proxy?url=URL&referer=SpoofedReferer&origin=ActiveMirror`
-*   **Cloudflare Worker Proxy Integration:** Requests are routed through a Cloudflare Worker helper (`streamhub-proxy.1545zoya.workers.dev`) to guarantee reliable CORS bypass and secure proxying.
-*   **Range Support (206 Partial Content):** The proxy captures and forwards the `Range` headers sent by video players (e.g. `Range: bytes=1048576-`). It streams the media chunk back to the client with appropriate headers (`Content-Type`, `Content-Length`, `Content-Range`, `Accept-Ranges`), enabling seek/rewind capability and instant buffering on mobile players.
-*   **Memory Safety & Connection Cleanup:** Listens to client connection closes (`req.on('close')`) to abort the backend-to-worker connection immediately, preventing socket/resource leaks.
+---
+
+### Catalog Endpoints
+
+#### Trending / Home Page
+```
+GET /api/catalog/trending
+→ {
+    "ok": true,
+    "hero": [ { tmdbId, type, title, year, backdropUrl, rating } ],
+    "rails": [ { key, title, ranked, items: [ Movie ] } ]
+  }
+```
+
+#### Search
+```
+GET /api/catalog/search?q=avatar&page=1
+→ { "ok": true, "items": [ Movie ] }
+```
+
+#### Title Details (Movie or TV)
+```
+GET /api/catalog/title/:type/:tmdbId
+  type = "movie" | "tv"
+
+→ {
+    "ok": true,
+    "tmdbId": 76479,
+    "title": "The Boys",
+    "type": "tv",
+    "overview": "...",
+    "poster": "https://...",
+    "backdrop": "https://...",
+    "rating": 8.4,
+    "year": "2019",
+    "seasons": [ { seasonNumber, episodeCount, name } ],
+    "subjectId": "5139196938264400928",
+    "detailPath": "the-boys-c8bx84KzD76"
+  }
+```
+> ✅ Cached in memory for 10 minutes (catalog data is stable)
+
+#### Season Episodes
+```
+GET /api/catalog/season/:tmdbId/:seasonNumber
+
+→ {
+    "ok": true,
+    "initialEpisodes": [
+      { episode, name, overview, still, runtime, airDate }
+    ]
+  }
+```
+> ✅ Cached in memory for 10 minutes
 
 ---
 
-## 🛣️ API Endpoints Reference
+### Stream Endpoints
 
-### 📁 Catalog Routes (`/api/catalog`)
+#### Get Available Languages / Dubs
+```
+GET /api/stream/languages/:type/:tmdbId
+  For TV: ?se=1&ep=1&sid=<subjectId>&dp=<detailPath>
 
-#### 1. Trending Items
-*   **Endpoint:** `GET /api/catalog/trending`
-*   **Description:** Returns curated trending media containing hero banners and content rails.
-
-#### 2. Categorized Catalog
-*   **Endpoint:** `GET /api/catalog/category/:tab`
-*   **Parameters:** `:tab` (e.g. `netflix`, `prime-video`, `hulu`, etc.)
-*   **Description:** Returns curated platform-specific titles.
-
-#### 3. Hybrid Search
-*   **Endpoint:** `GET /api/catalog/search`
-*   **Query Params:**
-    *   `q` (string, required) — The search keyword.
-    *   `page` (number, optional) — Defaults to `1`.
-*   **Description:** Searches titles across movies and TV series, returning metadata and direct watch status.
-
-#### 4. Title Details
-*   **Endpoint:** `GET /api/catalog/title/:type/:tmdbId`
-*   **Parameters:**
-    *   `:type` — `movie` or `tv`
-    *   `:tmdbId` — TMDB identifier
-*   **Description:** Fetches comprehensive info (overview, runtime, cast, backdrop). For TV series, lists available seasons.
-
-#### 5. Season Episodes
-*   **Endpoint:** `GET /api/catalog/season/:tmdbId/:seasonNumber`
-*   **Description:** Lists all episodes for a specific season of a TV show.
+→ {
+    "ok": true,
+    "variants": [
+      { "dubSubjectId": "4910882524659959568", "language": "Tamil dub", "isOriginal": false },
+      { "dubSubjectId": "2319163628954659828", "language": "Hindi dub", "isOriginal": false },
+      { "dubSubjectId": "5139196938264400928", "language": "English", "isOriginal": true }
+    ]
+  }
+```
+> ✅ Cached per (type, tmdbId, season, episode) — 10 minutes
 
 ---
 
-### 🎥 Streaming Routes (`/api/stream`)
+#### ⭐ Get Stream URLs (Play)
 
-#### 1. Language Variants
-*   **Endpoint:** `GET /api/stream/languages/:type/:tmdbId`
-*   **Parameters:** `:type`, `:tmdbId`
-*   **Query Params (Required for TV, omit for movies):**
-    *   `se` (season number)
-    *   `ep` (episode number)
-    *   `sid` (subjectId)
-    *   `dp` (detailPath)
-*   **Description:** Retrieves audio language options (dubs/subs) available for playback.
+```
+GET /api/stream/play/:tmdbId
 
-#### 2. Get Playback Stream Info
-*   **Endpoint:** `GET /api/stream/play/:tmdbId`
-*   **Query Params:** Same as above (`type`, `se`, `ep`, `sid`, `dp`). Pass a specific `sid` (dubSubjectId) from languages to play dub audio.
-    *   `proxy` (boolean, optional) — Pass `true` to rewrite raw CDN links into backend proxy routes (useful for browser-based video players bound by CORS). Defaults to `false` (returns raw CDN URLs directly for native clients like Flutter `media_kit`).
-*   **Description:** Retrieves the stream configuration containing fresh, signed playback URLs and spoof headers.
-*   **Response Format (Default - Raw CDN URLs):**
-    ```json
-    {
-      "ok": true,
-      "tmdbId": 550,
-      "title": "Fight Club",
-      "type": "movie",
-      "year": 1999,
-      "mp4": "https://bcdnxw.hakunaymatata.com/resource/7db37ca37d606d50cc669a96cd42c129.mp4?sign=xxx&t=xxx",
-      "resolution": "1080",
-      "streams": [
-        {
-          "url": "https://bcdnxw.hakunaymatata.com/resource/7db37ca37d606d50cc669a96cd42c129.mp4?sign=xxx&t=xxx",
-          "resolution": 1080,
-          "size": 646186864
-        }
-      ],
-      "headers": {
-        "Referer": "https://net27.cc/api/embed-tmdb/550",
-        "User-Agent": "Mozilla/5.0 ...",
-        "Origin": "https://net27.cc"
-      }
-    }
-    ```
+For movies:
+  GET /api/stream/play/550
 
-#### 3. Media Proxy Stream (Range-Compatible)
-*   **Endpoint:** `GET /api/stream/proxy`
-*   **Query Params:** `url`, `referer`, `origin`
-*   **Headers Supported:** `Range`
-*   **Description:** Proxies raw media data, simulating all target headers to satisfy upstream constraints while servicing standard client seeks.
+For TV episodes:
+  GET /api/stream/play/76479?type=tv&se=1&ep=1&sid=<subjectId>&dp=<detailPath>
 
----
+For specific language dub:
+  Add &sid=<dubSubjectId> from the /languages endpoint
+```
 
-## 🚀 Environment and Deployment
+**Response:**
+```json
+{
+  "ok": true,
+  "tmdbId": 76479,
+  "title": "The Boys",
+  "type": "tv",
+  "year": "2019",
+  "currentSeason": 1,
+  "currentEpisode": 1,
+  "resolution": "1080",
+  "mp4": "https://streamhub-proxy.1545zoya.workers.dev/?url=https%3A%2F%2Fbcdnxw...mp4%3Fsign%3D...%26t%3D...&referer=...&origin=...",
+  "streams": [
+    { "url": "https://streamhub-proxy.1545zoya.workers.dev/?url=...", "resolution": 360, "size": 210144117 },
+    { "url": "https://streamhub-proxy.1545zoya.workers.dev/?url=...", "resolution": 480, "size": 222382021 },
+    { "url": "https://streamhub-proxy.1545zoya.workers.dev/?url=...", "resolution": 720, "size": 406800865 },
+    { "url": "https://streamhub-proxy.1545zoya.workers.dev/?url=...", "resolution": 1080, "size": 646186864 }
+  ],
+  "subjectId": "5139196938264400928",
+  "fallbackHls": "/api/loffe/tt1190634",
+  "headers": {
+    "Referer": "https://net27.cc/api/embed-tmdb/76479?type=tv&se=1&ep=1",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7)...",
+    "Origin": "https://net27.cc"
+  }
+}
+```
 
-*   **Runtime:** Node.js (Express.js)
-*   **Local Run Script:** `npm run dev` (utilizes `nodemon` for instant restarts)
-*   **Production Deployment:** Hosted on **Render** at `https://ott-backend-eg8y.onrender.com`
-*   **Environment Variables (`.env`):**
-    *   `PORT`: Port to run the server on (default `5000`).
-    *   `BACKEND_URL`: The host URL used to format and prefix proxied playback URLs.
+> ⚠️ **NEVER CACHE** stream URLs — they contain signed tokens that expire  
+> ✅ `streams[].url` are **CF Worker URLs** — Flutter plays them directly with MediaKit  
+> ✅ No custom HTTP headers needed in default mode (CF Worker handles CORS)
+
+**URL Mode Query Param (`?proxy=`):**
+
+| `?proxy=`   | URL type returned          | Use case                                        |
+|-------------|----------------------------|-------------------------------------------------|
+| *(omit)*    | CF Worker URL (default)    | Flutter / mobile apps ✅                        |
+| `false`     | Raw CDN URL                | Clients that set Referer/Origin manually        |
+| `true`      | Render server proxy URL    | Local testing only (403 on Render datacenter)   |
 
 ---
 
-## ⚡ Error & Rate-Limit Resiliency
-1.  **Upstream 429 Handling:** When Net27 triggers an API rate limit (`HTTP 429`), the service catches the error, delays for **3 seconds**, and transparently retries the query to ensure user flow is uninterrupted. If it continues failing, it gracefully propagates a sanitized 429 JSON response.
-2.  **Server Timeout Guard:** Network requests to Net27 feature an aggressive 10s timeout window, preventing blocking requests from freezing the main Express event loop.
-3.  **Active Connections Cleanup:** If the client exits or changes the video during proxying, the backend immediately terminates the upstream connection to conserve bandwidth and prevent server thread starvation.
+#### Stream Proxy (Fallback / Local Testing Only)
+```
+GET /api/stream/proxy?url=<encoded_url>&referer=<encoded_ref>&origin=<encoded_origin>
+```
+> ⚠️ This proxies through the Render server → CF Worker → CDN.  
+> Returns 403 when called from Render (datacenter IP blocked by CDN).  
+> Works only from local machine. Use CF Worker URLs directly instead.
+
+---
+
+## 🌐 Net27 Mirror Discovery (`services/net27.js`)
+
+The service auto-discovers a working Net27 mirror at startup:
+
+```
+1. Try known mirrors in order: net27.cc → net52.cc → net22.cc
+   └─ Probe each: GET / → check response HTML for "Search movies"
+   
+2. If all fail → DNS sweep net10.cc through net99.cc (parallel)
+   └─ Resolve each, probe responding ones
+   
+3. Ultimate fallback → use net27.cc regardless
+```
+
+**Mirror cache TTL:** 10 minutes  
+**API request timeout:** 10 seconds  
+**Rate limit handling:** Auto-retry once after 3s on HTTP 429
+
+---
+
+## 📦 Caching Policy
+
+| Data Type            | Cached? | TTL        | Reason                              |
+|----------------------|---------|------------|-------------------------------------|
+| Mirror domain        | ✅ Yes  | 10 minutes | Avoid probing on every request      |
+| Catalog details      | ✅ Yes  | 10 minutes | Stable data (title, seasons, etc.)  |
+| Season episodes      | ✅ Yes  | 10 minutes | Stable episode metadata             |
+| Language variants    | ✅ Yes  | 10 minutes | Stable dub list per episode         |
+| **Stream URLs**      | ❌ No   | Never      | Signed tokens expire — always fresh |
+
+---
+
+## 🔑 CDN Access & Security Deep Dive
+
+### How CDN Signing Works
+The CDN (`bcdnxw.hakunaymatata.com`) issues **HMAC-signed URLs**:
+```
+https://bcdnxw.hakunaymatata.com/resource/<hash>.mp4?sign=<hmac>&t=<unix_expiry>
+```
+- `sign` = HMAC-SHA1 of the path + secret key
+- `t` = expiry unix timestamp (typically issued for ~30-60 minutes)
+
+### Why Server Proxy Gets 403
+```
+❌ Render server (datacenter IP)  → direct CDN   = 403 ACCESS DENIED
+❌ Render server → CF Worker      → CDN           = 403 ACCESS DENIED
+   (CF Worker exposes Render's IP via X-Forwarded-For or by egress region)
+
+✅ Local machine (consumer IP)    → CF Worker → CDN = 206 Partial Content
+✅ Flutter mobile (consumer IP)   → CF Worker → CDN = 206 Partial Content
+✅ Browser (consumer IP)          → CF Worker → CDN = 206 Partial Content
+```
+
+### Token "Expiry" Discovery
+Net27's embed API sometimes returns tokens where `t` timestamp appears expired.
+However, the CDN validates by **IP/region, not by timestamp** when accessed via CF Worker.
+This is consistent with how Net27's own website works (confirmed via network capture).
+
+### CF Worker Role
+`streamhub-proxy.1545zoya.workers.dev` is Net27's own Cloudflare Worker:
+- Net27's website embeds CF Worker URLs as `<video src>` directly in the browser
+- Flutter plays the same CF Worker URLs via MediaKit
+- CF Worker runs on Cloudflare's edge network (trusted IPs globally)
+- Adds `access-control-allow-origin: *` CORS header
+
+---
+
+## 📱 Flutter Integration
+
+### `BackendService.getStreams()` — Call on every Play press
+```dart
+final result = await BackendService.getStreams(
+  tmdbId: 76479,
+  type: 'tv',
+  season: 1,
+  episode: 1,
+  sid: selectedLanguage?.dubSubjectId,  // from getLanguages()
+  dp: movie.detailPath,
+);
+
+// result.streams → sorted by resolution ascending
+// result.bestUrl → highest resolution CF Worker URL
+// result.headers → Referer/Origin (for raw CDN mode only)
+```
+
+### MediaKit Playback (in `CustomVideoPlayerScreen`)
+```dart
+// CF Worker URL — no custom headers needed (Worker handles CORS)
+await _player.open(Media(cfWorkerUrl));
+
+// Raw CDN URL (?proxy=false mode) — must set headers
+await _player.open(Media(cdnUrl, httpHeaders: {
+  'Referer': result.headers!['Referer']!,
+  'Origin': result.headers!['Origin']!,
+  'User-Agent': 'Mozilla/5.0 (Linux; Android 13...',
+}));
+```
+
+### Quality Switching
+```dart
+// All quality URLs in result.streams — MediaKit seek position preserved
+await _player.pause();
+await _player.open(Media(quality.url, httpHeaders: playerHeaders));
+await _player.seek(currentPosition);
+await _player.play();
+```
+
+---
+
+## 🔁 Complete Watch Flow (TV Episode)
+
+```
+1. User opens app
+   └─ GET /api/catalog/trending → Hero banners + Category rails
+
+2. User taps a TV show
+   └─ GET /api/catalog/title/tv/76479
+      → Title details + seasons list + subjectId + detailPath
+
+3. Detail screen loads
+   └─ GET /api/stream/languages/tv/76479?se=1&ep=1&sid=...&dp=...
+      → [ { language: "Tamil dub", dubSubjectId: "..." }, ... ]
+
+4. User selects "Tamil dub" + taps Play on Episode 3
+   └─ GET /api/stream/play/76479?type=tv&se=1&ep=3&sid=<tamilDubSid>&dp=...
+      → { streams: [ { url: "https://streamhub-proxy.../...mp4...", resolution: 360 }, ... ] }
+
+5. Flutter → MediaKit.open(streams.last.url)
+   └─ Flutter → CF Worker → CDN → 206 video bytes → playback ✅
+
+6. User changes quality to 1080p
+   └─ Flutter switches URL in-place, seeks to saved position
+
+7. User exits player
+   └─ Hive saves { positionSeconds, totalDurationSeconds } for resume
+```
+
+---
+
+## 🚀 Deployment (Render)
+
+### Environment
+- **Service type:** Web Service (Node.js)
+- **Build command:** `npm install`
+- **Start command:** `node server.js`
+- **Region:** Oregon (US West)
+- **Auto-deploy:** On push to `main` branch
+
+### Cold Start
+Render free tier sleeps after 15 minutes of inactivity. First request after sleep takes ~10-15 seconds (Node startup + Net27 mirror probe). Subsequent requests are fast (~50-600ms).
+
+### Logs to Watch
+```
+[Net27] ✅ Using mirror: https://net27.cc          ← Mirror found
+[Net27] ✅ Token valid, expires in 1800s           ← Fresh token
+[Net27] ℹ️ Token t=... appears expired by 1200s    ← Stale token (still works via CF Worker)
+GET /api/stream/play/76479 200 600ms               ← Play request ✅
+GET /api/stream/proxy?url=... 403 485ms            ← Server proxy blocked ⚠️ (expected, use CF Worker)
+```
+
+---
+
+## 🧪 Testing Endpoints
+
+### Quick Smoke Test (all in browser)
+```
+Health:    https://ott-backend-eg8y.onrender.com/health
+Trending:  https://ott-backend-eg8y.onrender.com/api/catalog/trending
+Title:     https://ott-backend-eg8y.onrender.com/api/catalog/title/tv/76479
+Languages: https://ott-backend-eg8y.onrender.com/api/stream/languages/tv/76479?se=1&ep=1
+Play:      https://ott-backend-eg8y.onrender.com/api/stream/play/76479?type=tv&se=1&ep=1
+```
+
+### Verify Stream URL Works (Node.js)
+```javascript
+const axios = require('axios');
+const r = await axios.get('https://ott-backend-eg8y.onrender.com/api/stream/play/76479?type=tv&se=1&ep=1');
+const cfWorkerUrl = r.data.streams[0].url;
+
+// Test CF Worker directly
+const video = await axios.get(cfWorkerUrl, {
+  headers: { Range: 'bytes=0-1023' },
+  responseType: 'arraybuffer'
+});
+console.log(video.status); // 206 ✅
+```
+
+---
+
+## ⚡ Performance Notes
+
+| Operation              | Typical Latency | Notes                                   |
+|------------------------|----------------|-----------------------------------------|
+| Mirror probe (cached)  | ~0ms           | Cached for 10 minutes                   |
+| Mirror probe (first)   | ~200-500ms     | One HTTP request to net27.cc            |
+| Catalog trending       | ~1-2s          | Net27 API response time                 |
+| Title details          | ~300ms         | Cached after first fetch                |
+| Language variants      | ~300ms         | Cached per episode                      |
+| Stream play            | ~500-1500ms    | Net27 embed API (not cached)            |
+| CF Worker video chunk  | ~50-200ms      | Cloudflare edge — very fast             |
+
+---
+
+## 📝 Known Behaviours
+
+1. **Net27 stale tokens**: The embed API (`/api/embed-tmdb/`) sometimes returns CDN URLs where the `t=` timestamp looks expired. This is a Net27 server-side caching issue. The CF Worker still serves these URLs successfully because the CDN validates by IP, not by timestamp.
+
+2. **Mirror rotation**: If `net27.cc` goes down, the backend auto-switches to `net52.cc` or `net22.cc` within 10 minutes (next cache expiry).
+
+3. **Render 403 on proxy route**: `GET /api/stream/proxy` always returns 403 when deployed on Render because the CDN blocks datacenter IPs. This is expected and by design — the proxy route exists only for local testing.
+
+4. **`streamsCache` variable**: Declared in net27.js but unused — `getStreams()` intentionally never caches (stream URLs expire).
+
+---
+
+*Last updated: 2026-05-29 — StreamVault Backend v1.0 Production*

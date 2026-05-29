@@ -249,14 +249,17 @@ async function getLanguages(type, tmdbId, opts = {}) {
     return cached;
   }
 
+  // Pass all available params to the Net27 variants API for BOTH movies and TV.
+  // Without sid/dp, Net27 cannot identify the specific title and may return no variants.
   const params = {};
-  if (type === 'tv') {
-    if (opts.se) params.se = opts.se;
-    if (opts.ep) params.ep = opts.ep;
-    if (opts.sid) params.sid = opts.sid;
-    if (opts.dp) params.dp = opts.dp;
-  }
+  if (opts.se) params.se = opts.se;
+  if (opts.ep) params.ep = opts.ep;
+  if (opts.sid) params.sid = opts.sid;
+  if (opts.dp) params.dp = opts.dp;
+
+  console.log(`[Net27] Fetching language variants for ${type}/${tmdbId}`, params);
   const data = await apiGet(`/api/variants-tmdb/${type}/${tmdbId}`, params);
+  console.log(`[Net27] Language variants result: ok=${data?.ok}, count=${data?.variants?.length ?? 0}`);
   languagesCache.set(cacheKey, data);
   return data;
 }
