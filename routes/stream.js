@@ -118,18 +118,20 @@ router.get('/play/:tmdbId', async (req, res) => {
     const protocol = isLocal ? req.protocol : 'https';
     const backendBaseUrl = process.env.BACKEND_URL || `${protocol}://${host}`;
 
+    const useProxy = req.query.proxy === 'true';
+
     const getProxyUrl = (cdnUrl) => {
       if (!cdnUrl) return '';
       return `${backendBaseUrl}/api/stream/proxy?url=${encodeURIComponent(cdnUrl)}&referer=${encodeURIComponent(refererUrl)}&origin=${encodeURIComponent(domain)}`;
     };
 
-    const proxyMp4 = getProxyUrl(data.mp4);
-    const proxyStreams = (data.streams || []).map(stream => ({
+    const finalMp4 = useProxy ? getProxyUrl(data.mp4) : data.mp4;
+    const finalStreams = (data.streams || []).map(stream => ({
       ...stream,
-      url: getProxyUrl(stream.url)
+      url: useProxy ? getProxyUrl(stream.url) : stream.url
     }));
 
-    // Return clean response with proxy URLs
+    // Return clean response with stream URLs
     res.json({
       ok: true,
       tmdbId: data.tmdbId,
@@ -138,9 +140,9 @@ router.get('/play/:tmdbId', async (req, res) => {
       year: data.year,
       currentSeason: data.currentSeason,
       currentEpisode: data.currentEpisode,
-      mp4: proxyMp4,
+      mp4: finalMp4,
       resolution: data.resolution,
-      streams: proxyStreams,
+      streams: finalStreams,
       subjectId: data.subjectId,
       fallbackHls: data.fallbackHls,
       headers: {

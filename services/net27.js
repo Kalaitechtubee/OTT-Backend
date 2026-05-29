@@ -275,13 +275,6 @@ async function getLanguages(type, tmdbId, opts = {}) {
  *   - dp:   detailPath
  */
 async function getStreams(tmdbId, opts = {}) {
-  const cacheKey = `${tmdbId}_${opts.type || ''}_${opts.se || ''}_${opts.ep || ''}_${opts.sid || ''}_${opts.dp || ''}`;
-  const cached = streamsCache.get(cacheKey);
-  if (cached) {
-    console.log(`[Net27] Cache hit for streams: ${cacheKey}`);
-    return cached;
-  }
-
   const params = {};
   if (opts.type) params.type = opts.type;
   if (opts.se) params.se = opts.se;
@@ -289,8 +282,8 @@ async function getStreams(tmdbId, opts = {}) {
   if (opts.sid) params.sid = opts.sid;
   if (opts.dp) params.dp = opts.dp;
 
+  // Fetch fresh streams on every call to avoid cached signature expiration
   const data = await apiGet(`/api/embed-tmdb/${tmdbId}`, params);
-  streamsCache.set(cacheKey, data);
   return data;
 }
 
