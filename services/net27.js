@@ -262,6 +262,25 @@ async function getLanguages(type, tmdbId, opts = {}) {
 }
 
 /**
+ * Extract the UNIX timestamp `t` from a signed CDN URL.
+ * Returns 0 if not found.
+ */
+function extractTokenExpiry(url) {
+  if (!url) return 0;
+  const m = url.match(/[?&]t=(\d+)/);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+/**
+ * Returns true if the URL's signed token is valid for at least `bufferSecs` more seconds.
+ */
+function isTokenFresh(url, bufferSecs = 30) {
+  const t = extractTokenExpiry(url);
+  if (!t) return true; // No token — assume OK
+  return t > (Date.now() / 1000) + bufferSecs;
+}
+
+/**
  * Get fresh MP4 stream URLs for a title.
  *
  * ⚠️ NEVER CACHE the returned URLs — they contain signed tokens that expire.
@@ -274,7 +293,7 @@ async function getLanguages(type, tmdbId, opts = {}) {
  *   - sid:  subjectId (for language selection)
  *   - dp:   detailPath
  */
-async function getStreams(tmdbId, opts = {}) {
+async function getStreams(tmdbId, opts = {}, _attempt = 0) {
   const params = {};
   if (opts.type) params.type = opts.type;
   if (opts.se) params.se = opts.se;
@@ -282,8 +301,29 @@ async function getStreams(tmdbId, opts = {}) {
   if (opts.sid) params.sid = opts.sid;
   if (opts.dp) params.dp = opts.dp;
 
-  // Fetch fresh streams on every call to avoid cached signature expiration
+  // Add a cache-buster on retries to prevent Net27 returning stale cached responses
+  if (_attempt > 0) {
+    params._cb = Date.now();
+    console.log(`[Net27] getStreams retry #${_attempt} with cache-buster (stale token detected)`);
+    await delay(500 * _attempt); // back-off: 500ms, 1000ms
+  }
+
   const data = await apiGet(`/api/embed-tmdb/${tmdbId}`, params);
+
+  // Validate that the returned stream URLs have fresh (non-expired) tokens
+  const checkUrl = data?.mp4 || (data?.streams && data.streams[0]?.url);
+  if (checkUrl && !isTokenFresh(checkUrl) && _attempt < 3) {
+    const t = extractTokenExpiry(checkUrl);
+    console.warn(
+      `[Net27] ⚠️ Stale token detected (expired ${Math.round(Date.now() / 1000 - t)}s ago). Retrying...`
+    );
+    return getStreams(tmdbId, opts, _attempt + 1);
+  }
+
+  if (checkUrl && !isTokenFresh(checkUrl)) {
+    console.error('[Net27] ❌ All retries exhausted — Net27 is still returning expired tokens.');
+  }
+
   return data;
 }
 
