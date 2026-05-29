@@ -113,7 +113,10 @@ router.get('/play/:tmdbId', async (req, res) => {
     const refererUrl = `${domain}/api/embed-tmdb/${tmdbId}${refererQuery}`;
 
     // Rewriting URLs to route through the proxy endpoint
-    const backendBaseUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+    const host = req.get('host');
+    const isLocal = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('10.0.2.2');
+    const protocol = isLocal ? req.protocol : 'https';
+    const backendBaseUrl = process.env.BACKEND_URL || `${protocol}://${host}`;
 
     const getProxyUrl = (cdnUrl) => {
       if (!cdnUrl) return '';
