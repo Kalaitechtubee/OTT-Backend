@@ -149,8 +149,9 @@ sequenceDiagram
 #### 2. Get Playback Stream Info
 *   **Endpoint:** `GET /api/stream/play/:tmdbId`
 *   **Query Params:** Same as above (`type`, `se`, `ep`, `sid`, `dp`). Pass a specific `sid` (dubSubjectId) from languages to play dub audio.
-*   **Description:** Retrieves the stream configuration. All CDNs are automatically transformed into backend proxy routes.
-*   **Response Format:**
+    *   `proxy` (boolean, optional) — Pass `true` to rewrite raw CDN links into backend proxy routes (useful for browser-based video players bound by CORS). Defaults to `false` (returns raw CDN URLs directly for native clients like Flutter `media_kit`).
+*   **Description:** Retrieves the stream configuration containing fresh, signed playback URLs and spoof headers.
+*   **Response Format (Default - Raw CDN URLs):**
     ```json
     {
       "ok": true,
@@ -158,15 +159,20 @@ sequenceDiagram
       "title": "Fight Club",
       "type": "movie",
       "year": 1999,
-      "mp4": "https://ott-backend-eg8y.onrender.com/api/stream/proxy?url=...",
+      "mp4": "https://bcdnxw.hakunaymatata.com/resource/7db37ca37d606d50cc669a96cd42c129.mp4?sign=xxx&t=xxx",
       "resolution": "1080",
       "streams": [
         {
-          "url": "https://ott-backend-eg8y.onrender.com/api/stream/proxy?url=...",
+          "url": "https://bcdnxw.hakunaymatata.com/resource/7db37ca37d606d50cc669a96cd42c129.mp4?sign=xxx&t=xxx",
           "resolution": 1080,
           "size": 646186864
         }
-      ]
+      ],
+      "headers": {
+        "Referer": "https://net27.cc/api/embed-tmdb/550",
+        "User-Agent": "Mozilla/5.0 ...",
+        "Origin": "https://net27.cc"
+      }
     }
     ```
 
