@@ -43,6 +43,13 @@ router.get('/languages/:type/:tmdbId', async (req, res) => {
     if (req.query.dp) opts.dp = req.query.dp;
 
     const data = await net27.getLanguages(type, parseInt(tmdbId), opts);
+    if (data && data.variants) {
+      const parentSid = data.defaultSubjectId || opts.sid || '';
+      data.variants = data.variants.map(v => ({
+        ...v,
+        sid: v.sid || parentSid
+      }));
+    }
     res.json(data);
   } catch (e) {
     handleRouteError(res, e, 'Failed to fetch language variants');
@@ -94,8 +101,11 @@ router.get('/play/:tmdbId', async (req, res) => {
 
     const data = await net27.getStreams(tmdbId, opts);
 
-    console.log("[Backend Debug] Selected Dub:", req.query.dub || 'None');
-    console.log("[Backend Debug] Returned Subject:", data?.subjectId);
+    console.log({
+      dub: req.query.dub || null,
+      sid: req.query.sid || null,
+      returnedSubjectId: data?.subjectId || null,
+    });
 
     if (!data || !data.ok) {
       return res.status(404).json({
