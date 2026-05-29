@@ -102,7 +102,7 @@ router.get('/play/:tmdbId', async (req, res) => {
 
     const domain = await net27.getWorkingDomain();
 
-    // Construct exact embed referer URL
+    // Construct exact embed referer URL (what Net27 embed page uses as Referer)
     const refererParams = [];
     if (opts.type) refererParams.push(`type=${opts.type}`);
     if (opts.se) refererParams.push(`se=${opts.se}`);
@@ -112,26 +112,47 @@ router.get('/play/:tmdbId', async (req, res) => {
     const refererQuery = refererParams.length > 0 ? `?${refererParams.join('&')}` : '';
     const refererUrl = `${domain}/api/embed-tmdb/${tmdbId}${refererQuery}`;
 
-    // Rewriting URLs to route through the proxy endpoint
+    // ─── URL Strategy ───────────────────────────────────────────────────────
+    //
+    // The CDN (bcdnxw.hakunaymatata.com) blocks all server/datacenter IPs (403).
+    // Net27's own website proxies via Cloudflare Worker for browser playback.
+    // Flutter (mobile consumer IPs) can also hit the CF Worker directly.
+    //
+    // Architecture: Flutter → CF Worker → CDN   ✅ (no Render proxy involved)
+    //
+    // ?proxy=true  → Render server proxy (only works locally, 403 on Render)
+    // ?proxy=false → Raw CDN URLs (for clients that set headers manually)
+    // default      → CF Worker URLs (Flutter plays these directly ✅)
+    //
+    const CF_WORKER = 'https://streamhub-proxy.1545zoya.workers.dev';
+
+    const buildCfWorkerUrl = (cdnUrl) => {
+      if (!cdnUrl) return '';
+      return `${CF_WORKER}/?url=${encodeURIComponent(cdnUrl)}&referer=${encodeURIComponent(refererUrl)}&origin=${encodeURIComponent(domain)}`;
+    };
+
     const host = req.get('host');
     const isLocal = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('10.0.2.2');
     const protocol = isLocal ? req.protocol : 'https';
     const backendBaseUrl = process.env.BACKEND_URL || `${protocol}://${host}`;
 
-    // IMPORTANT: Do NOT proxy through the server — CDN blocks all datacenter IPs (Render, AWS, etc.).
-    // Mobile clients (Flutter) can access CDN directly using the Referer/Origin headers returned below.
-    // Pass ?proxy=true ONLY for browser-based testing (the browser can't set Referer on video elements).
-    const useProxy = req.query.proxy === 'true';
-
-    const getProxyUrl = (cdnUrl) => {
+    const buildRenderProxyUrl = (cdnUrl) => {
       if (!cdnUrl) return '';
       return `${backendBaseUrl}/api/stream/proxy?url=${encodeURIComponent(cdnUrl)}&referer=${encodeURIComponent(refererUrl)}&origin=${encodeURIComponent(domain)}`;
     };
 
-    const finalMp4 = useProxy ? getProxyUrl(data.mp4) : data.mp4;
+    // Determine URL mode
+    const proxyMode = req.query.proxy; // 'true' | 'false' | undefined
+    const transformUrl = (cdnUrl) => {
+      if (proxyMode === 'true') return buildRenderProxyUrl(cdnUrl);   // Render server proxy
+      if (proxyMode === 'false') return cdnUrl;                        // Raw CDN URL (mobile sets headers)
+      return buildCfWorkerUrl(cdnUrl);                                 // Default: CF Worker (Flutter plays directly)
+    };
+
+    const finalMp4 = transformUrl(data.mp4);
     const finalStreams = (data.streams || []).map(stream => ({
       ...stream,
-      url: useProxy ? getProxyUrl(stream.url) : stream.url
+      url: transformUrl(stream.url)
     }));
 
     // Return clean response with stream URLs
@@ -148,9 +169,11 @@ router.get('/play/:tmdbId', async (req, res) => {
       streams: finalStreams,
       subjectId: data.subjectId,
       fallbackHls: data.fallbackHls,
+      // Headers needed when playing raw CDN URLs (?proxy=false mode)
+      // In default CF Worker mode, the worker handles CORS — no custom headers needed.
       headers: {
         "Referer": refererUrl,
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36",
         "Origin": domain
       }
     });
