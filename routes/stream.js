@@ -165,7 +165,7 @@ router.get('/proxy', async (req, res) => {
     }
 
     const targetUrl = url;
-    const workerProxyUrl = `https://streamhub-proxy.1545zoya.workers.dev/?url=${encodeURIComponent(targetUrl)}`;
+    const workerProxyUrl = `https://streamhub-proxy.1545zoya.workers.dev/?url=${encodeURIComponent(targetUrl)}&referer=${encodeURIComponent(referer || '')}&origin=${encodeURIComponent(origin || '')}`;
 
     // Prepare headers to match worker proxy requirements
     const headers = {
