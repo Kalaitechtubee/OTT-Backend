@@ -118,9 +118,10 @@ router.get('/play/:tmdbId', async (req, res) => {
     const protocol = isLocal ? req.protocol : 'https';
     const backendBaseUrl = process.env.BACKEND_URL || `${protocol}://${host}`;
 
-    // Default: always route through CF Worker proxy (CDN blocks direct server IPs with 403)
-    // Pass ?proxy=false to get raw CDN URLs (for clients that handle headers themselves)
-    const useProxy = req.query.proxy !== 'false';
+    // IMPORTANT: Do NOT proxy through the server — CDN blocks all datacenter IPs (Render, AWS, etc.).
+    // Mobile clients (Flutter) can access CDN directly using the Referer/Origin headers returned below.
+    // Pass ?proxy=true ONLY for browser-based testing (the browser can't set Referer on video elements).
+    const useProxy = req.query.proxy === 'true';
 
     const getProxyUrl = (cdnUrl) => {
       if (!cdnUrl) return '';
