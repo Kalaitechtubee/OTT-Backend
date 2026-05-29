@@ -88,10 +88,14 @@ router.get('/play/:tmdbId', async (req, res) => {
     if (req.query.type) opts.type = req.query.type;
     if (req.query.se) opts.se = req.query.se;
     if (req.query.ep) opts.ep = req.query.ep;
+    if (req.query.dub) opts.dub = req.query.dub;
     if (req.query.sid) opts.sid = req.query.sid;
     if (req.query.dp) opts.dp = req.query.dp;
 
     const data = await net27.getStreams(tmdbId, opts);
+
+    console.log("[Backend Debug] Selected Dub:", req.query.dub || 'None');
+    console.log("[Backend Debug] Returned Subject:", data?.subjectId);
 
     if (!data || !data.ok) {
       return res.status(404).json({
@@ -107,6 +111,7 @@ router.get('/play/:tmdbId', async (req, res) => {
     if (opts.type) refererParams.push(`type=${opts.type}`);
     if (opts.se) refererParams.push(`se=${opts.se}`);
     if (opts.ep) refererParams.push(`ep=${opts.ep}`);
+    if (opts.dub) refererParams.push(`dub=${opts.dub}`);
     if (opts.sid) refererParams.push(`sid=${opts.sid}`);
     if (opts.dp) refererParams.push(`dp=${opts.dp}`);
     const refererQuery = refererParams.length > 0 ? `?${refererParams.join('&')}` : '';

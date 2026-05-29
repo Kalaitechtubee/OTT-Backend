@@ -292,6 +292,7 @@ async function getStreams(tmdbId, opts = {}) {
   if (opts.type) params.type = opts.type;
   if (opts.se) params.se = opts.se;
   if (opts.ep) params.ep = opts.ep;
+  if (opts.dub) params.dub = opts.dub;
   if (opts.sid) params.sid = opts.sid;
   if (opts.dp) params.dp = opts.dp;
 
