@@ -1,0 +1,19 @@
+{
+  "name": "streamvault-backend",
+  "version": "1.0.0",
+  "description": "StreamVault API proxy — routes Flutter requests to Net27 APIs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "axios": "^1.16.1",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
