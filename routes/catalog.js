@@ -20,18 +20,18 @@ router.get('/trending', async (req, res) => {
   try {
     const { language } = req.query;
     const data = await net27.getCatalog('trending');
-    if (!data || !language) {
-      return res.json(data);
-    }
+    if (!data) return res.json(data);
+    
+    const activeLang = language || 'All Languages';
+    const langLower = activeLang.toLowerCase().trim();
+    const isLangSelected = activeLang !== 'All Languages';
 
-    const langLower = language.toLowerCase().trim();
-
-    // 1. Collect unique items from hero and rails
+    // 1. Collect all unique items
     const itemsMap = new Map();
     if (data.hero) {
       data.hero.forEach(h => {
         const key = `${h.type}_${h.tmdbId}`;
-        itemsMap.set(key, { tmdbId: h.tmdbId, type: h.type, title: h.title });
+        itemsMap.set(key, { tmdbId: h.tmdbId, type: h.type, title: h.title, rating: h.rating, poster: h.poster, backdrop: h.backdropUrl || h.backdrop });
       });
     }
     if (data.rails) {
@@ -46,9 +46,9 @@ router.get('/trending', async (req, res) => {
         }
       });
     }
+    const itemsList = Array.from(itemsMap.values());
 
     // 2. Fetch variants for unique items in parallel
-    const itemsList = Array.from(itemsMap.values());
     const langResults = await Promise.all(
       itemsList.map(async (item) => {
         try {
@@ -63,155 +63,202 @@ router.get('/trending', async (req, res) => {
       })
     );
 
-    // 3. Filter items matching the language (either original or dub)
-    const supportedItems = new Map(); // key -> { item, preferredDubSubjectId }
-    const dubbedItems = new Map(); // key -> item
-    
+    // Map each item's language details
+    const itemLanguages = new Map(); // key -> { originalLangs, dubLangs }
     langResults.forEach(({ item, variantsData }) => {
+      const originalLangs = [];
+      const dubLangs = [];
       if (variantsData && variantsData.variants) {
-        const match = variantsData.variants.find(
-          v => v.language.toLowerCase().includes(langLower)
-        );
-        if (match) {
-          supportedItems.set(`${item.type}_${item.tmdbId}`, {
-            item,
-            preferredDubSubjectId: match.dubSubjectId || match.sid
-          });
-          
-          if (!match.isOriginal) {
-            dubbedItems.set(`${item.type}_${item.tmdbId}`, item);
+        variantsData.variants.forEach(v => {
+          if (v.isOriginal) {
+            originalLangs.push(v.language.toLowerCase());
+          } else {
+            dubLangs.push(v.language.toLowerCase());
           }
-        }
+        });
       }
+      itemLanguages.set(`${item.type}_${item.tmdbId}`, { originalLangs, dubLangs });
     });
 
-    // 4. Reconstruct hero banners
-    const filteredHero = [];
-    if (data.hero) {
-      data.hero.forEach(h => {
-        const key = `${h.type}_${h.tmdbId}`;
-        if (supportedItems.has(key)) {
-          filteredHero.push(h);
-        }
-      });
-    }
+    // Helper to check language support
+    const isNativeLang = (item) => {
+      if (!isLangSelected) return true;
+      const langs = itemLanguages.get(`${item.type}_${item.tmdbId}`);
+      if (!langs) return false;
+      return langs.originalLangs.some(l => l.includes(langLower));
+    };
 
-    // 5. Reconstruct category rails based on preferred language
+    const isDubbedLang = (item) => {
+      if (!isLangSelected) return false;
+      const langs = itemLanguages.get(`${item.type}_${item.tmdbId}`);
+      if (!langs) return false;
+      return langs.dubLangs.some(l => l.includes(langLower));
+    };
+
+    const supportsLang = (item) => {
+      if (!isLangSelected) return true;
+      return isNativeLang(item) || isDubbedLang(item);
+    };
+
+    // Helper to sort a list of items putting preferred language first
+    const sortPreferredFirst = (items) => {
+      if (!isLangSelected) return items;
+      const sorted = [...items];
+      sorted.sort((a, b) => {
+        const aSupports = supportsLang(a);
+        const bSupports = supportsLang(b);
+        if (aSupports && !bSupports) return -1;
+        if (!aSupports && bSupports) return 1;
+        return 0;
+      });
+      return sorted;
+    };
+
+    // 3. Reconstruct Category Rails
     const filteredRails = [];
 
-    // 🔥 Trending <Language>
-    const trendingItems = [];
-    const trendingRail = data.rails ? data.rails.find(r => r.title.toLowerCase().includes('trending') || r.title.toLowerCase().includes('today')) : null;
-    if (trendingRail && trendingRail.items) {
-      trendingRail.items.forEach(item => {
-        if (supportedItems.has(`${item.type}_${item.tmdbId}`)) {
-          trendingItems.push(item);
-        }
-      });
-    }
-    // If we didn't find items in the trending rail, fallback to any highly rated supported items
-    if (trendingItems.length === 0 && data.rails) {
-      data.rails.forEach(rail => {
-        if (rail.items) {
-          rail.items.forEach(item => {
-            if (supportedItems.has(`${item.type}_${item.tmdbId}`) && trendingItems.length < 10) {
-              trendingItems.push(item);
-            }
-          });
-        }
-      });
+    // 1. Trending Now (Mixed, preferred lang first)
+    const rawTrending = getItemsFromOriginalMatches(data.rails, ['trending', 'top 10', 'popular']);
+    const trendingItems = sortPreferredFirst(rawTrending.length > 0 ? rawTrending : itemsList).slice(0, 15);
+    filteredRails.push({
+      key: 'trending',
+      title: 'Trending Now',
+      ranked: true,
+      items: trendingItems
+    });
+
+    // 2. New Releases (Mixed, preferred lang first)
+    const rawNew = getItemsFromOriginalMatches(data.rails, ['newest', 'latest', 'hot new', 'fresh']);
+    const newItems = sortPreferredFirst(rawNew.length > 0 ? rawNew : itemsList).slice(0, 15);
+    filteredRails.push({
+      key: 'new_releases',
+      title: 'New Releases',
+      ranked: false,
+      items: newItems
+    });
+
+    // Language specific rails (only shown if a language is selected)
+    if (isLangSelected) {
+      // 3. <Language> Movies (Native only)
+      const nativeMovies = itemsList
+        .filter(item => item.type === 'movie' && isNativeLang(item))
+        .slice(0, 15);
+      if (nativeMovies.length > 0) {
+        filteredRails.push({
+          key: 'native_movies_lang',
+          title: `${activeLang} Movies`,
+          ranked: false,
+          items: nativeMovies
+        });
+      }
+
+      // 4. <Language> Dubbed Movies (Dubbed only)
+      const dubbedMovies = itemsList
+        .filter(item => item.type === 'movie' && isDubbedLang(item))
+        .slice(0, 15);
+      if (dubbedMovies.length > 0) {
+        filteredRails.push({
+          key: 'dubbed_movies_lang',
+          title: `${activeLang} Dubbed Movies`,
+          ranked: false,
+          items: dubbedMovies
+        });
+      }
+
+      // 5. <Language> TV Shows (TV shows supporting language)
+      const langTV = itemsList
+        .filter(item => item.type === 'tv' && supportsLang(item))
+        .slice(0, 15);
+      if (langTV.length > 0) {
+        filteredRails.push({
+          key: 'tv_shows_lang',
+          title: `${activeLang} TV Shows`,
+          ranked: false,
+          items: langTV
+        });
+      }
     }
 
-    if (trendingItems.length > 0) {
-      filteredRails.push({
-        key: 'trending_lang',
-        title: `🔥 Trending in ${language}`,
-        ranked: true,
-        items: trendingItems.slice(0, 10)
-      });
-    }
+    // Global Rails:
+    // 6. Popular Movies
+    const popularMovies = itemsList.filter(item => item.type === 'movie').slice(0, 15);
+    filteredRails.push({
+      key: 'popular_movies',
+      title: 'Popular Movies',
+      ranked: false,
+      items: popularMovies
+    });
 
-    // 🎬 <Language> Movies
-    const langMovies = itemsList
-      .filter(item => item.type === 'movie' && supportedItems.has(`${item.type}_${item.tmdbId}`))
-      .slice(0, 15);
-    if (langMovies.length > 0) {
-      filteredRails.push({
-        key: 'movies_lang',
-        title: `🎬 ${language} Movies`,
-        ranked: false,
-        items: langMovies
-      });
-    }
+    // 7. Top Rated Movies (Sorted by rating)
+    const topRatedMovies = [...popularMovies];
+    topRatedMovies.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    filteredRails.push({
+      key: 'top_rated_movies',
+      title: 'Top Rated Movies',
+      ranked: false,
+      items: topRatedMovies.slice(0, 15)
+    });
 
-    // 📺 <Language> TV Shows
-    const langSeries = itemsList
-      .filter(item => item.type === 'tv' && supportedItems.has(`${item.type}_${item.tmdbId}`))
-      .slice(0, 15);
-    if (langSeries.length > 0) {
-      filteredRails.push({
-        key: 'series_lang',
-        title: `📺 ${language} TV Shows`,
-        ranked: false,
-        items: langSeries
-      });
-    }
+    // 8. Popular TV Shows
+    const popularTV = itemsList.filter(item => item.type === 'tv').slice(0, 15);
+    filteredRails.push({
+      key: 'popular_tv',
+      title: 'Popular TV Shows',
+      ranked: false,
+      items: popularTV
+    });
 
-    // 🎭 <Language> Dubbed Movies
-    const langDubbed = Array.from(dubbedItems.values())
-      .filter(item => item.type === 'movie')
-      .slice(0, 15);
-    if (langDubbed.length > 0) {
-      filteredRails.push({
-        key: 'dubbed_lang',
-        title: `🎭 ${language} Dubbed Movies`,
-        ranked: false,
-        items: langDubbed
-      });
-    }
+    // 9. Action Movies
+    const actionMovies = getItemsFromOriginalMatches(data.rails, ['action', 'thriller']).filter(item => item.type === 'movie').slice(0, 15);
+    filteredRails.push({
+      key: 'action_movies',
+      title: 'Action Movies',
+      ranked: false,
+      items: actionMovies.length > 0 ? actionMovies : popularMovies.slice(5, 15)
+    });
 
-    // ⭐ Top Rated <Language>
-    const topRatedItems = itemsList
-      .filter(item => supportedItems.has(`${item.type}_${item.tmdbId}`))
-      .slice(0, 15);
-    if (topRatedItems.length > 0) {
-      filteredRails.push({
-        key: 'top_rated_lang',
-        title: `⭐ Top Rated ${language}`,
-        ranked: false,
-        items: topRatedItems
-      });
-    }
-
-    // 🆕 New <Language> Releases
-    const newItems = [];
-    const newRail = data.rails ? data.rails.find(r => r.title.toLowerCase().includes('newest') || r.title.toLowerCase().includes('latest') || r.title.toLowerCase().includes('hot')) : null;
-    if (newRail && newRail.items) {
-      newRail.items.forEach(item => {
-        if (supportedItems.has(`${item.type}_${item.tmdbId}`)) {
-          newItems.push(item);
-        }
-      });
-    }
-    if (newItems.length > 0) {
-      filteredRails.push({
-        key: 'new_lang',
-        title: `🆕 New ${language} Releases`,
-        ranked: false,
-        items: newItems.slice(0, 15)
-      });
-    }
+    // 10. Comedy Movies
+    const comedyMovies = getItemsFromOriginalMatches(data.rails, ['comedy', 'romance', 'animation']).filter(item => item.type === 'movie').slice(0, 15);
+    filteredRails.push({
+      key: 'comedy_movies',
+      title: 'Comedy Movies',
+      ranked: false,
+      items: comedyMovies.length > 0 ? comedyMovies : popularMovies.slice(7, 17)
+    });
 
     res.json({
       ok: true,
       tab: data.tab,
-      hero: filteredHero.length > 0 ? filteredHero : data.hero,
-      rails: filteredRails.length > 0 ? filteredRails : data.rails
+      hero: sortPreferredFirst(data.hero || []).slice(0, 5),
+      rails: filteredRails
     });
   } catch (e) {
     handleRouteError(res, e, 'Failed to fetch trending catalog');
   }
 });
+
+// Helper function to extract items from original rails matching keywords
+function getItemsFromOriginalMatches(rails, keywords) {
+  const items = [];
+  const seen = new Set();
+  if (rails) {
+    rails.forEach(rail => {
+      const title = rail.title.toLowerCase();
+      if (keywords.some(kw => title.includes(kw))) {
+        if (rail.items) {
+          rail.items.forEach(item => {
+            const key = `${item.type}_${item.tmdbId}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              items.push(item);
+            }
+          });
+        }
+      }
+    });
+  }
+  return items;
+}
 
 /**
  * GET /api/catalog/category/:tab
