@@ -309,6 +309,50 @@ router.get('/search', async (req, res) => {
 });
 
 /**
+ * GET /api/catalog/trailer/:type/:tmdbId
+ *
+ * Returns a YouTube trailer key from TMDB (requires TMDB_API_KEY in env).
+ */
+router.get('/trailer/:type/:tmdbId', async (req, res) => {
+  try {
+    const apiKey = process.env.TMDB_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({ ok: false, error: 'TMDB API key not configured' });
+    }
+
+    const { type, tmdbId } = req.params;
+    if (!['movie', 'tv'].includes(type)) {
+      return res.status(400).json({ ok: false, error: 'Type must be "movie" or "tv"' });
+    }
+
+    const axios = require('axios');
+    const tmdbType = type === 'tv' ? 'tv' : 'movie';
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/${tmdbType}/${tmdbId}/videos`,
+      { params: { api_key: apiKey }, timeout: 10000 },
+    );
+
+    const videos = response.data?.results ?? [];
+    const trailer =
+      videos.find((v) => v.site === 'YouTube' && v.type === 'Trailer') ||
+      videos.find((v) => v.site === 'YouTube' && v.type === 'Teaser') ||
+      videos.find((v) => v.site === 'YouTube');
+
+    if (!trailer?.key) {
+      return res.status(404).json({ ok: false, error: 'No trailer found' });
+    }
+
+    res.json({
+      ok: true,
+      youtubeKey: trailer.key,
+      name: trailer.name || 'Trailer',
+    });
+  } catch (e) {
+    handleRouteError(res, e, 'Failed to fetch trailer');
+  }
+});
+
+/**
  * GET /api/catalog/title/:type/:tmdbId
  *
  * Full details for a movie or TV show.

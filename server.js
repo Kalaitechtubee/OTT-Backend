@@ -26,7 +26,7 @@ app.get('/health', (req, res) => {
 
 // Start Server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`StreamVault Backend v1.0 listening on port ${PORT}`);
+  console.log(`MovieZon Backend v1.0 listening on port ${PORT}`);
   console.log(`Health: http://localhost:${PORT}/health`);
   console.log(`Catalog: http://localhost:${PORT}/api/catalog/trending`);
   console.log(`Stream:  http://localhost:${PORT}/api/stream/play/:tmdbId`);
