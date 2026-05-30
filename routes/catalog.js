@@ -28,12 +28,6 @@ router.get('/trending', async (req, res) => {
 
     // 1. Collect all unique items
     const itemsMap = new Map();
-    if (data.hero) {
-      data.hero.forEach(h => {
-        const key = `${h.type}_${h.tmdbId}`;
-        itemsMap.set(key, { tmdbId: h.tmdbId, type: h.type, title: h.title, rating: h.rating, poster: h.poster, backdrop: h.backdropUrl || h.backdrop });
-      });
-    }
     if (data.rails) {
       data.rails.forEach(rail => {
         if (rail.items) {
@@ -43,6 +37,27 @@ router.get('/trending', async (req, res) => {
               itemsMap.set(key, item);
             }
           });
+        }
+      });
+    }
+    if (data.hero) {
+      data.hero.forEach(h => {
+        const key = `${h.type}_${h.tmdbId}`;
+        if (!itemsMap.has(key)) {
+          itemsMap.set(key, {
+            tmdbId: h.tmdbId,
+            type: h.type,
+            title: h.title,
+            rating: h.rating,
+            poster: h.poster || '',
+            backdrop: h.backdropUrl || h.backdrop
+          });
+        } else {
+          // Merge backdrop if not present
+          const existing = itemsMap.get(key);
+          if (!existing.backdrop && (h.backdropUrl || h.backdrop)) {
+            existing.backdrop = h.backdropUrl || h.backdrop;
+          }
         }
       });
     }
@@ -199,16 +214,7 @@ router.get('/trending', async (req, res) => {
       items: topRatedMovies.slice(0, 15)
     });
 
-    // 8. Popular TV Shows
-    const popularTV = itemsList.filter(item => item.type === 'tv').slice(0, 15);
-    filteredRails.push({
-      key: 'popular_tv',
-      title: 'Popular TV Shows',
-      ranked: false,
-      items: popularTV
-    });
-
-    // 9. Action Movies
+    // 8. Action Movies
     const actionMovies = getItemsFromOriginalMatches(data.rails, ['action', 'thriller']).filter(item => item.type === 'movie').slice(0, 15);
     filteredRails.push({
       key: 'action_movies',
@@ -217,13 +223,22 @@ router.get('/trending', async (req, res) => {
       items: actionMovies.length > 0 ? actionMovies : popularMovies.slice(5, 15)
     });
 
-    // 10. Comedy Movies
+    // 9. Comedy Movies
     const comedyMovies = getItemsFromOriginalMatches(data.rails, ['comedy', 'romance', 'animation']).filter(item => item.type === 'movie').slice(0, 15);
     filteredRails.push({
       key: 'comedy_movies',
       title: 'Comedy Movies',
       ranked: false,
       items: comedyMovies.length > 0 ? comedyMovies : popularMovies.slice(7, 17)
+    });
+
+    // 10. Popular TV Shows
+    const popularTV = itemsList.filter(item => item.type === 'tv').slice(0, 15);
+    filteredRails.push({
+      key: 'popular_tv',
+      title: 'Popular TV Shows',
+      ranked: false,
+      items: popularTV
     });
 
     res.json({
