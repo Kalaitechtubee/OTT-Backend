@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const net27 = require('../services/net27');
+const { TMDB_API_KEY, TMDB_BASE_URL } = require('../config/tmdb');
 
 const handleRouteError = (res, error, defaultMessage, statusCode = 502) => {
   console.error(`${defaultMessage}:`, error.message);
@@ -315,9 +316,13 @@ router.get('/search', async (req, res) => {
  */
 router.get('/trailer/:type/:tmdbId', async (req, res) => {
   try {
-    const apiKey = process.env.TMDB_API_KEY;
+    const apiKey = TMDB_API_KEY;
     if (!apiKey) {
-      return res.status(503).json({ ok: false, error: 'TMDB API key not configured' });
+      return res.json({
+        ok: false,
+        error: 'Trailer service is not configured on the server. Set TMDB_API_KEY in backend env.',
+        code: 'TMDB_NOT_CONFIGURED',
+      });
     }
 
     const { type, tmdbId } = req.params;
@@ -328,7 +333,7 @@ router.get('/trailer/:type/:tmdbId', async (req, res) => {
     const axios = require('axios');
     const tmdbType = type === 'tv' ? 'tv' : 'movie';
     const response = await axios.get(
-      `https://api.themoviedb.org/3/${tmdbType}/${tmdbId}/videos`,
+      `${TMDB_BASE_URL}/${tmdbType}/${tmdbId}/videos`,
       { params: { api_key: apiKey }, timeout: 10000 },
     );
 
@@ -339,7 +344,7 @@ router.get('/trailer/:type/:tmdbId', async (req, res) => {
       videos.find((v) => v.site === 'YouTube');
 
     if (!trailer?.key) {
-      return res.status(404).json({ ok: false, error: 'No trailer found' });
+      return res.json({ ok: false, error: 'No trailer found for this title.' });
     }
 
     res.json({
