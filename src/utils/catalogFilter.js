@@ -1,4 +1,12 @@
 const net27 = require('../providers/net27');
+const { normalizeLanguageName, languageMatchesLabel } = require('./languageMatchers');
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Max items to probe via Net27 variants API (avoids 429 rate limits). */
+const MAX_LANG_PROBE_ITEMS = 36;
+const LANG_PROBE_CONCURRENCY = 6;
+const LANG_PROBE_BATCH_DELAY_MS = 180;
 
 function getItemsFromOriginalMatches(rails, keywords) {
   const items = [];
@@ -22,13 +30,140 @@ function getItemsFromOriginalMatches(rails, keywords) {
   return items;
 }
 
+/** Map item key → rail titles it appeared in (no extra API calls). */
+function buildItemRailIndex(rawData) {
+  const index = new Map();
+  const add = (item, railTitle) => {
+    const key = `${item.type}_${item.tmdbId}`;
+    if (!index.has(key)) index.set(key, new Set());
+    index.get(key).add(railTitle.toLowerCase());
+  };
+
+  rawData.rails?.forEach((rail) => {
+    const railTitle = (rail.title || '').toLowerCase();
+    rail.items?.forEach((item) => add(item, railTitle));
+  });
+
+  return index;
+}
+
+function inferLangFromRails(railTitles, activeLang) {
+  if (!railTitles || railTitles.size === 0) return null;
+
+  const langLower = activeLang.toLowerCase();
+  let fromDub = false;
+  let fromNative = false;
+
+  for (const title of railTitles) {
+    if (!languageMatchesLabel(title, activeLang)) continue;
+    if (title.includes('dub')) {
+      fromDub = true;
+    } else {
+      fromNative = true;
+    }
+  }
+
+  if (fromNative || fromDub) {
+    return { originalLangs: fromNative ? [langLower] : [], dubLangs: fromDub ? [langLower] : [] };
+  }
+
+  return null;
+}
+
+async function mapWithConcurrency(items, fn, concurrency) {
+  const results = [];
+  for (let i = 0; i < items.length; i += concurrency) {
+    const batch = items.slice(i, i + concurrency);
+    results.push(...(await Promise.all(batch.map(fn))));
+    if (i + concurrency < items.length) {
+      await delay(LANG_PROBE_BATCH_DELAY_MS);
+    }
+  }
+  return results;
+}
+
+async function probeItemLanguages(itemsList) {
+  const probeSet = itemsList.slice(0, MAX_LANG_PROBE_ITEMS);
+
+  return mapWithConcurrency(
+    probeSet,
+    async (item) => {
+      try {
+        const variantsData = await net27.getLanguages(item.type, item.tmdbId, {
+          sid: item.subjectId,
+          dp: item.detailPath,
+        });
+        return { item, variantsData };
+      } catch (_) {
+        return { item, variantsData: null };
+      }
+    },
+    LANG_PROBE_CONCURRENCY,
+  );
+}
+
+/** Probe catalog items once; result is shared across all language filters. */
+async function buildItemLanguageMap(rawData) {
+  const itemsMap = new Map();
+  if (rawData.rails) {
+    rawData.rails.forEach((rail) => {
+      rail.items?.forEach((item) => {
+        const key = `${item.type}_${item.tmdbId}`;
+        if (!itemsMap.has(key)) itemsMap.set(key, item);
+      });
+    });
+  }
+  if (rawData.hero) {
+    rawData.hero.forEach((h) => {
+      const key = `${h.type}_${h.tmdbId}`;
+      if (!itemsMap.has(key)) {
+        itemsMap.set(key, {
+          tmdbId: h.tmdbId,
+          type: h.type,
+          title: h.title,
+          rating: h.rating,
+          poster: h.poster || '',
+          backdrop: h.backdropUrl || h.backdrop,
+          subjectId: h.subjectId,
+          detailPath: h.detailPath,
+        });
+      }
+    });
+  }
+
+  const langResults = await probeItemLanguages(Array.from(itemsMap.values()));
+  const itemLanguages = new Map();
+  langResults.forEach(({ item, variantsData }) => {
+    itemLanguages.set(`${item.type}_${item.tmdbId}`, variantsToLangBuckets(variantsData));
+  });
+  return itemLanguages;
+}
+
+function variantsToLangBuckets(variantsData) {
+  const originalLangs = [];
+  const dubLangs = [];
+  if (variantsData?.variants) {
+    variantsData.variants.forEach((v) => {
+      const label = (v.language || '').toLowerCase();
+      if (!label) return;
+      if (v.isOriginal) {
+        originalLangs.push(label);
+      } else {
+        dubLangs.push(label);
+      }
+    });
+  }
+  return { originalLangs, dubLangs };
+}
+
 /**
  * Build language-filtered catalog rails from raw Net27 trending data.
+ * @param {Map<string, {originalLangs: string[], dubLangs: string[]}>} [precomputedItemLanguages]
  */
-async function buildFilteredCatalog(rawData, language) {
-  const activeLang = language || 'All Languages';
+async function buildFilteredCatalog(rawData, language, precomputedItemLanguages) {
+  const activeLang = normalizeLanguageName(language) || 'All Languages';
   const langLower = activeLang.toLowerCase().trim();
-  const isLangSelected = activeLang && activeLang !== 'All Languages';
+  const isLangSelected = Boolean(activeLang && activeLang !== 'All Languages');
 
   const itemsMap = new Map();
   if (rawData.rails) {
@@ -54,59 +189,47 @@ async function buildFilteredCatalog(rawData, language) {
           rating: h.rating,
           poster: h.poster || '',
           backdrop: h.backdropUrl || h.backdrop,
+          subjectId: h.subjectId,
+          detailPath: h.detailPath,
         });
       } else {
         const existing = itemsMap.get(key);
         if (!existing.backdrop && (h.backdropUrl || h.backdrop)) {
           existing.backdrop = h.backdropUrl || h.backdrop;
         }
+        if (!existing.subjectId && h.subjectId) existing.subjectId = h.subjectId;
+        if (!existing.detailPath && h.detailPath) existing.detailPath = h.detailPath;
       }
     });
   }
   const itemsList = Array.from(itemsMap.values());
+  const railIndex = buildItemRailIndex(rawData);
 
-  const langResults = await Promise.all(
-    itemsList.map(async (item) => {
-      try {
-        const variantsData = await net27.getLanguages(item.type, item.tmdbId, {
-          sid: item.subjectId,
-          dp: item.detailPath,
-        });
-        return { item, variantsData };
-      } catch (_) {
-        return { item, variantsData: null };
-      }
-    }),
-  );
+  const itemLanguages = precomputedItemLanguages || (await buildItemLanguageMap(rawData));
 
-  const itemLanguages = new Map();
-  langResults.forEach(({ item, variantsData }) => {
-    const originalLangs = [];
-    const dubLangs = [];
-    if (variantsData && variantsData.variants) {
-      variantsData.variants.forEach((v) => {
-        if (v.isOriginal) {
-          originalLangs.push(v.language.toLowerCase());
-        } else {
-          dubLangs.push(v.language.toLowerCase());
-        }
-      });
+  const getLangBuckets = (item) => {
+    const key = `${item.type}_${item.tmdbId}`;
+    const probed = itemLanguages.get(key);
+    if (probed && (probed.originalLangs.length || probed.dubLangs.length)) {
+      return probed;
     }
-    itemLanguages.set(`${item.type}_${item.tmdbId}`, { originalLangs, dubLangs });
-  });
+    if (isLangSelected) {
+      const fromRails = inferLangFromRails(railIndex.get(key), activeLang);
+      if (fromRails) return fromRails;
+    }
+    return { originalLangs: [], dubLangs: [] };
+  };
 
   const isNativeLang = (item) => {
     if (!isLangSelected) return true;
-    const langs = itemLanguages.get(`${item.type}_${item.tmdbId}`);
-    if (!langs) return false;
-    return langs.originalLangs.some((l) => l.includes(langLower));
+    const langs = getLangBuckets(item);
+    return langs.originalLangs.some((l) => languageMatchesLabel(l, activeLang));
   };
 
   const isDubbedLang = (item) => {
     if (!isLangSelected) return false;
-    const langs = itemLanguages.get(`${item.type}_${item.tmdbId}`);
-    if (!langs) return false;
-    return langs.dubLangs.some((l) => l.includes(langLower));
+    const langs = getLangBuckets(item);
+    return langs.dubLangs.some((l) => languageMatchesLabel(l, activeLang));
   };
 
   const supportsLang = (item) => {
@@ -129,7 +252,12 @@ async function buildFilteredCatalog(rawData, language) {
 
   const filterByLang = (items) => {
     if (!isLangSelected) return items;
-    return items.filter((item) => supportsLang(item));
+    const matched = items.filter((item) => supportsLang(item));
+    // If strict filter empties a rail, fall back to sorted preference (partial catalog beats blank UI).
+    if (matched.length === 0 && items.length > 0) {
+      return sortPreferredFirst(items).slice(0, 20);
+    }
+    return matched;
   };
 
   const filteredRails = [];
@@ -279,10 +407,16 @@ function getCategoryItems(catalog, category) {
     catalog;
 
   switch (category) {
-    case 'movies':
-      return isLangSelected
-        ? itemsList.filter((item) => item.type === 'movie' && isNativeLang(item))
-        : itemsList.filter((item) => item.type === 'movie');
+    case 'movies': {
+      if (!isLangSelected) {
+        return itemsList.filter((item) => item.type === 'movie');
+      }
+      const native = itemsList.filter((item) => item.type === 'movie' && isNativeLang(item));
+      if (native.length > 0) return native;
+      const fromRail = getRailItems(catalog, 'native_movies_lang');
+      if (fromRail.length > 0) return fromRail;
+      return itemsList.filter((item) => item.type === 'movie' && supportsLang(item));
+    }
     case 'dubbed':
       return itemsList.filter((item) => item.type === 'movie' && isDubbedLang(item));
     case 'series':
@@ -308,6 +442,7 @@ function getCategoryItems(catalog, category) {
 
 module.exports = {
   buildFilteredCatalog,
+  buildItemLanguageMap,
   getCategoryItems,
   getItemsFromOriginalMatches,
 };

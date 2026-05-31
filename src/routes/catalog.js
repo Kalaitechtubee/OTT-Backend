@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const net27 = require('../providers/net27');
 const sourceManager = require('../services/sourceManager');
-const { buildFilteredCatalog, getCategoryItems } = require('../utils/catalogFilter');
+const { buildFilteredCatalog, buildItemLanguageMap, getCategoryItems } = require('../utils/catalogFilter');
+const { normalizeLanguageName } = require('../utils/languageMatchers');
 const { normalizeSearchResponse } = require('../utils/searchNormalize');
 const searchCache = require('../utils/searchCache');
 const { TMDB_API_KEY, TMDB_BASE_URL } = require('../config/tmdb');
@@ -15,10 +16,75 @@ const handleRouteError = (res, error, defaultMessage, statusCode = 502) => {
   return res.status(statusCode).json({ ok: false, error: defaultMessage });
 };
 
+const RAW_CATALOG_TTL_MS = 20 * 60 * 1000;
+const FILTERED_CATALOG_TTL_MS = 10 * 60 * 1000;
+
+let rawCatalogCache = { data: null, fetchedAt: 0 };
+let itemLanguagesCache = { map: null, fetchedAt: 0, rawFetchedAt: 0 };
+const filteredCatalogCache = new Map();
+/** Single-flight loader so parallel requests don't double-probe Net27. */
+let catalogLoadPromise = null;
+
+async function getRawTrendingCatalog() {
+  const now = Date.now();
+  if (rawCatalogCache.data && now - rawCatalogCache.fetchedAt < RAW_CATALOG_TTL_MS) {
+    return rawCatalogCache.data;
+  }
+  try {
+    const data = await net27.getCatalog('trending');
+    if (!data) return rawCatalogCache.data;
+    rawCatalogCache = { data, fetchedAt: now };
+    itemLanguagesCache = { map: null, fetchedAt: 0, rawFetchedAt: 0 };
+    filteredCatalogCache.clear();
+    return data;
+  } catch (error) {
+    if (error.response?.status === 429 && rawCatalogCache.data) {
+      console.warn('[Catalog] Upstream 429 — serving stale raw catalog');
+      return rawCatalogCache.data;
+    }
+    throw error;
+  }
+}
+
+async function getItemLanguagesForCatalog(rawData) {
+  const now = Date.now();
+  if (
+    itemLanguagesCache.map &&
+    itemLanguagesCache.rawFetchedAt === rawCatalogCache.fetchedAt &&
+    now - itemLanguagesCache.fetchedAt < RAW_CATALOG_TTL_MS
+  ) {
+    return itemLanguagesCache.map;
+  }
+  const map = await buildItemLanguageMap(rawData);
+  itemLanguagesCache = { map, fetchedAt: now, rawFetchedAt: rawCatalogCache.fetchedAt };
+  return map;
+}
+
 async function loadFilteredCatalog(language) {
-  const data = await net27.getCatalog('trending');
-  if (!data) return null;
-  return buildFilteredCatalog(data, language);
+  const langKey = normalizeLanguageName(language) || 'All Languages';
+  const now = Date.now();
+  const cached = filteredCatalogCache.get(langKey);
+  if (cached && now - cached.fetchedAt < FILTERED_CATALOG_TTL_MS) {
+    return cached.catalog;
+  }
+
+  if (!catalogLoadPromise) {
+    catalogLoadPromise = (async () => {
+      const data = await getRawTrendingCatalog();
+      if (!data) return null;
+      const itemLanguages = await getItemLanguagesForCatalog(data);
+      return { data, itemLanguages };
+    })().finally(() => {
+      catalogLoadPromise = null;
+    });
+  }
+
+  const shared = await catalogLoadPromise;
+  if (!shared) return null;
+
+  const catalog = await buildFilteredCatalog(shared.data, language, shared.itemLanguages);
+  filteredCatalogCache.set(langKey, { catalog, fetchedAt: Date.now() });
+  return catalog;
 }
 
 /**

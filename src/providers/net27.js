@@ -305,24 +305,21 @@ async function getStreams(tmdbId, opts = {}) {
   if (opts.sid) params.sid = opts.sid;
   if (opts.dp) params.dp = opts.dp;
 
-  // Always fetch fresh — never cache stream responses (signed tokens expire)
-  const data = await apiGet(`/api/embed-tmdb/${tmdbId}`, params);
-
-  // Note: Net27 sometimes returns tokens that appear "expired" by timestamp,
-  // but the CDN (bcdnxw.hakunaymatata.com) validates by IP/region, not timestamp.
-  // Requests routed through the Cloudflare Worker always succeed (206 Partial Content).
-  const checkUrl = data?.mp4 || (data?.streams && data.streams[0]?.url);
-  if (checkUrl) {
-    const t = extractTokenExpiry(checkUrl);
-    const nowSec = Math.floor(Date.now() / 1000);
-    if (t && t < nowSec) {
-      console.log(`[Net27] ℹ️ Token t=${t} appears expired by ${nowSec - t}s — CDN still accepts via CF Worker.`);
-    } else {
-      console.log(`[Net27] ✅ Token valid, expires in ${t ? t - nowSec : '?'}s`);
+  const maxAttempts = 2;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await apiGet(`/api/embed-tmdb/${tmdbId}`, params);
+    } catch (error) {
+      const status = error.response?.status;
+      const retryable = status === 429 || status === 502 || status === 503;
+      if (retryable && attempt < maxAttempts - 1) {
+        console.warn(`[Net27] embed ${tmdbId} got ${status}, retrying in 3s...`);
+        await delay(3000);
+        continue;
+      }
+      throw error;
     }
   }
-
-  return data;
 }
 
 module.exports = {
