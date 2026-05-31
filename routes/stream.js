@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const net27 = require('../services/net27');
+const sourceManager = require('../services/sourceManager');
 
 const handleRouteError = (res, error, defaultMessage, statusCode = 502) => {
   console.error(`${defaultMessage}:`, error.message);
@@ -42,7 +43,7 @@ router.get('/languages/:type/:tmdbId', async (req, res) => {
     if (req.query.sid) opts.sid = req.query.sid;
     if (req.query.dp) opts.dp = req.query.dp;
 
-    const data = await net27.getLanguages(type, parseInt(tmdbId), opts);
+    const data = await sourceManager.languages(type, parseInt(tmdbId), opts);
     if (data && data.variants) {
       const parentSid = data.defaultSubjectId || opts.sid || '';
       data.variants = data.variants.map(v => ({
@@ -99,7 +100,7 @@ router.get('/play/:tmdbId', async (req, res) => {
     if (req.query.sid) opts.sid = req.query.sid;
     if (req.query.dp) opts.dp = req.query.dp;
 
-    const data = await net27.getStreams(tmdbId, opts);
+    const data = await sourceManager.play(tmdbId, opts);
 
     console.log({
       dub: req.query.dub || null,
@@ -170,18 +171,49 @@ router.get('/play/:tmdbId', async (req, res) => {
       url: transformUrl(stream.url)
     }));
 
+    // Set cache busting headers to prevent caching of signed CDN/worker URLs
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+
+    let poster = '';
+    let languages = [];
+    try {
+      const details = await sourceManager.details(opts.type || 'movie', tmdbId);
+      poster = details?.poster || details?.poster_path || '';
+    } catch (err) {
+      console.warn('[PlayRoute] Failed to load details for poster:', err.message);
+    }
+
+    try {
+      const langData = await sourceManager.languages(opts.type || 'movie', tmdbId, opts);
+      if (langData && langData.variants) {
+        const parentSid = langData.defaultSubjectId || opts.sid || '';
+        languages = langData.variants.map(v => ({
+          id: v.dubSubjectId || v.sid || parentSid || 'original',
+          language: v.language || 'Original'
+        }));
+      }
+    } catch (err) {
+      console.warn('[PlayRoute] Failed to load languages:', err.message);
+    }
+
     // Return clean response with stream URLs
     res.json({
       ok: true,
+      title: data.title || '',
+      poster: poster,
+      streams: finalStreams,
+      languages: languages,
+      workerUrl: CF_WORKER,
+      // Keep backward compatibility fields for existing clients
       tmdbId: data.tmdbId,
-      title: data.title,
       type: data.type,
       year: data.year,
       currentSeason: data.currentSeason,
       currentEpisode: data.currentEpisode,
       mp4: finalMp4,
       resolution: data.resolution,
-      streams: finalStreams,
       subjectId: data.subjectId,
       fallbackHls: data.fallbackHls,
       // Headers needed when playing raw CDN URLs (?proxy=false mode)

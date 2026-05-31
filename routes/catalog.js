@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const net27 = require('../services/net27');
+const sourceManager = require('../services/sourceManager');
 const { TMDB_API_KEY, TMDB_BASE_URL } = require('../config/tmdb');
 
 const handleRouteError = (res, error, defaultMessage, statusCode = 502) => {
@@ -302,7 +303,7 @@ router.get('/search', async (req, res) => {
     if (!q || q.trim() === '') {
       return res.status(400).json({ ok: false, error: 'Query parameter "q" is required' });
     }
-    const data = await net27.searchTitles(q.trim(), parseInt(page) || 1);
+    const data = await sourceManager.search(q.trim(), parseInt(page) || 1);
     res.json(data);
   } catch (e) {
     handleRouteError(res, e, 'Search failed');
@@ -372,7 +373,7 @@ router.get('/title/:type/:tmdbId', async (req, res) => {
     if (!['movie', 'tv'].includes(type)) {
       return res.status(400).json({ ok: false, error: 'Type must be "movie" or "tv"' });
     }
-    const data = await net27.getTitleDetails(type, parseInt(tmdbId));
+    const data = await sourceManager.details(type, parseInt(tmdbId));
     res.json(data);
   } catch (e) {
     handleRouteError(res, e, 'Failed to fetch title details');

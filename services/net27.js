@@ -26,7 +26,7 @@ const client = axios.create({
 
 // ─── Memory Caching ──────────────────────────────────────────────────────────
 class MemoryCache {
-  constructor(ttlMs = 10 * 60 * 1000) {
+  constructor(ttlMs = 15 * 60 * 1000) { // default 15 minutes
     this.cache = new Map();
     this.ttl = ttlMs;
   }
@@ -53,6 +53,7 @@ const catalogDetailsCache = new MemoryCache();
 const languagesCache = new MemoryCache();
 const streamsCache = new MemoryCache();
 const seasonEpisodesCache = new MemoryCache();
+const searchCache = new MemoryCache();
 
 // ─── Mirror Discovery ───────────────────────────────────────────────────────
 
@@ -187,7 +188,15 @@ async function getCatalog(tab = 'trending') {
  * @param {number} page  - Page number (default 1)
  */
 async function searchTitles(query, page = 1) {
-  return apiGet('/api/catalog/search-hybrid', { q: query, page });
+  const cacheKey = `${query}_${page}`;
+  const cached = searchCache.get(cacheKey);
+  if (cached) {
+    console.log(`[Net27] Cache hit for search: ${cacheKey}`);
+    return cached;
+  }
+  const data = await apiGet('/api/catalog/search-hybrid', { q: query, page });
+  searchCache.set(cacheKey, data);
+  return data;
 }
 
 /**
