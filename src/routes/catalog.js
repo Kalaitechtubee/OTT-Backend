@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const net27 = require('../services/net27');
+const net27 = require('../providers/net27');
 const sourceManager = require('../services/sourceManager');
-const { buildFilteredCatalog, getCategoryItems } = require('../services/catalogFilter');
-const { normalizeSearchResponse } = require('../services/searchNormalize');
-const searchCache = require('../services/searchCache');
+const { buildFilteredCatalog, getCategoryItems } = require('../utils/catalogFilter');
+const { normalizeSearchResponse } = require('../utils/searchNormalize');
+const searchCache = require('../utils/searchCache');
 const { TMDB_API_KEY, TMDB_BASE_URL } = require('../config/tmdb');
 
 const handleRouteError = (res, error, defaultMessage, statusCode = 502) => {

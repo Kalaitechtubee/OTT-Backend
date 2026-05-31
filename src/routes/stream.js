@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const net27 = require('../services/net27');
+const net27 = require('../providers/net27');
 const sourceManager = require('../services/sourceManager');
 
 const handleRouteError = (res, error, defaultMessage, statusCode = 502) => {

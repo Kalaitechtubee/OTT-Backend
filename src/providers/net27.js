@@ -326,6 +326,9 @@ async function getStreams(tmdbId, opts = {}) {
 }
 
 module.exports = {
+  provider: 'net27',
+  enabled: true,
+
   getWorkingDomain,
   getCatalog,
   searchTitles,
@@ -333,4 +336,10 @@ module.exports = {
   getSeasonEpisodes,
   getLanguages,
   getStreams,
+
+  // Unified provider interface (used by resolvers)
+  search: searchTitles,
+  details: getTitleDetails,
+  languages: getLanguages,
+  streams: getStreams,
 };

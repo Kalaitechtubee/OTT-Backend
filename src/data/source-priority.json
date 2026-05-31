@@ -1,0 +1,6 @@
+{
+  "search": ["net27", "net11", "moviesda"],
+  "play": ["net27", "net11", "moviesda"],
+  "languages": ["net27", "net11", "moviesda"],
+  "details": ["net27", "net11", "moviesda"]
+}

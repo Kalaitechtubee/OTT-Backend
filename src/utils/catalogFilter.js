@@ -1,4 +1,4 @@
-const net27 = require('./net27');
+const net27 = require('../providers/net27');
 
 function getItemsFromOriginalMatches(rails, keywords) {
   const items = [];

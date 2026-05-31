@@ -3,10 +3,10 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const catalogRouter = require('./routes/catalog');
-const streamRouter = require('./routes/stream');
-const searchCache = require('./services/searchCache');
-const net27 = require('./services/net27');
+const catalogRouter = require('./src/routes/catalog');
+const streamRouter = require('./src/routes/stream');
+const searchCache = require('./src/utils/searchCache');
+const net27 = require('./src/providers/net27');
 
 const app = express();
 const PORT = process.env.PORT || 5000;

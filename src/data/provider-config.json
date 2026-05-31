@@ -1,0 +1,10 @@
+{
+  "multiSourceSearch": false,
+  "multiSourcePlay": false,
+  "multiSourceLanguages": false,
+  "enabled": {
+    "net27": true,
+    "net11": false,
+    "moviesda": false
+  }
+}
