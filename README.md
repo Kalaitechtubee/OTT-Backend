@@ -96,11 +96,31 @@ GET /api/catalog/trending
   }
 ```
 
-#### Search
+#### Search (Net27 search-hybrid)
 ```
-GET /api/catalog/search?q=avatar&page=1
-→ { "ok": true, "items": [ Movie ] }
+GET /api/catalog/search?q=mersal&page=1
+
+Proxies Net27: GET /api/catalog/search-hybrid?q=mersal
+
+→ {
+    "ok": true,
+    "query": "mersal",
+    "source": "net27-search-hybrid",
+    "streamableCount": 1,
+    "items": [{
+      "tmdbId": 456287,
+      "title": "Mersal",
+      "type": "movie",
+      "streamable": true,
+      "subjectId": "7305948787733053624",
+      "detailPath": "mersal-hindi-...",
+      "variants": [...]
+    }]
+  }
 ```
+
+Results are deduped (TMDB + aoneroom-direct), sorted with `streamable: true` first,
+and file-cached for 24h under `backend/data/search-cache.json`.
 
 #### Title Details (Movie or TV)
 ```

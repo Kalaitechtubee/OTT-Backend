@@ -5,6 +5,8 @@ const cors = require('cors');
 const morgan = require('morgan');
 const catalogRouter = require('./routes/catalog');
 const streamRouter = require('./routes/stream');
+const searchCache = require('./services/searchCache');
+const net27 = require('./services/net27');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -32,4 +34,8 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Health: http://localhost:${PORT}/health`);
   console.log(`Catalog: http://localhost:${PORT}/api/catalog/trending`);
   console.log(`Stream:  http://localhost:${PORT}/api/stream/play/:tmdbId`);
+  console.log(`Search:  Net27 search-hybrid via /api/catalog/search`);
+
+  // Warm popular Tamil searches into file cache (non-blocking)
+  searchCache.warmFromFetcher((q, page) => net27.searchTitles(q, page));
 });
