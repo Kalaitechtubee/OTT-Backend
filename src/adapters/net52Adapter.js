@@ -31,18 +31,66 @@ function adaptDetails(rawResponse) {
   };
 }
 
+const providerConfig = require('../config/provider');
+const BASE_URL = process.env.NET52_BASE_URL || providerConfig.NET52_BASE_URL || 'https://net52.cc';
+
 function adaptStreams(rawResponse) {
   if (!rawResponse) return { streams: [], subtitles: [] };
-  const rawStreams = Array.isArray(rawResponse) ? rawResponse : (rawResponse.streams || []);
-  const streams = rawStreams.map(s => ({
-    quality: s.quality || 'Auto',
-    url: s.url || ''
-  }));
+
+  const streams = [];
+  const subtitles = [];
+
+  // Parse Net52 playlist array
+  if (Array.isArray(rawResponse)) {
+    for (const playlist of rawResponse) {
+      if (playlist && Array.isArray(playlist.sources)) {
+        for (const src of playlist.sources) {
+          if (src && src.file) {
+            let streamUrl = src.file;
+            // Prepend base URL if relative path
+            if (streamUrl.startsWith('/')) {
+              streamUrl = `${BASE_URL}${streamUrl}`;
+            }
+            streams.push({
+              quality: src.label || 'Auto',
+              url: streamUrl
+            });
+          }
+        }
+      }
+    }
+  } else if (rawResponse.streams) {
+    // Fallback if Net52 returns { streams: [...] } directly
+    const rawStreams = Array.isArray(rawResponse.streams) ? rawResponse.streams : [];
+    for (const s of rawStreams) {
+      if (s) {
+        let streamUrl = s.url || s.file || '';
+        if (streamUrl.startsWith('/')) {
+          streamUrl = `${BASE_URL}${streamUrl}`;
+        }
+        streams.push({
+          quality: s.quality || s.label || 'Auto',
+          url: streamUrl
+        });
+      }
+    }
+  }
+
+  // Handle subtitles if present
   const rawSubs = rawResponse.subtitles || [];
-  const subtitles = rawSubs.map(sub => ({
-    language: sub.language || 'English',
-    url: sub.url || ''
-  }));
+  for (const sub of rawSubs) {
+    if (sub) {
+      let subUrl = sub.url || '';
+      if (subUrl.startsWith('/')) {
+        subUrl = `${BASE_URL}${subUrl}`;
+      }
+      subtitles.push({
+        language: sub.language || 'English',
+        url: subUrl
+      });
+    }
+  }
+
   return {
     streams,
     subtitles

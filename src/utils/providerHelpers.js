@@ -8,7 +8,22 @@ function hasStreams(data) {
   if (data.playlist === null) return false;
   if (Array.isArray(data.sources) && data.sources.length === 0) return false;
   if (Array.isArray(data.streams) && data.streams.length === 0) return false;
-  if (Array.isArray(data) && data.length > 0) return true;
+  
+  if (Array.isArray(data)) {
+    if (data.length === 0) return false;
+    return data.some(item => {
+      if (!item) return false;
+      if (item.url || item.file) return true;
+      if (Array.isArray(item.sources) && item.sources.length > 0) {
+        return item.sources.some(src => src && (src.file || src.url));
+      }
+      if (Array.isArray(item.streams) && item.streams.length > 0) {
+        return item.streams.some(st => st && (st.url || st.file));
+      }
+      return false;
+    });
+  }
+  
   return Boolean(data.mp4 || (Array.isArray(data.streams) && data.streams.length > 0) || (Array.isArray(data.sources) && data.sources.length > 0));
 }
 
