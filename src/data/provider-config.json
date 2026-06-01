@@ -1,8 +1,9 @@
 {
-  "multiSourceSearch": false,
-  "multiSourcePlay": false,
-  "multiSourceLanguages": false,
+  "multiSourceSearch": true,
+  "multiSourcePlay": true,
+  "multiSourceLanguages": true,
   "enabled": {
+    "net52": true,
     "net27": true,
     "net11": false,
     "moviesda": false

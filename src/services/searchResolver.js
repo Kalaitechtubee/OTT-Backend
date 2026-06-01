@@ -2,9 +2,17 @@ const fs = require('fs');
 const path = require('path');
 const registry = require('./sourceRegistry');
 const { adaptProvider } = require('../utils/providerHelpers');
+const { DEFAULT_PROVIDER } = require('../config/provider');
+const net27Adapter = require('../adapters/net27Adapter');
+const net52Adapter = require('../adapters/net52Adapter');
 
 const CONFIG_PATH = path.join(__dirname, '..', 'data', 'provider-config.json');
 const PRIORITY_PATH = path.join(__dirname, '..', 'data', 'source-priority.json');
+
+const adapters = {
+  net27: net27Adapter,
+  net52: net52Adapter
+};
 
 function loadProviderConfig() {
   try {
@@ -16,7 +24,7 @@ function loadProviderConfig() {
   }
   return {
     multiSourceSearch: false,
-    enabled: { net27: true, net11: false, moviesda: false },
+    enabled: { net27: true, net52: true, net11: false, moviesda: false },
   };
 }
 
@@ -28,7 +36,7 @@ function loadPriority() {
   } catch (e) {
     console.warn('[SearchResolver] Failed to load source-priority.json:', e.message);
   }
-  return { search: ['net27'] };
+  return { search: ['net52', 'net27'] };
 }
 
 function getProvider(name) {
@@ -47,19 +55,26 @@ function getEnabledProviders(priorityList = []) {
 }
 
 /**
- * V1 (multiSourceSearch: false): net27 only.
+ * V1 (multiSourceSearch: false): DEFAULT_PROVIDER only.
  * V2: try sources in priority order until results are found.
  */
 async function search(query, page = 1) {
   const config = loadProviderConfig();
   const priority = loadPriority();
-  const chain = getEnabledProviders(priority.search || ['net27']);
+  const chain = getEnabledProviders(priority.search || [DEFAULT_PROVIDER || 'net27']);
 
   if (!config.multiSourceSearch || chain.length <= 1) {
-    const primary = chain[0] || 'net27';
+    const primary = chain[0] || DEFAULT_PROVIDER || 'net27';
     const provider = getProvider(primary);
     if (!provider) throw new Error(`Provider "${primary}" is not registered`);
-    return provider.search(query, page);
+    
+    const data = await provider.search(query, page);
+    const adapt = adapters[primary]?.adaptSearch || ((x) => x);
+    return {
+      success: true,
+      provider: primary,
+      results: adapt(data)
+    };
   }
 
   for (const name of chain) {
@@ -70,14 +85,19 @@ async function search(query, page = 1) {
       const data = await provider.search(query, page);
       if (provider.hasSearchResults(data)) {
         console.log(`[SearchResolver] Hit on ${name} for "${query}"`);
-        return data;
+        const adapt = adapters[name]?.adaptSearch || ((x) => x);
+        return {
+          success: true,
+          provider: name,
+          results: adapt(data)
+        };
       }
     } catch (e) {
       console.warn(`[SearchResolver] ${name} failed for "${query}":`, e.message);
     }
   }
 
-  return { ok: true, items: [], query, page };
+  return { success: false, provider: null, results: [] };
 }
 
 module.exports = { search, getProvider, getEnabledProviders, loadPriority };

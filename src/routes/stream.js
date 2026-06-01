@@ -102,15 +102,9 @@ router.get('/play/:tmdbId', async (req, res) => {
 
     const data = await sourceManager.play(tmdbId, opts);
 
-    console.log({
-      dub: req.query.dub || null,
-      sid: req.query.sid || null,
-      returnedSubjectId: data?.subjectId || null,
-    });
-
-    if (!data || !data.ok) {
+    if (!data || !data.success) {
       return res.status(404).json({
-        ok: false,
+        success: false,
         error: data?.error || 'No streams found for this title',
       });
     }
@@ -128,18 +122,7 @@ router.get('/play/:tmdbId', async (req, res) => {
     const refererQuery = refererParams.length > 0 ? `?${refererParams.join('&')}` : '';
     const refererUrl = `${domain}/api/embed-tmdb/${tmdbId}${refererQuery}`;
 
-    // ─── URL Strategy ───────────────────────────────────────────────────────
-    //
-    // The CDN (bcdnxw.hakunaymatata.com) blocks all server/datacenter IPs (403).
-    // Net27's own website proxies via Cloudflare Worker for browser playback.
-    // Flutter (mobile consumer IPs) can also hit the CF Worker directly.
-    //
-    // Architecture: Flutter → CF Worker → CDN   ✅ (no Render proxy involved)
-    //
-    // ?proxy=true  → Render server proxy (only works locally, 403 on Render)
-    // ?proxy=false → Raw CDN URLs (for clients that set headers manually)
-    // default      → CF Worker URLs (Flutter plays these directly ✅)
-    //
+    // Cloudflare worker details
     const CF_WORKER = 'https://streamhub-proxy.1545zoya.workers.dev';
 
     const buildCfWorkerUrl = (cdnUrl) => {
@@ -165,10 +148,10 @@ router.get('/play/:tmdbId', async (req, res) => {
       return buildCfWorkerUrl(cdnUrl);                                 // Default: CF Worker (Flutter plays directly)
     };
 
-    const finalMp4 = transformUrl(data.mp4);
+    // Only apply Net27 specific worker proxying if the provider is net27
     const finalStreams = (data.streams || []).map(stream => ({
       ...stream,
-      url: transformUrl(stream.url)
+      url: data.provider === 'net27' ? transformUrl(stream.url) : stream.url
     }));
 
     // Set cache busting headers to prevent caching of signed CDN/worker URLs
@@ -176,53 +159,12 @@ router.get('/play/:tmdbId', async (req, res) => {
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
 
-    let poster = '';
-    let languages = [];
-    try {
-      const details = await sourceManager.details(opts.type || 'movie', tmdbId);
-      poster = details?.poster || details?.poster_path || '';
-    } catch (err) {
-      console.warn('[PlayRoute] Failed to load details for poster:', err.message);
-    }
-
-    try {
-      const langData = await sourceManager.languages(opts.type || 'movie', tmdbId, opts);
-      if (langData && langData.variants) {
-        const parentSid = langData.defaultSubjectId || opts.sid || '';
-        languages = langData.variants.map(v => ({
-          id: v.dubSubjectId || v.sid || parentSid || 'original',
-          language: v.language || 'Original'
-        }));
-      }
-    } catch (err) {
-      console.warn('[PlayRoute] Failed to load languages:', err.message);
-    }
-
     // Return clean response with stream URLs
     res.json({
-      ok: true,
-      title: data.title || '',
-      poster: poster,
+      success: true,
+      provider: data.provider,
       streams: finalStreams,
-      languages: languages,
-      workerUrl: CF_WORKER,
-      // Keep backward compatibility fields for existing clients
-      tmdbId: data.tmdbId,
-      type: data.type,
-      year: data.year,
-      currentSeason: data.currentSeason,
-      currentEpisode: data.currentEpisode,
-      mp4: finalMp4,
-      resolution: data.resolution,
-      subjectId: data.subjectId,
-      fallbackHls: data.fallbackHls,
-      // Headers needed when playing raw CDN URLs (?proxy=false mode)
-      // In default CF Worker mode, the worker handles CORS — no custom headers needed.
-      headers: {
-        "Referer": refererUrl,
-        "User-Agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36",
-        "Origin": domain
-      }
+      subtitles: data.subtitles || []
     });
   } catch (e) {
     handleRouteError(res, e, 'Failed to fetch stream URLs');

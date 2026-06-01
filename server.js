@@ -37,5 +37,6 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Search:  Net27 search-hybrid via /api/catalog/search`);
 
   // Warm popular Tamil searches into file cache (non-blocking)
-  searchCache.warmFromFetcher((q, page) => net27.searchTitles(q, page));
+  const sourceManager = require('./src/services/sourceManager');
+  searchCache.warmFromFetcher((q, page) => sourceManager.search(q, page));
 });

@@ -1,9 +1,17 @@
 const fs = require('fs');
 const path = require('path');
 const { getProvider, getEnabledProviders } = require('./searchResolver');
+const { DEFAULT_PROVIDER } = require('../config/provider');
+const net27Adapter = require('../adapters/net27Adapter');
+const net52Adapter = require('../adapters/net52Adapter');
 
 const CONFIG_PATH = path.join(__dirname, '..', 'data', 'provider-config.json');
 const PRIORITY_PATH = path.join(__dirname, '..', 'data', 'source-priority.json');
+
+const adapters = {
+  net27: net27Adapter,
+  net52: net52Adapter
+};
 
 function loadProviderConfig() {
   try {
@@ -24,23 +32,32 @@ function loadPriority() {
   } catch (e) {
     console.warn('[PlayResolver] Failed to load source-priority.json:', e.message);
   }
-  return { play: ['net27'] };
+  return { play: ['net52', 'net27'] };
 }
 
 /**
- * V1: net27 only — same as previous sourceManager.play().
- * V2: net27 → net11 → moviesda until streams are found.
+ * V1: DEFAULT_PROVIDER only.
+ * V2: try sources in priority order until streams are found.
  */
 async function resolve(tmdbId, opts = {}) {
   const config = loadProviderConfig();
   const priority = loadPriority();
-  const chain = getEnabledProviders(priority.play || ['net27']);
+  const chain = getEnabledProviders(priority.play || [DEFAULT_PROVIDER || 'net27']);
 
   if (!config.multiSourcePlay || chain.length <= 1) {
-    const primary = chain[0] || 'net27';
+    const primary = chain[0] || DEFAULT_PROVIDER || 'net27';
     const provider = getProvider(primary);
     if (!provider) throw new Error(`Provider "${primary}" is not registered`);
-    return provider.streams(tmdbId, opts);
+    
+    const data = await provider.streams(tmdbId, opts);
+    const adapt = adapters[primary]?.adaptStreams || ((x) => x);
+    const adapted = adapt(data);
+    return {
+      success: true,
+      provider: primary,
+      streams: adapted.streams || [],
+      subtitles: adapted.subtitles || []
+    };
   }
 
   let lastError = null;
@@ -53,7 +70,14 @@ async function resolve(tmdbId, opts = {}) {
       const data = await provider.streams(tmdbId, opts);
       if (provider.hasStreams(data)) {
         console.log(`[PlayResolver] Streams from ${name} for tmdbId=${tmdbId}`);
-        return { ...data, provider: name };
+        const adapt = adapters[name]?.adaptStreams || ((x) => x);
+        const adapted = adapt(data);
+        return {
+          success: true,
+          provider: name,
+          streams: adapted.streams || [],
+          subtitles: adapted.subtitles || []
+        };
       }
     } catch (e) {
       lastError = e;
@@ -62,7 +86,7 @@ async function resolve(tmdbId, opts = {}) {
   }
 
   if (lastError) throw lastError;
-  return { ok: false, error: 'No streams found from any provider' };
+  return { success: false, provider: null, streams: [], subtitles: [] };
 }
 
 module.exports = { resolve, loadPriority };

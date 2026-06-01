@@ -1,6 +1,6 @@
 {
-  "search": ["net27", "net11", "moviesda"],
-  "play": ["net27", "net11", "moviesda"],
-  "languages": ["net27", "net11", "moviesda"],
-  "details": ["net27", "net11", "moviesda"]
+  "search": ["net27", "net52", "moviesda"],
+  "play": ["net27", "net52", "moviesda"],
+  "languages": ["net27", "net52", "moviesda"],
+  "details": ["net27", "net52", "moviesda"]
 }

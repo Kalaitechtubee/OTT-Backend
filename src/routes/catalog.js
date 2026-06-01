@@ -207,14 +207,13 @@ router.get('/search', async (req, res) => {
       if (cached) return res.json(cached);
     }
 
-    const raw = await sourceManager.search(query, pageNum);
-    const normalized = normalizeSearchResponse(raw, query);
+    const unifiedResult = await sourceManager.search(query, pageNum);
 
-    if (pageNum === 1 && normalized.items?.length) {
-      searchCache.set(query, normalized);
+    if (pageNum === 1 && unifiedResult.results?.length) {
+      searchCache.set(query, unifiedResult);
     }
 
-    res.json(normalized);
+    res.json(unifiedResult);
   } catch (e) {
     handleRouteError(res, e, 'Search failed');
   }

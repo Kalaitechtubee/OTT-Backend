@@ -81,10 +81,15 @@ function warmFromFetcher(fetchFn) {
       if (get(q)) continue;
       try {
         const raw = await fetchFn(q, 1);
-        if (raw?.items?.length) {
-          const { normalizeSearchResponse } = require('./searchNormalize');
-          set(q, normalizeSearchResponse(raw, q));
-          console.log(`[SearchCache] Warmed "${q}" (${raw.items.length} raw → cached)`);
+        if (raw) {
+          if (raw.success !== undefined) {
+            set(q, raw);
+            console.log(`[SearchCache] Warmed unified "${q}" (${raw.results?.length ?? 0} results)`);
+          } else if (raw.items?.length) {
+            const { normalizeSearchResponse } = require('./searchNormalize');
+            set(q, normalizeSearchResponse(raw, q));
+            console.log(`[SearchCache] Warmed "${q}" (${raw.items.length} raw → cached)`);
+          }
         }
       } catch (e) {
         console.warn(`[SearchCache] Warm failed for "${q}":`, e.message);

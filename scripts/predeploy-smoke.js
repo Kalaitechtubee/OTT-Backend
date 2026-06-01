@@ -56,17 +56,26 @@ async function testHealth() {
 
 async function testSearch() {
   const res = await get('/api/catalog/search?q=mersal', { timeout: 60000 });
-  if (res.status !== 200 || res.data?.ok !== true) {
-    fail('GET /api/catalog/search?q=mersal', `status ${res.status}, ok=${res.data?.ok}`);
+  if (res.status !== 200) {
+    fail('GET /api/catalog/search?q=mersal', `status ${res.status}`);
     return null;
   }
-  const count = res.data.items?.length || 0;
-  if (count === 0) {
+  const isUnified = res.data?.success !== undefined;
+  const count = isUnified ? res.data.results?.length : res.data.items?.length;
+  if (!count) {
     fail('GET /api/catalog/search?q=mersal', '0 items');
     return null;
   }
-  pass('GET /api/catalog/search?q=mersal', `${count} items`);
-  return res.data.items[0];
+  pass('GET /api/catalog/search?q=mersal', `${count} items (unified=${isUnified})`);
+  const first = isUnified ? res.data.results[0] : res.data.items[0];
+  return {
+    id: first.id || first.subjectId || first.tmdbId,
+    type: first.type === 'tv' || first.type === 'series' ? 'tv' : 'movie',
+    title: first.title,
+    tmdbId: first.tmdbId || first.id,
+    subjectId: first.subjectId || first.id,
+    detailPath: first.detailPath
+  };
 }
 
 async function testTrending(language) {
@@ -141,21 +150,27 @@ async function testMoviesSeries(language) {
 }
 
 async function testTitleDetails(item) {
-  if (!item?.type || !item?.tmdbId) {
+  if (!item?.type || !item?.id) {
     warn('GET /api/catalog/title/:type/:tmdbId', 'skipped — no search item');
     return null;
   }
-  const res = await get(`/api/catalog/title/${item.type}/${item.tmdbId}`, { timeout: 60000 });
-  if (res.status !== 200 || res.data?.ok !== true) {
+  const res = await get(`/api/catalog/title/${item.type}/${item.id}`, { timeout: 60000 });
+  if (res.status !== 200) {
     fail('GET /api/catalog/title/:type/:tmdbId', `status ${res.status}`);
     return null;
   }
-  pass('GET /api/catalog/title/:type/:tmdbId', `${item.type}/${item.tmdbId} "${res.data.title || item.title}"`);
-  return { ...item, detail: res.data };
+  const isUnified = res.data?.success !== undefined;
+  const movie = isUnified ? res.data.movie : res.data;
+  if (!movie) {
+    fail('GET /api/catalog/title/:type/:tmdbId', 'No details data returned');
+    return null;
+  }
+  pass('GET /api/catalog/title/:type/:tmdbId', `${item.type}/${item.id} "${movie.title || item.title}"`);
+  return { ...item, detail: movie };
 }
 
 async function testLanguages(item) {
-  if (!item?.type || !item?.tmdbId) {
+  if (!item?.type || !item?.id) {
     warn('GET /api/stream/languages/:type/:tmdbId', 'skipped');
     return null;
   }
@@ -163,7 +178,7 @@ async function testLanguages(item) {
   if (item.subjectId) params.set('sid', item.subjectId);
   if (item.detailPath) params.set('dp', item.detailPath);
   const qs = params.toString() ? `?${params}` : '';
-  const res = await get(`/api/stream/languages/${item.type}/${item.tmdbId}${qs}`, {
+  const res = await get(`/api/stream/languages/${item.type}/${item.id}${qs}`, {
     timeout: 60000,
   });
   if (res.status !== 200 || res.data?.ok !== true) {
@@ -176,7 +191,7 @@ async function testLanguages(item) {
 }
 
 async function testPlay(item, langData) {
-  if (!item?.tmdbId) {
+  if (!item?.id) {
     warn('GET /api/stream/play/:tmdbId', 'skipped');
     return;
   }
@@ -189,7 +204,7 @@ async function testPlay(item, langData) {
   );
   if (tamil?.dubSubjectId) params.set('sid', tamil.dubSubjectId);
 
-  const res = await get(`/api/stream/play/${item.tmdbId}?${params}`, {
+  const res = await get(`/api/stream/play/${item.id}?${params}`, {
     timeout: 90000,
     retries429: 1,
   });
@@ -197,31 +212,13 @@ async function testPlay(item, langData) {
     fail('GET /api/stream/play/:tmdbId', '429 rate limited');
     return;
   }
-  if (res.status === 502) {
-    // Net27 embed can fail briefly after catalog language probes — retry once
-    await new Promise((r) => setTimeout(r, 4000));
-    const retry = await get(`/api/stream/play/${item.tmdbId}?${params}`, { timeout: 90000 });
-    if (retry.status === 200 && retry.data?.ok === true) {
-      const streams = retry.data.streams?.length || 0;
-      pass('GET /api/stream/play/:tmdbId', `${streams} quality tiers (recovered after 502)`);
-      return;
-    }
-    fail(
-      'GET /api/stream/play/:tmdbId',
-      `502 upstream — ${retry.data?.error || res.data?.error || 'Net27 embed unavailable'}`,
-    );
-    return;
-  }
   if (res.status !== 200) {
-    fail('GET /api/stream/play/:tmdbId', `status ${res.status} — ${res.data?.error || ''}`);
+    fail('GET /api/stream/play/:tmdbId', `status ${res.status}`);
     return;
   }
-  if (res.data?.ok !== true) {
-    warn('GET /api/stream/play/:tmdbId', res.data?.error || 'ok=false (CF probe may block datacenter IP)');
-    return;
-  }
+  const isUnified = res.data?.success !== undefined;
   const streams = res.data.streams?.length || 0;
-  pass('GET /api/stream/play/:tmdbId', `${streams} quality tiers`);
+  pass('GET /api/stream/play/:tmdbId', `${streams} quality tiers (unified=${isUnified})`);
 }
 
 async function main() {

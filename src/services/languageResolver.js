@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { getProvider, getEnabledProviders } = require('./searchResolver');
+const { DEFAULT_PROVIDER } = require('../config/provider');
 
 const CONFIG_PATH = path.join(__dirname, '..', 'data', 'provider-config.json');
 const PRIORITY_PATH = path.join(__dirname, '..', 'data', 'source-priority.json');
@@ -24,20 +25,20 @@ function loadPriority() {
   } catch (e) {
     console.warn('[LanguageResolver] Failed to load source-priority.json:', e.message);
   }
-  return { languages: ['net27'] };
+  return { languages: ['net52', 'net27'] };
 }
 
 /**
- * V1: net27 only.
+ * V1: DEFAULT_PROVIDER only.
  * V2: try sources in priority order until variants are found.
  */
 async function resolve(type, tmdbId, opts = {}) {
   const config = loadProviderConfig();
   const priority = loadPriority();
-  const chain = getEnabledProviders(priority.languages || ['net27']);
+  const chain = getEnabledProviders(priority.languages || [DEFAULT_PROVIDER || 'net27']);
 
   if (!config.multiSourceLanguages || chain.length <= 1) {
-    const primary = chain[0] || 'net27';
+    const primary = chain[0] || DEFAULT_PROVIDER || 'net27';
     const provider = getProvider(primary);
     if (!provider) throw new Error(`Provider "${primary}" is not registered`);
     return provider.languages(type, tmdbId, opts);

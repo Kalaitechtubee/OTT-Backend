@@ -3,14 +3,15 @@ const searchResolver = require('./searchResolver');
 const playResolver = require('./playResolver');
 const languageResolver = require('./languageResolver');
 const { adaptProvider } = require('../utils/providerHelpers');
+const { DEFAULT_PROVIDER } = require('../config/provider');
+const { getEnabledProviders, loadPriority } = require('./searchResolver');
+const net27Adapter = require('../adapters/net27Adapter');
+const net52Adapter = require('../adapters/net52Adapter');
 
-/**
- * Single entry point for routes.
- *
- *   routes → sourceManager → resolvers → sourceRegistry → providers/*
- *
- * Multi-source flags in src/data/provider-config.json default to off (V1).
- */
+const adapters = {
+  net27: net27Adapter,
+  net52: net52Adapter
+};
 
 function getProvider(name) {
   return adaptProvider(registry[name], name);
@@ -21,9 +22,30 @@ async function search(query, page = 1) {
 }
 
 async function details(type, tmdbId) {
-  const provider = getProvider('net27');
-  if (!provider) throw new Error('Provider net27 is not registered');
-  return provider.details(type, tmdbId);
+  const priority = loadPriority();
+  const chain = getEnabledProviders(priority.details || ['net52', 'net27']);
+
+  for (const name of chain) {
+    const provider = getProvider(name);
+    if (!provider) continue;
+
+    try {
+      const data = await provider.details(type, tmdbId);
+      if (data) {
+        console.log(`[SourceManager] Title details from ${name} for tmdbId=${tmdbId}`);
+        const adapt = adapters[name]?.adaptDetails || ((x) => x);
+        return {
+          success: true,
+          provider: name,
+          movie: adapt(data)
+        };
+      }
+    } catch (e) {
+      console.warn(`[SourceManager] ${name} details failed for tmdbId=${tmdbId}:`, e.message);
+    }
+  }
+
+  return { success: false, provider: null, movie: null };
 }
 
 async function languages(type, tmdbId, opts = {}) {
