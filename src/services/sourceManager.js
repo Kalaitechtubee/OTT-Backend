@@ -32,32 +32,46 @@ async function details(type, tmdbId) {
     if (!provider) continue;
 
     try {
+      console.log(`[SourceManager] Trying ${name} for details tmdbId=${tmdbId}`);
       const data = await provider.details(type, tmdbId);
-      if (data) {
-        console.log(`[SourceManager] Title details from ${name} for tmdbId=${tmdbId}`);
-        const adapt = adapters[name]?.adaptDetails || ((x) => x);
-        const movie = adapt(data);
+      if (!data) {
+        console.warn(`[SourceManager] ${name} returned null for tmdbId=${tmdbId}, trying next...`);
+        continue;
+      }
 
-        if (!primaryResult) {
+      const adapt = adapters[name]?.adaptDetails || ((x) => x);
+      const movie = adapt(data);
+
+      // Check if the adapted movie has meaningful data (at least a title)
+      const hasTitle = movie && movie.title && movie.title.trim().length > 0;
+
+      if (!primaryResult) {
+        if (hasTitle) {
           primaryResult = { provider: name, movie };
-          console.log(`[SourceManager] Details primary provider ${name} for tmdbId=${tmdbId}`);
+          console.log(`[SourceManager] ✅ Details primary provider ${name} for tmdbId=${tmdbId}: "${movie.title}"`);
         } else {
-          // Merge missing helpful fields from subsequent providers into the primary movie
-          const fieldsToMerge = ['subjectId', 'detailPath', 'seasons', 'languages'];
-          for (const f of fieldsToMerge) {
-            if ((primaryResult.movie[f] === null || primaryResult.movie[f] === undefined || (Array.isArray(primaryResult.movie[f]) && primaryResult.movie[f].length === 0)) && movie[f]) {
-              primaryResult.movie[f] = movie[f];
-              console.log(`[SourceManager] Merged field ${f} from ${name} into primary details for tmdbId=${tmdbId}`);
-            }
+          console.warn(`[SourceManager] ${name} returned empty details for tmdbId=${tmdbId}, trying next...`);
+          continue;
+        }
+      } else {
+        // Merge missing helpful fields from subsequent providers into the primary movie
+        const fieldsToMerge = ['subjectId', 'detailPath', 'seasons', 'languages', 'title', 'overview', 'rating', 'director', 'genres', 'poster', 'backdrop'];
+        for (const f of fieldsToMerge) {
+          const primaryVal = primaryResult.movie[f];
+          const isEmpty = primaryVal === null || primaryVal === undefined || primaryVal === '' ||
+            (Array.isArray(primaryVal) && primaryVal.length === 0);
+          if (isEmpty && movie[f]) {
+            primaryResult.movie[f] = movie[f];
+            console.log(`[SourceManager] Merged field ${f} from ${name} into primary details for tmdbId=${tmdbId}`);
           }
         }
-
-        // If primary has all necessary fields, stop early
-        const hasSubject = primaryResult && primaryResult.movie && (primaryResult.movie.subjectId || primaryResult.movie.detailPath);
-        if (hasSubject) break;
       }
+
+      // If primary has all necessary fields, stop early
+      const hasSubject = primaryResult && primaryResult.movie && (primaryResult.movie.subjectId || primaryResult.movie.detailPath);
+      if (hasSubject) break;
     } catch (e) {
-      console.warn(`[SourceManager] ${name} details failed for tmdbId=${tmdbId}:`, e.message);
+      console.warn(`[SourceManager] ${name} details failed for tmdbId=${tmdbId}: ${e.message}, trying next...`);
     }
   }
 

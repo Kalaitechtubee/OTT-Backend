@@ -29,33 +29,27 @@ function loadPriority() {
 }
 
 /**
- * V1: DEFAULT_PROVIDER only.
- * V2: try sources in priority order until variants are found.
+ * Try sources in priority order until language variants are found.
+ * If a provider errors or returns no variants, fall through to the next.
  */
 async function resolve(type, tmdbId, opts = {}) {
-  const config = loadProviderConfig();
   const priority = loadPriority();
   const chain = getEnabledProviders(priority.languages || [DEFAULT_PROVIDER || 'net27']);
-
-  if (!config.multiSourceLanguages || chain.length <= 1) {
-    const primary = chain[0] || DEFAULT_PROVIDER || 'net27';
-    const provider = getProvider(primary);
-    if (!provider) throw new Error(`Provider "${primary}" is not registered`);
-    return provider.languages(type, tmdbId, opts);
-  }
 
   for (const name of chain) {
     const provider = getProvider(name);
     if (!provider) continue;
 
     try {
+      console.log(`[LanguageResolver] Trying provider ${name} for ${type}/${tmdbId}`);
       const data = await provider.languages(type, tmdbId, opts);
       if (provider.hasLanguages(data)) {
-        console.log(`[LanguageResolver] Variants from ${name} for ${type}/${tmdbId}`);
+        console.log(`[LanguageResolver] ✅ Variants from ${name} for ${type}/${tmdbId} (${data?.variants?.length || 0} variants)`);
         return { ...data, provider: name };
       }
+      console.warn(`[LanguageResolver] ${name} returned no variants for ${type}/${tmdbId}, trying next...`);
     } catch (e) {
-      console.warn(`[LanguageResolver] ${name} failed for ${type}/${tmdbId}:`, e.message);
+      console.warn(`[LanguageResolver] ${name} failed for ${type}/${tmdbId}: ${e.message}, trying next...`);
     }
   }
 

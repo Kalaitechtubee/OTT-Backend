@@ -55,45 +55,46 @@ function getEnabledProviders(priorityList = []) {
 }
 
 /**
- * V1 (multiSourceSearch: false): DEFAULT_PROVIDER only.
- * V2: try sources in priority order until results are found.
+ * Try sources in priority order until results are found.
+ * If the primary provider errors or returns empty results, fall through to the next.
  */
 async function search(query, page = 1) {
-  const config = loadProviderConfig();
   const priority = loadPriority();
   const chain = getEnabledProviders(priority.search || [DEFAULT_PROVIDER || 'net27']);
-
-  if (!config.multiSourceSearch || chain.length <= 1) {
-    const primary = chain[0] || DEFAULT_PROVIDER || 'net27';
-    const provider = getProvider(primary);
-    if (!provider) throw new Error(`Provider "${primary}" is not registered`);
-    
-    const data = await provider.search(query, page);
-    const adapt = adapters[primary]?.adaptSearch || ((x) => x);
-    return {
-      success: true,
-      provider: primary,
-      results: adapt(data)
-    };
-  }
 
   for (const name of chain) {
     const provider = getProvider(name);
     if (!provider) continue;
 
     try {
+      console.log(`[SearchResolver] Trying provider ${name} for "${query}"`);
       const data = await provider.search(query, page);
-      if (provider.hasSearchResults(data)) {
-        console.log(`[SearchResolver] Hit on ${name} for "${query}"`);
-        const adapt = adapters[name]?.adaptSearch || ((x) => x);
+      const adapt = adapters[name]?.adaptSearch || ((x) => x);
+      const adapted = adapt(data);
+
+      // Check if adapted results have items
+      if (Array.isArray(adapted) && adapted.length > 0) {
+        console.log(`[SearchResolver] ✅ Hit on ${name} for "${query}" (${adapted.length} results)`);
         return {
           success: true,
           provider: name,
-          results: adapt(data)
+          results: adapted
         };
       }
+
+      // Also check raw data in case adapter returns the full object
+      if (provider.hasSearchResults(data)) {
+        console.log(`[SearchResolver] ✅ Hit on ${name} for "${query}" (raw check)`);
+        return {
+          success: true,
+          provider: name,
+          results: adapted
+        };
+      }
+
+      console.warn(`[SearchResolver] ${name} returned no results for "${query}", trying next...`);
     } catch (e) {
-      console.warn(`[SearchResolver] ${name} failed for "${query}":`, e.message);
+      console.warn(`[SearchResolver] ${name} failed for "${query}": ${e.message}, trying next...`);
     }
   }
 

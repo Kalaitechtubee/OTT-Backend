@@ -21,7 +21,7 @@ function adaptDetails(rawResponse) {
     director: rawResponse.director || null,
     genres: rawResponse.genres || [],
     languages: rawResponse.languages || [],
-    description: rawResponse.overview || '',
+    overview: rawResponse.overview || rawResponse.description || '',
     subjectId: rawResponse.subjectId || null,
     detailPath: rawResponse.detailPath || null,
     seasons: rawResponse.seasons || []

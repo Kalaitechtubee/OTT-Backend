@@ -36,66 +36,33 @@ function loadPriority() {
 }
 
 /**
- * V1: DEFAULT_PROVIDER only.
- * V2: try sources in priority order until streams are found.
+ * Try sources in priority order until streams are found.
+ * If a provider errors or returns empty streams, fall through to the next.
  */
 async function resolve(tmdbId, opts = {}) {
-  const config = loadProviderConfig();
   const priority = loadPriority();
-  const chain = getEnabledProviders(priority.play || [DEFAULT_PROVIDER || 'net27']);
-
-  let primary = null;
-  if (!config.multiSourcePlay || chain.length <= 1) {
-    primary = chain[0] || DEFAULT_PROVIDER || 'net27';
-    const provider = getProvider(primary);
-    if (!provider) throw new Error(`Provider "${primary}" is not registered`);
-
-    try {
-      console.log(`[PlayResolver] Primary provider ${primary} selected for tmdbId=${tmdbId}`);
-      const data = await provider.streams(tmdbId, opts);
-      const adapt = adapters[primary]?.adaptStreams || ((x) => x);
-      const adapted = adapt(data);
-
-      if (provider.hasStreams(data)) {
-        return {
-          success: true,
-          provider: primary,
-          streams: adapted.streams || [],
-          subtitles: adapted.subtitles || []
-        };
-      }
-      console.warn(`[PlayResolver] Primary provider ${primary} returned no streams for tmdbId=${tmdbId}`);
-      // If primary returned no streams and there are other enabled providers,
-      // fall through to try them (useful when multiSourcePlay is disabled).
-    } catch (e) {
-      console.warn(`[PlayResolver] Primary provider ${primary} failed for tmdbId=${tmdbId}:`, e.message);
-      // Continue to try other providers below
-    }
-
-    // If we reach here, primary did not yield usable streams — try other providers.
-    if (chain.length <= 1) {
-      // No other providers available
-      return { success: false, provider: null, streams: [], subtitles: [] };
-    }
-  }
+  const chain = getEnabledProviders(priority.play || ['net52', 'net27']);
 
   let lastError = null;
 
   for (const name of chain) {
-    if (primary && name === primary) {
-      continue;
-    }
-
     const provider = getProvider(name);
     if (!provider) continue;
 
     try {
-      console.log(`[PlayResolver] Trying fallback provider ${name} for tmdbId=${tmdbId}`);
+      console.log(`[PlayResolver] Trying provider ${name} for tmdbId=${tmdbId}`);
       const data = await provider.streams(tmdbId, opts);
-      if (provider.hasStreams(data)) {
-        console.log(`[PlayResolver] Streams from ${name} for tmdbId=${tmdbId}`);
-        const adapt = adapters[name]?.adaptStreams || ((x) => x);
-        const adapted = adapt(data);
+      const adapt = adapters[name]?.adaptStreams || ((x) => x);
+      const adapted = adapt(data);
+
+      // Check if we got usable streams (adapted format: { streams: [...], subtitles: [...] })
+      const hasUsableStreams = adapted?.streams?.length > 0;
+
+      // Also check raw data format
+      const hasRawStreams = provider.hasStreams(data);
+
+      if (hasUsableStreams || hasRawStreams) {
+        console.log(`[PlayResolver] ✅ Streams from ${name} for tmdbId=${tmdbId} (${adapted?.streams?.length || 0} streams)`);
         return {
           success: true,
           provider: name,
@@ -103,10 +70,11 @@ async function resolve(tmdbId, opts = {}) {
           subtitles: adapted.subtitles || []
         };
       }
-      console.warn(`[PlayResolver] ${name} returned no streams for tmdbId=${tmdbId}`);
+
+      console.warn(`[PlayResolver] ${name} returned no streams for tmdbId=${tmdbId}, trying next...`);
     } catch (e) {
       lastError = e;
-      console.warn(`[PlayResolver] ${name} failed for tmdbId=${tmdbId}:`, e.message);
+      console.warn(`[PlayResolver] ${name} failed for tmdbId=${tmdbId}: ${e.message}, trying next...`);
     }
   }
 

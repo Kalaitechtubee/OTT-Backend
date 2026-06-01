@@ -4,16 +4,19 @@ function adaptSearchItem(item) {
   if (!item) return null;
   return {
     id: String(item.id || ''),
-    title: item.t || 'Untitled',
-    year: String(item.y || ''),
-    runtime: item.r || null,
-    type: item.r === 'Series' ? 'series' : 'movie',
-    poster: item.poster || null
+    title: item.t || item.title || 'Untitled',
+    year: String(item.y || item.year || ''),
+    runtime: item.r || item.runtime || null,
+    type: item.r === 'Series' || item.type === 'series' || item.type === 'tv' ? 'series' : 'movie',
+    poster: item.poster || item.img || null
   };
 }
 
 function adaptSearch(rawResponse) {
-  const items = Array.isArray(rawResponse) ? rawResponse : (rawResponse?.results || []);
+  // Net52 returns results under `searchResult` key
+  const items = Array.isArray(rawResponse)
+    ? rawResponse
+    : (rawResponse?.searchResult || rawResponse?.results || rawResponse?.items || []);
   return items.map(adaptSearchItem).filter(Boolean);
 }
 
@@ -28,9 +31,26 @@ function adaptDetails(rawResponse) {
     director: rawResponse.director || rawResponse.d || null,
     genres: rawResponse.genres || rawResponse.g || [],
     languages: rawResponse.languages || rawResponse.l || [],
-    description: rawResponse.description || rawResponse.desc || '',
-    seasons: rawResponse.seasons || []
+    // Use `overview` as the key so frontend movieFromJson picks it up
+    overview: rawResponse.description || rawResponse.desc || rawResponse.overview || '',
+    // Net52 doesn't provide these, but include them so sourceManager can merge from Net27
+    subjectId: rawResponse.subjectId || null,
+    detailPath: rawResponse.detailPath || null,
+    seasons: rawResponse.seasons || [],
+    // Poster/backdrop for frontend compatibility
+    poster: rawResponse.poster || rawResponse.img || null,
+    backdrop: rawResponse.backdrop || null,
   };
+}
+
+/**
+ * Parse a quality label like "720p", "1080p", "Auto" into a numeric resolution.
+ */
+function parseResolution(label) {
+  if (!label) return 0;
+  if (typeof label === 'number') return label;
+  const match = String(label).match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
 }
 
 function adaptStreams(rawResponse) {
@@ -51,9 +71,12 @@ function adaptStreams(rawResponse) {
             if (streamUrl.startsWith('/')) {
               streamUrl = `${baseUrl}${streamUrl}`;
             }
+            const resolution = parseResolution(src.label);
             streams.push({
               quality: src.label || 'Auto',
-              url: streamUrl
+              url: streamUrl,
+              resolution: resolution,
+              size: src.size || 0
             });
           }
         }
@@ -68,9 +91,12 @@ function adaptStreams(rawResponse) {
         if (streamUrl.startsWith('/')) {
           streamUrl = `${baseUrl}${streamUrl}`;
         }
+        const resolution = parseResolution(s.label || s.quality || s.resolution);
         streams.push({
           quality: s.quality || s.label || 'Auto',
-          url: streamUrl
+          url: streamUrl,
+          resolution: resolution,
+          size: s.size || 0
         });
       }
     }

@@ -1,5 +1,5 @@
 function hasSearchResults(data) {
-  const items = data?.results || data?.items || (Array.isArray(data) ? data : null);
+  const items = data?.results || data?.items || data?.searchResult || (Array.isArray(data) ? data : null);
   return Array.isArray(items) && items.length > 0;
 }
 

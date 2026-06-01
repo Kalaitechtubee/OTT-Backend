@@ -9,7 +9,7 @@ const searchCache = require('./src/utils/searchCache');
 const net27 = require('./src/providers/net27');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 6000;
 
 // Trust reverse proxy headers (Render, Heroku, Cloudflare, etc.)
 app.set('trust proxy', true);
