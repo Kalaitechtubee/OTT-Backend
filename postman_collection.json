@@ -1,0 +1,96 @@
+{
+  "info": {
+    "name": "OTT Backend API (production)",
+    "description": "Postman collection for OTT backend (production BACKEND_URL)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://ott-backend-eg8y.onrender.com",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Catalog",
+      "item": [
+        {
+          "name": "GET /api/catalog/trending",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/trending?language=Tamil",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","catalog","trending"],
+              "query": [
+                { "key": "language", "value": "Tamil" }
+              ]
+            },
+            "description": "Curated trending content with hero banners and category rails"
+          }
+        },
+        {
+          "name": "GET /api/catalog/movies",
+          "request": {"method": "GET","header": [],"url": {"raw": "{{baseUrl}}/api/catalog/movies?language=Tamil","host":["{{baseUrl}}"],"path":["api","catalog","movies"],"query":[{"key":"language","value":"Tamil"}]},"description":"Movies category (filtered by language)"}
+        },
+        {
+          "name": "GET /api/catalog/series",
+          "request": {"method": "GET","header": [],"url": {"raw": "{{baseUrl}}/api/catalog/series?language=Tamil","host":["{{baseUrl}}"],"path":["api","catalog","series"],"query":[{"key":"language","value":"Tamil"}]},"description":"Series category (filtered by language)"}
+        },
+        {
+          "name": "GET /api/catalog/category/:category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/category/movies?language=Tamil",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","catalog","category","movies"],
+              "query": [ { "key": "language", "value": "Tamil" } ]
+            },
+            "description": "Get items for a specific category. Categories: movies, dubbed, series, trending, new_releases, action, comedy, horror, romance"
+          }
+        },
+        {
+          "name": "GET /api/catalog/tab/:tab",
+          "request": {"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/api/catalog/tab/netflix","host":["{{baseUrl}}"],"path":["api","catalog","tab","netflix"]},"description":"Legacy tab catalog (netflix, prime-video, etc.)"}
+        },
+        {
+          "name": "GET /api/catalog/search",
+          "request": {"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/api/catalog/search?q=spider&page=1","host":["{{baseUrl}}"],"path":["api","catalog","search"],"query":[{"key":"q","value":"spider"},{"key":"page","value":"1"}]},"description":"Search catalog (query param 'q' required). Uses provider hybrid search."}
+        },
+        {
+          "name": "GET /api/catalog/trailer/:type/:tmdbId",
+          "request": {"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/api/catalog/trailer/movie/550","host":["{{baseUrl}}"],"path":["api","catalog","trailer","movie","550"]},"description":"Fetch trailer for a movie or series (type: movie|series)"}
+        },
+        {
+          "name": "GET /api/catalog/title/:type/:tmdbId",
+          "request": {"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/api/catalog/title/movie/550","host":["{{baseUrl}}"],"path":["api","catalog","title","movie","550"]},"description":"Get title details (type: movie|series)"}
+        },
+        {
+          "name": "GET /api/catalog/season/:tmdbId/:seasonNumber",
+          "request": {"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/api/catalog/season/76479/1","host":["{{baseUrl}}"],"path":["api","catalog","season","76479","1"]},"description":"Get season episodes for a TV show"}
+        }
+      ]
+    },
+    {
+      "name": "Stream",
+      "item": [
+        {
+          "name": "GET /api/stream/languages/:type/:tmdbId",
+          "request": {"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/api/stream/languages/movie/550","host":["{{baseUrl}}"],"path":["api","stream","languages","movie","550"]},"description":"Get available language variants for a title. For TV shows, add ?se=1&ep=1&sid=<subjectId>&dp=<detailPath>"}
+        },
+        {
+          "name": "GET /api/stream/play/:tmdbId",
+          "request": {"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/api/stream/play/550?type=movie","host":["{{baseUrl}}"],"path":["api","stream","play","550"],"query":[{"key":"type","value":"movie"}]},"description":"Get fresh MP4 stream URLs. Do not cache results. For TV episodes add ?type=series&se=1&ep=1"}
+        },
+        {
+          "name": "GET /api/stream/proxy",
+          "request": {"method":"GET","header":[],"url":{"raw":"{{baseUrl}}/api/stream/proxy?url=https%3A%2F%2Fcdn.example%2Fvideo.mp4&referer=&origin=","host":["{{baseUrl}}"],"path":["api","stream","proxy"],"query":[{"key":"url","value":"https://cdn.example/video.mp4"},{"key":"referer","value":""},{"key":"origin","value":""}]},"description":"Proxy video stream requests (supports Range headers)"}
+        }
+      ]
+    }
+  ]
+}

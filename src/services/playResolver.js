@@ -48,16 +48,32 @@ async function resolve(tmdbId, opts = {}) {
     const primary = chain[0] || DEFAULT_PROVIDER || 'net27';
     const provider = getProvider(primary);
     if (!provider) throw new Error(`Provider "${primary}" is not registered`);
-    
-    const data = await provider.streams(tmdbId, opts);
-    const adapt = adapters[primary]?.adaptStreams || ((x) => x);
-    const adapted = adapt(data);
-    return {
-      success: true,
-      provider: primary,
-      streams: adapted.streams || [],
-      subtitles: adapted.subtitles || []
-    };
+
+    try {
+      const data = await provider.streams(tmdbId, opts);
+      const adapt = adapters[primary]?.adaptStreams || ((x) => x);
+      const adapted = adapt(data);
+
+      if (provider.hasStreams(data)) {
+        return {
+          success: true,
+          provider: primary,
+          streams: adapted.streams || [],
+          subtitles: adapted.subtitles || []
+        };
+      }
+      // If primary returned no streams and there are other enabled providers,
+      // fall through to try them (useful when multiSourcePlay is disabled).
+    } catch (e) {
+      console.warn(`[PlayResolver] Primary provider ${primary} failed for tmdbId=${tmdbId}:`, e.message);
+      // Continue to try other providers below
+    }
+
+    // If we reach here, primary did not yield usable streams — try other providers.
+    if (chain.length <= 1) {
+      // No other providers available
+      return { success: false, provider: null, streams: [], subtitles: [] };
+    }
   }
 
   let lastError = null;
