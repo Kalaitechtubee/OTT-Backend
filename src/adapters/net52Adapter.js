@@ -26,7 +26,8 @@ function adaptDetails(rawResponse) {
     director: rawResponse.director || rawResponse.d || null,
     genres: rawResponse.genres || rawResponse.g || [],
     languages: rawResponse.languages || rawResponse.l || [],
-    description: rawResponse.description || rawResponse.desc || ''
+    description: rawResponse.description || rawResponse.desc || '',
+    seasons: rawResponse.seasons || []
   };
 }
 

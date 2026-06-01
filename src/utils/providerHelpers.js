@@ -1,10 +1,11 @@
 function hasSearchResults(data) {
-  const items = data?.items;
+  const items = data?.results || data?.items || (Array.isArray(data) ? data : null);
   return Array.isArray(items) && items.length > 0;
 }
 
 function hasStreams(data) {
   if (!data || data.ok === false) return false;
+  if (Array.isArray(data) && data.length > 0) return true;
   return Boolean(data.mp4 || (Array.isArray(data.streams) && data.streams.length > 0));
 }
 

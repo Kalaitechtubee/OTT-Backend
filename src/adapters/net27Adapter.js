@@ -23,7 +23,8 @@ function adaptDetails(rawResponse) {
     languages: rawResponse.languages || [],
     description: rawResponse.overview || '',
     subjectId: rawResponse.subjectId || null,
-    detailPath: rawResponse.detailPath || null
+    detailPath: rawResponse.detailPath || null,
+    seasons: rawResponse.seasons || []
   };
 }
 
