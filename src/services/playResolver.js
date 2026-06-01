@@ -85,7 +85,9 @@ async function resolve(tmdbId, opts = {}) {
     }
   }
 
-  if (lastError) throw lastError;
+  if (lastError) {
+    console.warn(`[PlayResolver] All providers failed for tmdbId=${tmdbId}. Last error:`, lastError.message);
+  }
   return { success: false, provider: null, streams: [], subtitles: [] };
 }
 

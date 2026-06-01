@@ -4,12 +4,16 @@ function hasSearchResults(data) {
 }
 
 function hasStreams(data) {
-  if (!data || data.ok === false) return false;
+  if (!data || data.ok === false || data.success === false) return false;
+  if (data.playlist === null) return false;
+  if (Array.isArray(data.sources) && data.sources.length === 0) return false;
+  if (Array.isArray(data.streams) && data.streams.length === 0) return false;
   if (Array.isArray(data) && data.length > 0) return true;
-  return Boolean(data.mp4 || (Array.isArray(data.streams) && data.streams.length > 0));
+  return Boolean(data.mp4 || (Array.isArray(data.streams) && data.streams.length > 0) || (Array.isArray(data.sources) && data.sources.length > 0));
 }
 
 function hasLanguages(data) {
+  if (!data || data.ok === false || data.success === false) return false;
   return Array.isArray(data?.variants) && data.variants.length > 0;
 }
 
