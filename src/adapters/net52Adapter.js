@@ -1,3 +1,5 @@
+const net52 = require('../providers/net52');
+
 function adaptSearchItem(item) {
   if (!item) return null;
   return {
@@ -31,14 +33,12 @@ function adaptDetails(rawResponse) {
   };
 }
 
-const providerConfig = require('../config/provider');
-const BASE_URL = process.env.NET52_BASE_URL || providerConfig.NET52_BASE_URL || 'https://net52.cc';
-
 function adaptStreams(rawResponse) {
   if (!rawResponse) return { streams: [], subtitles: [] };
 
   const streams = [];
   const subtitles = [];
+  const baseUrl = net52.getActiveDomainSync();
 
   // Parse Net52 playlist array
   if (Array.isArray(rawResponse)) {
@@ -49,7 +49,7 @@ function adaptStreams(rawResponse) {
             let streamUrl = src.file;
             // Prepend base URL if relative path
             if (streamUrl.startsWith('/')) {
-              streamUrl = `${BASE_URL}${streamUrl}`;
+              streamUrl = `${baseUrl}${streamUrl}`;
             }
             streams.push({
               quality: src.label || 'Auto',
@@ -66,7 +66,7 @@ function adaptStreams(rawResponse) {
       if (s) {
         let streamUrl = s.url || s.file || '';
         if (streamUrl.startsWith('/')) {
-          streamUrl = `${BASE_URL}${streamUrl}`;
+          streamUrl = `${baseUrl}${streamUrl}`;
         }
         streams.push({
           quality: s.quality || s.label || 'Auto',
@@ -82,7 +82,7 @@ function adaptStreams(rawResponse) {
     if (sub) {
       let subUrl = sub.url || '';
       if (subUrl.startsWith('/')) {
-        subUrl = `${BASE_URL}${subUrl}`;
+        subUrl = `${baseUrl}${subUrl}`;
       }
       subtitles.push({
         language: sub.language || 'English',
