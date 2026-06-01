@@ -233,7 +233,8 @@ router.get('/trailer/:type/:tmdbId', async (req, res) => {
       });
     }
 
-    const { type, tmdbId } = req.params;
+    let { type, tmdbId } = req.params;
+    if (type === 'series') type = 'tv';
     if (!['movie', 'tv'].includes(type)) {
       return res.status(400).json({ ok: false, error: 'Type must be "movie" or "tv"' });
     }
@@ -270,7 +271,8 @@ router.get('/trailer/:type/:tmdbId', async (req, res) => {
  */
 router.get('/title/:type/:tmdbId', async (req, res) => {
   try {
-    const { type, tmdbId } = req.params;
+    let { type, tmdbId } = req.params;
+    if (type === 'series') type = 'tv';
     if (!['movie', 'tv'].includes(type)) {
       return res.status(400).json({ ok: false, error: 'Type must be "movie" or "tv"' });
     }

@@ -32,7 +32,8 @@ const handleRouteError = (res, error, defaultMessage, statusCode = 502) => {
  */
 router.get('/languages/:type/:tmdbId', async (req, res) => {
   try {
-    const { type, tmdbId } = req.params;
+    let { type, tmdbId } = req.params;
+    if (type === 'series') type = 'tv';
     if (!['movie', 'tv'].includes(type)) {
       return res.status(400).json({ ok: false, error: 'Type must be "movie" or "tv"' });
     }
@@ -93,7 +94,9 @@ router.get('/play/:tmdbId', async (req, res) => {
     const tmdbId = parseInt(req.params.tmdbId);
 
     const opts = {};
-    if (req.query.type) opts.type = req.query.type;
+    if (req.query.type) {
+      opts.type = req.query.type === 'series' ? 'tv' : req.query.type;
+    }
     if (req.query.se) opts.se = req.query.se;
     if (req.query.ep) opts.ep = req.query.ep;
     if (req.query.dub) opts.dub = req.query.dub;
