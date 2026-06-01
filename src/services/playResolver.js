@@ -44,12 +44,14 @@ async function resolve(tmdbId, opts = {}) {
   const priority = loadPriority();
   const chain = getEnabledProviders(priority.play || [DEFAULT_PROVIDER || 'net27']);
 
+  let primary = null;
   if (!config.multiSourcePlay || chain.length <= 1) {
-    const primary = chain[0] || DEFAULT_PROVIDER || 'net27';
+    primary = chain[0] || DEFAULT_PROVIDER || 'net27';
     const provider = getProvider(primary);
     if (!provider) throw new Error(`Provider "${primary}" is not registered`);
 
     try {
+      console.log(`[PlayResolver] Primary provider ${primary} selected for tmdbId=${tmdbId}`);
       const data = await provider.streams(tmdbId, opts);
       const adapt = adapters[primary]?.adaptStreams || ((x) => x);
       const adapted = adapt(data);
@@ -62,6 +64,7 @@ async function resolve(tmdbId, opts = {}) {
           subtitles: adapted.subtitles || []
         };
       }
+      console.warn(`[PlayResolver] Primary provider ${primary} returned no streams for tmdbId=${tmdbId}`);
       // If primary returned no streams and there are other enabled providers,
       // fall through to try them (useful when multiSourcePlay is disabled).
     } catch (e) {
@@ -79,10 +82,15 @@ async function resolve(tmdbId, opts = {}) {
   let lastError = null;
 
   for (const name of chain) {
+    if (primary && name === primary) {
+      continue;
+    }
+
     const provider = getProvider(name);
     if (!provider) continue;
 
     try {
+      console.log(`[PlayResolver] Trying fallback provider ${name} for tmdbId=${tmdbId}`);
       const data = await provider.streams(tmdbId, opts);
       if (provider.hasStreams(data)) {
         console.log(`[PlayResolver] Streams from ${name} for tmdbId=${tmdbId}`);
@@ -95,6 +103,7 @@ async function resolve(tmdbId, opts = {}) {
           subtitles: adapted.subtitles || []
         };
       }
+      console.warn(`[PlayResolver] ${name} returned no streams for tmdbId=${tmdbId}`);
     } catch (e) {
       lastError = e;
       console.warn(`[PlayResolver] ${name} failed for tmdbId=${tmdbId}:`, e.message);
