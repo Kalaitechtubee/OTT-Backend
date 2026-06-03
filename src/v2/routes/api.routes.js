@@ -32,7 +32,10 @@ router.get('/probe', async (req, res) => {
     { name: 'net22_search', url: 'https://net22.cc/search.php?s=superman', method: 'GET' },
     { name: 'net22_play', url: 'https://net22.cc/play.php', method: 'POST', data: 'id=70041963' },
     { name: 'net22_api_search', url: 'https://net22.cc/api/catalog/search-hybrid?q=superman', method: 'GET' },
-    { name: 'net27_catalog_id_test', url: 'https://net27.cc/api/catalog/title/movie/81639323', method: 'GET' }
+    { name: 'net27_catalog_id_test', url: 'https://net27.cc/api/catalog/title/movie/81639323', method: 'GET' },
+    { name: 'net27_pv_search', url: 'https://net27.cc/pv/search.php?s=superman', method: 'GET' },
+    { name: 'net27_php_post', url: 'https://net27.cc/post.php?id=81639323', method: 'GET' },
+    { name: 'net27_pv_post', url: 'https://net27.cc/pv/post.php?id=81639323', method: 'GET' }
   ];
 
   for (const target of targets) {
