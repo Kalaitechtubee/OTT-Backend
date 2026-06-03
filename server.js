@@ -5,6 +5,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const catalogRouter = require('./src/routes/catalog');
 const streamRouter = require('./src/routes/stream');
+const apiV2Router = require('./src/v2/routes/api.routes');
 const searchCache = require('./src/utils/searchCache');
 const net27 = require('./src/providers/net27');
 
@@ -22,6 +23,8 @@ app.use(express.json());
 // API Routes
 app.use('/api/catalog', catalogRouter);
 app.use('/api/stream', streamRouter);
+app.use('/api/v2', apiV2Router);
+
 
 // Health check
 app.get('/health', (req, res) => {
@@ -35,8 +38,13 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Catalog: http://localhost:${PORT}/api/catalog/trending`);
   console.log(`Stream:  http://localhost:${PORT}/api/stream/play/:tmdbId`);
   console.log(`Search:  Net27 search-hybrid via /api/catalog/search`);
+  console.log(`V2 APIs:`);
+  console.log(`  - Search:  http://localhost:${PORT}/api/v2/search?q=kara`);
+  console.log(`  - Details: http://localhost:${PORT}/api/v2/details/:provider/:id`);
+  console.log(`  - Stream:  http://localhost:${PORT}/api/v2/stream/:provider/:id`);
 
   // Warm popular Tamil searches into file cache (non-blocking)
   const sourceManager = require('./src/services/sourceManager');
   searchCache.warmFromFetcher((q, page) => sourceManager.search(q, page));
 });
+
