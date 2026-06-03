@@ -26,7 +26,9 @@ router.get('/probe', async (req, res) => {
     { name: 'net52_api_embed', url: 'https://net52.cc/api/embed-tmdb/1452', method: 'GET' },
     { name: 'net27_api_search', url: 'https://net27.cc/api/catalog/search-hybrid?q=superman', method: 'GET' },
     { name: 'net27_api_embed', url: 'https://net27.cc/api/embed-tmdb/1452', method: 'GET' },
-    { name: 'net27_leo_embed', url: 'https://net27.cc/api/embed-tmdb/949229', method: 'GET' }
+    { name: 'net27_leo_embed', url: 'https://net27.cc/api/embed-tmdb/949229', method: 'GET' },
+    { name: 'net27_php_search', url: 'https://net27.cc/search.php?s=superman', method: 'GET' },
+    { name: 'net27_php_play', url: 'https://net27.cc/play.php', method: 'POST', data: 'id=70041963' }
   ];
 
   for (const target of targets) {
