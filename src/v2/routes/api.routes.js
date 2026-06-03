@@ -21,7 +21,9 @@ router.get('/probe', async (req, res) => {
     { name: 'net11_search', url: 'https://net11.cc/search.php?s=superman', method: 'GET' },
     { name: 'net52_search', url: 'https://net52.cc/search.php?s=superman', method: 'GET' },
     { name: 'net52_pv_search', url: 'https://net52.cc/pv/search.php?s=superman', method: 'GET' },
-    { name: 'net11_play_post', url: 'https://net11.cc/play.php', method: 'POST', data: 'id=70041963' }
+    { name: 'net11_play_post', url: 'https://net11.cc/play.php', method: 'POST', data: 'id=70041963' },
+    { name: 'net52_api_search', url: 'https://net52.cc/api/catalog/search-hybrid?q=superman', method: 'GET' },
+    { name: 'net52_api_embed', url: 'https://net52.cc/api/embed-tmdb/1452', method: 'GET' }
   ];
 
   for (const target of targets) {
