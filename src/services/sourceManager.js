@@ -67,15 +67,51 @@ async function details(type, tmdbId) {
         }
       }
 
-      // If primary has all necessary fields, stop early
+      // If primary has all necessary fields, stop early.
+      // For TV shows, also require seasons data before breaking — Net27 is usually the
+      // only provider that returns season metadata and must not be skipped.
       const hasSubject = primaryResult && primaryResult.movie && (primaryResult.movie.subjectId || primaryResult.movie.detailPath);
-      if (hasSubject) break;
+      const hasSeasonsData = Array.isArray(primaryResult?.movie?.seasons) && primaryResult.movie.seasons.length > 0;
+      if (hasSubject && (type !== 'tv' || hasSeasonsData)) break;
     } catch (e) {
       console.warn(`[SourceManager] ${name} details failed for tmdbId=${tmdbId}: ${e.message}, trying next...`);
     }
   }
 
   if (primaryResult) {
+    // TMDB fallback: if this is a TV show and we still don't have seasons data,
+    // fetch season metadata directly from TMDB so the Flutter app can show the season picker.
+    if (type === 'tv') {
+      const hasSeasonsData = Array.isArray(primaryResult.movie.seasons) && primaryResult.movie.seasons.length > 0;
+      if (!hasSeasonsData) {
+        try {
+          const { TMDB_API_KEY, TMDB_BASE_URL } = require('../config/tmdb');
+          if (TMDB_API_KEY) {
+            const axios = require('axios');
+            const tmdbRes = await axios.get(`${TMDB_BASE_URL}/tv/${tmdbId}`, {
+              params: { api_key: TMDB_API_KEY },
+              timeout: 8000,
+            });
+            const tmdbSeasons = tmdbRes.data?.seasons;
+            if (Array.isArray(tmdbSeasons) && tmdbSeasons.length > 0) {
+              primaryResult.movie.seasons = tmdbSeasons
+                .filter(s => s.season_number > 0) // skip "Specials" (season 0)
+                .map(s => ({
+                  season_number: s.season_number,
+                  seasonNumber: s.season_number,
+                  episode_count: s.episode_count || 0,
+                  episodeCount: s.episode_count || 0,
+                  name: s.name || `Season ${s.season_number}`,
+                }));
+              console.log(`[SourceManager] TMDB fallback: populated ${primaryResult.movie.seasons.length} seasons for tmdbId=${tmdbId}`);
+            }
+          }
+        } catch (tmdbErr) {
+          console.warn(`[SourceManager] TMDB seasons fallback failed for tmdbId=${tmdbId}: ${tmdbErr.message}`);
+        }
+      }
+    }
+
     return { success: true, provider: primaryResult.provider, movie: primaryResult.movie };
   }
 

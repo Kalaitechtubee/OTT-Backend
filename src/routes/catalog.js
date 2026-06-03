@@ -285,15 +285,72 @@ router.get('/title/:type/:tmdbId', async (req, res) => {
 
 /**
  * GET /api/catalog/season/:tmdbId/:seasonNumber
+ *
+ * Returns episodes for a specific season.
+ * Primary source: Net27 upstream. Falls back to TMDB API.
  */
 router.get('/season/:tmdbId/:seasonNumber', async (req, res) => {
   try {
     const { tmdbId, seasonNumber } = req.params;
-    const data = await net27.getSeasonEpisodes(parseInt(tmdbId), parseInt(seasonNumber));
-    if (!data) {
-      return res.status(404).json({ ok: false, error: 'Season not found' });
+    const tmdbIdInt = parseInt(tmdbId);
+    const seasonNum = parseInt(seasonNumber);
+
+    // Try Net27 first
+    let data = null;
+    try {
+      data = await net27.getSeasonEpisodes(tmdbIdInt, seasonNum);
+    } catch (net27Err) {
+      console.warn(`[Catalog] Net27 season episodes failed for ${tmdbId}/S${seasonNumber}: ${net27Err.message}`);
     }
-    res.json(data);
+
+    // Check if Net27 returned usable episodes
+    const hasEpisodes = data && (
+      (Array.isArray(data.initialEpisodes) && data.initialEpisodes.length > 0) ||
+      (Array.isArray(data.episodes) && data.episodes.length > 0)
+    );
+
+    if (hasEpisodes) {
+      return res.json(data);
+    }
+
+    // TMDB fallback: fetch season episode metadata directly
+    console.log(`[Catalog] Net27 returned no episodes for ${tmdbId}/S${seasonNumber}, trying TMDB fallback...`);
+    const tmdbApiKey = TMDB_API_KEY;
+    if (!tmdbApiKey) {
+      return res.status(404).json({ ok: false, error: 'Season not found and TMDB fallback unavailable' });
+    }
+
+    const axios = require('axios');
+    const tmdbRes = await axios.get(`${TMDB_BASE_URL}/tv/${tmdbId}/season/${seasonNumber}`, {
+      params: { api_key: tmdbApiKey },
+      timeout: 8000,
+    });
+
+    const tmdbEpisodes = tmdbRes.data?.episodes;
+    if (!Array.isArray(tmdbEpisodes) || tmdbEpisodes.length === 0) {
+      return res.status(404).json({ ok: false, error: 'No episodes found for this season' });
+    }
+
+    // Normalize TMDB episode format to match what Flutter expects
+    const normalizedEpisodes = tmdbEpisodes.map(ep => ({
+      episode: ep.episode_number,
+      episode_number: ep.episode_number,
+      episodeNumber: ep.episode_number,
+      name: ep.name || `Episode ${ep.episode_number}`,
+      overview: ep.overview || '',
+      still: ep.still_path ? `https://image.tmdb.org/t/p/w342${ep.still_path}` : null,
+      still_path: ep.still_path || null,
+      runtime: ep.runtime || 0,
+      airDate: ep.air_date || '',
+      air_date: ep.air_date || '',
+    }));
+
+    console.log(`[Catalog] TMDB fallback: returning ${normalizedEpisodes.length} episodes for ${tmdbId}/S${seasonNumber}`);
+    res.json({
+      ok: true,
+      initialEpisodes: normalizedEpisodes,
+      tmdbFallback: true,
+    });
   } catch (e) {
     handleRouteError(res, e, 'Failed to fetch season episodes');
   }
