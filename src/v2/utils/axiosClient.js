@@ -100,7 +100,9 @@ function buildHeaders(provider, clientHeaders = {}) {
     'cf-connecting-ip',
     'CF-Connecting-IP',
     'true-client-ip',
-    'True-Client-IP'
+    'True-Client-IP',
+    'x-real-ip',
+    'X-Real-IP'
   ];
   for (const h of ipHeaders) {
     const val = clientHeaders[h] || clientHeaders[h.toLowerCase()];

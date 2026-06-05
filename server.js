@@ -3,11 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const catalogRouter = require('./src/routes/catalog');
-const streamRouter = require('./src/routes/stream');
 const apiV2Router = require('./src/v2/routes/api.routes');
-const searchCache = require('./src/utils/searchCache');
-const net27 = require('./src/providers/net27');
 
 const app = express();
 const PORT = process.env.PORT || 6000;
@@ -16,35 +12,31 @@ const PORT = process.env.PORT || 6000;
 app.set('trust proxy', true);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Accept', 'Content-Type', 'Authorization', 'X-Requested-With', 'Range'],
+  exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length', 'Content-Type'],
+  credentials: false,
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 
 // API Routes
-app.use('/api/catalog', catalogRouter);
-app.use('/api/stream', streamRouter);
 app.use('/api/v2', apiV2Router);
-
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'healthy', version: 'v1.0', timestamp: new Date() });
+  res.json({ status: 'healthy', version: 'v2.0', timestamp: new Date() });
 });
 
 // Start Server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`MovieZon Backend v1.0 listening on port ${PORT}`);
+  console.log(`MovieZon Backend v2.0 listening on port ${PORT}`);
   console.log(`Health: http://localhost:${PORT}/health`);
-  console.log(`Catalog: http://localhost:${PORT}/api/catalog/trending`);
-  console.log(`Stream:  http://localhost:${PORT}/api/stream/play/:tmdbId`);
-  console.log(`Search:  Net27 search-hybrid via /api/catalog/search`);
   console.log(`V2 APIs:`);
-  console.log(`  - Search:  http://localhost:${PORT}/api/v2/search?q=kara`);
+  console.log(`  - Search:  http://localhost:${PORT}/api/v2/search?q=Leo`);
   console.log(`  - Details: http://localhost:${PORT}/api/v2/details/:provider/:id`);
   console.log(`  - Stream:  http://localhost:${PORT}/api/v2/stream/:provider/:id`);
-
-  // Warm popular Tamil searches into file cache (non-blocking)
-  const sourceManager = require('./src/services/sourceManager');
-  searchCache.warmFromFetcher((q, page) => sourceManager.search(q, page));
 });
 

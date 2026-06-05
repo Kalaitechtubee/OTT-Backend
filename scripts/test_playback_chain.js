@@ -2,13 +2,16 @@ const axios = require('axios');
 
 async function verifyPlaybackChain() {
   console.log('=== RUNNING PLAYBACK CHAIN VERIFICATION ===');
-  const base = 'http://localhost:5000';
+  const base = 'http://localhost:8080';
+  
+  const id = process.argv[2] || '70041963';
+  const provider = process.argv[3] || 'net11';
   
   // Test 1: Query stream API
-  console.log('\n[Test 1] Querying GET /api/v2/stream/net11/70041963...');
+  console.log(`\n[Test 1] Querying GET /api/v2/stream/${provider}/${id}...`);
   let streamRes;
   try {
-    streamRes = await axios.get(`${base}/api/v2/stream/net11/70041963`);
+    streamRes = await axios.get(`${base}/api/v2/stream/${provider}/${id}`);
     console.log('  Status:', streamRes.status);
     console.log('  Response Data:', JSON.stringify(streamRes.data, null, 2));
   } catch (err) {
@@ -101,19 +104,19 @@ async function verifyPlaybackChain() {
   }
   console.log('  ✅ PASSED Test 3: Variant playlist contains EXTM3U and EXTINF segments.');
 
-  // Extract first segment URL from the variant body
+  // Extract first segment URL from the variant body (can be direct CDN URL or proxied)
   const variantLines = variantBody.split(/\r?\n/);
   let segmentProxyUrl = '';
   for (const line of variantLines) {
     const trimmed = line.trim();
-    if (trimmed.startsWith('http') && trimmed.includes('/stream/proxy')) {
+    if (trimmed.startsWith('http') && (trimmed.includes('/stream/proxy') || trimmed.includes('/files/'))) {
       segmentProxyUrl = trimmed;
       break;
     }
   }
 
   if (!segmentProxyUrl) {
-    console.error('  Could not parse segment proxy URL from variant playlist body.');
+    console.error('  Could not parse segment URL from variant playlist body.');
     return;
   }
 

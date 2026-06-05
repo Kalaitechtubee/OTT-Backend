@@ -5,7 +5,7 @@ const {
   getNet11Domain,
   getNet52Domain
 } = require('../utils/axiosClient');
-const { resolvePlaylistWithFallbacks, hasValidToken } = require('../utils/playlistResolver');
+const { resolvePlaylistWithFallbacks, hasValidToken, expandMasterPlaylist } = require('../utils/playlistResolver');
 
 /**
  * Normalize a URL that might be relative (/path or path) to absolute.
@@ -109,6 +109,7 @@ module.exports = {
   },
 
   async stream(id, clientHeaders = {}) {
+    let playToken = '';
     try {
       // Step 1: POST play.php to get the play token + title hint
       const playRes = await net11Request({
@@ -121,7 +122,10 @@ module.exports = {
         }
       }, clientHeaders);
 
-      const playToken = playRes.data?.h;
+      // ─── DIAGNOSTIC: Raw play.php response ───
+      console.log(`[Net11 DIAG] play.php RAW response for ID ${id}:`, JSON.stringify(playRes.data, null, 2));
+
+      playToken = playRes.data?.h || '';
       if (!playToken) {
         console.error(`[Net11 Provider] Failed to obtain play token for ID ${id}`);
         return { success: false, streams: [], subtitles: [] };
@@ -135,6 +139,25 @@ module.exports = {
         }
       })();
 
+      // Extract full token value for injection into playlist URLs.
+      // play.php returns: "in=HASH1::HASH2::TIMESTAMP::ni::i::"
+      // ipHash = just HASH1
+      // fullTokenValue = "HASH1::HASH2::TIMESTAMP" (first 3 parts, excludes ::ni::i::)
+      const fullTokenValue = (() => {
+        try {
+          const stripped = playToken.replace(/^in=/, '');
+          const parts = stripped.split('::').filter(Boolean);
+          // Use first 3 meaningful parts: hash, hash2, timestamp
+          // Exclude 'ni', 'i', and empty trailing parts
+          const meaningful = parts.filter(p => p !== 'ni' && p !== 'i');
+          return meaningful.join('::');
+        } catch (_e) {
+          return ipHash;
+        }
+      })();
+      console.log(`[Net11 DIAG] ipHash: ${ipHash}`);
+      console.log(`[Net11 DIAG] fullTokenValue: ${fullTokenValue}`);
+
       // Step 2: Fetch enriched playlist JSON from net52.cc (net11 redirects there)
       const net52Domain = await getNet52Domain();
       const net11Domain = await getNet11Domain();
@@ -144,20 +167,42 @@ module.exports = {
       const candidateHeaders = (originDomain) => ({
         'User-Agent': USER_AGENT,
         'Accept': 'application/json, text/plain, */*',
-        'Referer': `${originDomain}/search`,
+        'Referer': `${originDomain}/`,
         'Origin': originDomain,
+        // Browser-like Sec-Fetch headers — the provider may inspect these
+        'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
         ...(upstreamHeaders.Cookie ? { Cookie: upstreamHeaders.Cookie } : {})
       });
 
+      // IMPORTANT: Non-/pv/ candidates FIRST!
+      // Browser uses /playlist.php → returns /hls/ paths → real content
+      // /pv/playlist.php → returns /pv/hls/ paths → anti-abuse video (files/220884)
       const resolvedPlaylist = await resolvePlaylistWithFallbacks({
-        params: { id, t: now, tm: now, h: playToken },
+        params: { id, t: now, tm: now, h: playToken.replace(/^in=/, '') },
         candidates: [
-          { url: `${net52Domain}/pv/playlist.php`, headers: candidateHeaders(net52Domain) },
           { url: `${net52Domain}/playlist.php`, headers: candidateHeaders(net52Domain) },
-          { url: `${net11Domain}/pv/playlist.php`, headers: candidateHeaders(net11Domain) },
-          { url: `${net11Domain}/playlist.php`, headers: candidateHeaders(net11Domain) }
+          { url: `${net11Domain}/playlist.php`, headers: candidateHeaders(net11Domain) },
+          { url: `${net52Domain}/pv/playlist.php`, headers: candidateHeaders(net52Domain) },
+          { url: `${net11Domain}/pv/playlist.php`, headers: candidateHeaders(net11Domain) }
         ]
       });
+
+      // ─── DIAGNOSTIC: Raw playlist.php response ───
+      console.log(`[Net11 DIAG] playlist.php resolved from: ${resolvedPlaylist?.candidate?.url || 'NONE'}`);
+      console.log(`[Net11 DIAG] playlist.php RAW entry:`, JSON.stringify(resolvedPlaylist?.entry, null, 2));
+      if (resolvedPlaylist?.entry?.sources) {
+        resolvedPlaylist.entry.sources.forEach((s, i) => {
+          console.log(`[Net11 DIAG] source[${i}] file URL: ${s.file}`);
+          if (s.file && s.file.includes('220884')) {
+            console.warn(`[Net11 DIAG] ⚠️ ANTI-ABUSE DETECTED in source[${i}]! Contains files/220884`);
+          }
+        });
+      }
 
       if (!resolvedPlaylist?.entry || !Array.isArray(resolvedPlaylist.entry.sources)) {
         return { success: false, streams: [], subtitles: [] };
@@ -173,12 +218,22 @@ module.exports = {
       })();
 
       // Step 3: Map sources[] → streams[]
-      const streams = entry.sources
+      const rawStreams = entry.sources
         .filter(s => s && s.file)
         .map(s => {
-          let fileWithIp = s.file;
+          let fileWithIp = String(s.file || '').replace('in=in=', 'in=');
+          // Handle /pv/ format: in=::hash::timestamp::ni
           if (ipHash && fileWithIp.includes('in=::')) {
             fileWithIp = fileWithIp.replace('in=::', `in=${ipHash}::`);
+          }
+          // Handle standard format: in=unknown::ni (placeholder from /playlist.php)
+          // CRITICAL: Browser replaces 'unknown::ni' with the full derived token.
+          // Using only ipHash (first part) results in anti-abuse video.
+          // Try fullTokenValue (hash1::hash2::timestamp) for proper authorization.
+          if (fullTokenValue && fileWithIp.includes('in=unknown::ni')) {
+            fileWithIp = fileWithIp.replace('in=unknown::ni', `in=${fullTokenValue}`);
+          } else if (fullTokenValue && fileWithIp.includes('in=unknown')) {
+            fileWithIp = fileWithIp.replace('in=unknown', `in=${fullTokenValue}`);
           }
           const url = toAbsolute(fileWithIp, playlistOrigin);
           return {
@@ -188,8 +243,19 @@ module.exports = {
             url
           };
         })
-        // Drop broken/untokenized variants like `in=unknown::ni` so clients never hit 403.
+        // Drop broken/untokenized variants that still have 'unknown' after injection
         .filter((s) => hasValidToken(s.url));
+
+      // ─── DIAGNOSTIC: Mapped raw streams ───
+      rawStreams.forEach((s, i) => {
+        console.log(`[Net11 DIAG] rawStream[${i}] quality=${s.quality} url=${s.url}`);
+        if (s.url.includes('220884')) {
+          console.warn(`[Net11 DIAG] ⚠️ ANTI-ABUSE in rawStream[${i}]!`);
+        }
+      });
+
+      // Expand HLS master playlist to discover resolution variant playlists
+      const streams = await expandMasterPlaylist(rawStreams, resolvedPlaylist?.candidate?.headers || {});
 
       // Step 4: Map tracks[] → subtitles[]
       const subtitles = parseTracks(entry.tracks, playlistOrigin);
@@ -207,6 +273,8 @@ module.exports = {
         streams,
         subtitles,
         thumbnails: thumbnailTrack ? toAbsolute(thumbnailTrack.file, playlistOrigin) : null,
+        // Raw play token — forwarded through proxy chain to fix in=unknown::ni
+        playToken: playToken.replace(/^in=/, ''),
         debug: {
           playlistSource: resolvedPlaylist?.candidate?.url || null
         }

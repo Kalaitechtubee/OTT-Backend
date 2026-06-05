@@ -1,5 +1,5 @@
 const { buildHeaders, USER_AGENT, getNet52Domain, getNet11Domain, net52Request, net11Request } = require('../utils/axiosClient');
-const { resolvePlaylistWithFallbacks, hasValidToken } = require('../utils/playlistResolver');
+const { resolvePlaylistWithFallbacks, hasValidToken, expandMasterPlaylist } = require('../utils/playlistResolver');
 
 function toAbsolute(url, domain) {
   if (!url) return '';
@@ -36,12 +36,24 @@ module.exports = {
 
   async search(query, clientHeaders = {}) {
     try {
-      const res = await net52Request({
-        method: 'GET',
-        url: `/search.php`,
-        params: { s: query, t: Math.floor(Date.now() / 1000) },
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      }, clientHeaders);
+      // net52 content lives under /pv/ prefix — try that first, fallback to root
+      let res = null;
+      let lastErr = null;
+      for (const path of ['/pv/search.php', '/search.php']) {
+        try {
+          res = await net52Request({
+            method: 'GET',
+            url: path,
+            params: { s: query, t: Math.floor(Date.now() / 1000) },
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          }, clientHeaders);
+          if (res.data?.searchResult || res.data?.results) break; // valid response
+        } catch (err) {
+          lastErr = err;
+          continue; // try next path
+        }
+      }
+      if (!res) throw lastErr || new Error('Net52 search: no valid path responded');
 
       const items = res.data?.searchResult || res.data?.results || [];
       return items.map(item => ({
@@ -96,6 +108,7 @@ module.exports = {
 
       // Step 1: Query Net11 play.php to get backend IP hash
       let ipHash = '';
+      let playToken = '';
       try {
         const playRes = await net11Request({
           method: 'POST',
@@ -106,9 +119,10 @@ module.exports = {
             'X-Requested-With': 'XMLHttpRequest'
           }
         }, clientHeaders);
-        const playToken = playRes.data?.h;
-        if (playToken) {
-          ipHash = playToken.replace(/^in=/, '').split('::')[0] || '';
+        const rawToken = playRes.data?.h;
+        if (rawToken) {
+          playToken = rawToken;
+          ipHash = rawToken.replace(/^in=/, '').split('::')[0] || '';
         }
       } catch (err) {
         console.warn('[Net52 Provider] Failed to obtain IP hash from play.php:', err.message);
@@ -137,10 +151,10 @@ module.exports = {
         return { success: false, streams: [], subtitles: [] };
       }
 
-      const streams = entry.sources
+      const rawStreams = entry.sources
         .filter(s => s && s.file)
         .map(s => {
-          let fileWithIp = s.file;
+          let fileWithIp = String(s.file || '').replace('in=in=', 'in=');
           if (ipHash && fileWithIp.includes('in=::')) {
             fileWithIp = fileWithIp.replace('in=::', `in=${ipHash}::`);
           }
@@ -154,6 +168,9 @@ module.exports = {
         })
         // Drop broken/untokenized variants like `in=unknown::ni` so clients never hit 403.
         .filter((s) => hasValidToken(s.url));
+
+      // Expand HLS master playlist to discover resolution variant playlists
+      const streams = await expandMasterPlaylist(rawStreams, resolvedPlaylist?.candidate?.headers || {});
 
       const subtitles = parseTracks(entry.tracks, domain);
 
@@ -169,6 +186,8 @@ module.exports = {
         streams,
         subtitles,
         thumbnails: thumbnailTrack ? toAbsolute(thumbnailTrack.file, domain) : null,
+        // Raw play token — forwarded through proxy chain to fix in=unknown::ni
+        playToken: playToken ? playToken.replace(/^in=/, '') : '',
         debug: {
           playlistSource: resolvedPlaylist?.candidate?.url || null
         }
