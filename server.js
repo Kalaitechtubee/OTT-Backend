@@ -1,5 +1,10 @@
 require('dotenv').config();
 
+console.log('NET11 COOKIE:', process.env.NET11_COOKIE ? process.env.NET11_COOKIE.length : 'undefined');
+console.log('NET52_COOKIE:', process.env.NET52_COOKIE ? process.env.NET52_COOKIE.length : 'undefined');
+console.log('USE_NET52_COOKIE:', process.env.USE_NET52_COOKIE || 'undefined');
+
+
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
