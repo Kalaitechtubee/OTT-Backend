@@ -119,6 +119,7 @@ module.exports = {
             'X-Requested-With': 'XMLHttpRequest'
           }
         }, clientHeaders);
+
         const rawToken = playRes.data?.h;
         if (rawToken) {
           playToken = rawToken;

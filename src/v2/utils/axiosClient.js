@@ -87,7 +87,12 @@ function buildHeaders(provider, clientHeaders = {}) {
     : process.env.NET52_COOKIE;
 
   // Combine cookies (dynamic takes priority)
-  const finalCookie = dynamicCookie || envCookie || '';
+  let finalCookie = dynamicCookie || envCookie || '';
+
+  const USE_NET52_COOKIE = process.env.USE_NET52_COOKIE === 'true';
+  if (!USE_NET52_COOKIE) {
+    finalCookie = '';
+  }
 
   if (finalCookie) {
     headers['Cookie'] = finalCookie;
