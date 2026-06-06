@@ -11,6 +11,7 @@ router.get('/search', searchController.search);
 router.get('/details/tmdb/:tmdbId', tmdbController.getDetailsByTmdbId);
 router.get('/details/:provider/:id', detailsController.getDetails);
 router.get('/stream/proxy', streamProxyController.proxyStream);
+router.get('/stream/proxy.m3u8', streamProxyController.proxyStream);
 router.get('/stream/:provider/:id', streamController.getStream);
 
 // TMDB List Proxies

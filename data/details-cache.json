@@ -1,45 +1,14 @@
 {
-  "details::net52::0OBCCGYKAAAAYD4D0J29QKHBWD": {
+  "details::tmdb::1007757": {
     "value": {
-      "id": "0OBCCGYKAAAAYD4D0J29QKHBWD",
-      "provider": "net52",
-      "title": "Untitled",
-      "originalTitle": "",
-      "year": "N/A",
-      "description": "No description available.",
-      "director": "",
-      "genre": "",
-      "languages": [],
-      "cast": [],
-      "poster": null,
-      "backdrop": null,
-      "rating": null,
-      "trailer": null,
-      "tmdbId": null,
-      "mediaType": "movie",
-      "seasons": [],
-      "sources": [
-        {
-          "provider": "net52",
-          "id": "0OBCCGYKAAAAYD4D0J29QKHBWD"
-        }
-      ],
-      "audioLanguages": [
-        "Original Audio"
-      ]
-    },
-    "expiry": 1780816806341
-  },
-  "details::tmdb::76479": {
-    "value": {
-      "id": "0KRGHGZCHKS920ZQGY5LBRF7MA",
-      "provider": "net52",
-      "title": "The Boys",
-      "originalTitle": "The Boys",
-      "year": "2019",
-      "description": "A group of vigilantes known informally as “The Boys” set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
-      "director": "",
-      "genre": "Sci-Fi & Fantasy, Action & Adventure",
+      "id": "81749852",
+      "provider": "net11",
+      "title": "Swapped",
+      "originalTitle": "Swapped",
+      "year": "2026",
+      "description": "A small woodland creature and a majestic bird, two natural sworn enemies of the Valley, magically trade places and set off on an adventure of a lifetime to switch back. Their journey soon uncovers a greater threat—one that could endanger not only their species, but the entire valley they call home.",
+      "director": "Nathan Greno",
+      "genre": "Adventure, Animation, Family, Fantasy",
       "languages": [
         {
           "l": "English",
@@ -48,305 +17,204 @@
       ],
       "cast": [
         {
-          "name": "Karl Urban",
-          "character": "Billy Butcher",
-          "profilePath": "https://image.tmdb.org/t/p/w185/6CkZLwEJxfqqcJHyeXegMAvOlPh.jpg"
+          "name": "Michael B. Jordan",
+          "character": "Ollie (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/sMBpav8cK7t7Nk0yf4tuNOqNUyW.jpg"
         },
         {
-          "name": "Jack Quaid",
-          "character": "Hugh 'Hughie' Campbell",
-          "profilePath": "https://image.tmdb.org/t/p/w185/320qW5yEbxpmyxQ3evmClJbtKag.jpg"
+          "name": "Juno Temple",
+          "character": "Ivy (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nvsPrM4OKHVCDivgMx4FF6PgE5f.jpg"
         },
         {
-          "name": "Antony Starr",
-          "character": "Homelander",
-          "profilePath": "https://image.tmdb.org/t/p/w185/b0T56GMrHM24hDDjJ4DNPJcEUp6.jpg"
+          "name": "Tracy Morgan",
+          "character": "Boogle / Firewolf (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ec0OJVbs6NZKMbS1yiCAJKjeoJf.jpg"
         },
         {
-          "name": "Erin Moriarty",
-          "character": "Annie January / Starlight",
-          "profilePath": "https://image.tmdb.org/t/p/w185/nA2HsETMzIUAau5XDERIxfSdc5y.jpg"
+          "name": "Cedric the Entertainer",
+          "character": "Caloo (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/s6UrY5uofyxXsU5PydWBoLFReK0.jpg"
         },
         {
-          "name": "Laz Alonso",
-          "character": "Marvin T. 'Mother's Milk' Milk / M.M.",
-          "profilePath": "https://image.tmdb.org/t/p/w185/nmgOd3X2Xn3jIp9OLCRJzLExRWN.jpg"
+          "name": "Justina Machado",
+          "character": "Calli (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/j5FaJXoyhMHlqv1l6TBdt1CH1oO.jpg"
         },
         {
-          "name": "Chace Crawford",
-          "character": "Kevin Moskowitz / The Deep",
-          "profilePath": "https://image.tmdb.org/t/p/w185/wz7s1JT3bYi2vd4fWwmLT809cnT.jpg"
+          "name": "Nate Torrence",
+          "character": "Lodd (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/yT9o149xPygdY0NsF9sNgiQwuru.jpg"
         },
         {
-          "name": "Tomer Capone",
-          "character": "Serge / Frenchie",
-          "profilePath": "https://image.tmdb.org/t/p/w185/3IhYEhV3Tmx2CawG5DvcWQyephv.jpg"
+          "name": "Camden Brooks",
+          "character": "Young Ollie (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ge9FgIjRERhyylebW2Np9YwkqqR.jpg"
         },
         {
-          "name": "Karen Fukuhara",
-          "character": "Kimiko Miyashiro",
-          "profilePath": "https://image.tmdb.org/t/p/w185/sG6CWLdENCtzukNFkFYyPxqyRmS.jpg"
+          "name": "Táta Vega",
+          "character": "Grandma / Mrs. Dung Beetle (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/9SdaK2vly0Gx5yvI5rrTszh31vt.jpg"
         },
         {
-          "name": "Nathan Mitchell",
-          "character": "Justin / Black Noir II",
-          "profilePath": "https://image.tmdb.org/t/p/w185/ivaVpN1bU2HzKmncuf1IAG6ohlb.jpg"
+          "name": "Ambika Mod",
+          "character": "Violet (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/jN9HhFYPNMYIupFt6GzGnHAW88c.jpg"
         },
         {
-          "name": "Colby Minifie",
-          "character": "Ashley Barrett",
-          "profilePath": "https://image.tmdb.org/t/p/w185/56FVZRFdctYhZI8zHNbegkKMwl3.jpg"
+          "name": "Lolly Adefope",
+          "character": "Lily (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/qPS57Mw1vjydSSfSYoMw8u81waI.jpg"
         }
       ],
-      "poster": "https://image.tmdb.org/t/p/w500/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
-      "rating": "TMDB 8.5",
-      "trailer": "https://www.youtube.com/watch?v=tcrNsIaQkb4",
+      "poster": "https://image.tmdb.org/t/p/w500/tHhxWxge06goXU6ZQH1hj7vK8Hd.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/zMwhWailP1WY7sb6AoE6b8ugoy.jpg",
+      "rating": "TMDB 9.0",
+      "trailer": "https://www.youtube.com/watch?v=glgmAwRDP8s",
       "recommendations": [
         {
-          "id": 1403,
-          "title": "Marvel's Agents of S.H.I.E.L.D.",
-          "posterPath": "https://image.tmdb.org/t/p/w342/gHUCCMy1vvj58tzE3dZqeC9SXus.jpg",
-          "mediaType": "tv"
+          "id": 896536,
+          "title": "The Legend of Ochi",
+          "posterPath": "https://image.tmdb.org/t/p/w342/qYyEelO4JfOwE0Ui5KsrCE0O8UA.jpg",
+          "mediaType": "movie"
         },
         {
-          "id": 90228,
-          "title": "Dune: Prophecy",
-          "posterPath": "https://image.tmdb.org/t/p/w342/oWVohNsxkxA3u92EzRo8fTuXIS0.jpg",
-          "mediaType": "tv"
+          "id": 116711,
+          "title": "Epic",
+          "posterPath": "https://image.tmdb.org/t/p/w342/81cSsWzjTfR3cJSqnTiHwy1eyPK.jpg",
+          "mediaType": "movie"
         },
         {
-          "id": 128839,
-          "title": "La Brea",
-          "posterPath": "https://image.tmdb.org/t/p/w342/wEo5pzSZ3MF4EzNvY2R1OZNX266.jpg",
-          "mediaType": "tv"
+          "id": 412117,
+          "title": "The Secret Life of Pets 2",
+          "posterPath": "https://image.tmdb.org/t/p/w342/s9xg4V5EDKiphgIksVJ9gewBM11.jpg",
+          "mediaType": "movie"
         },
         {
-          "id": 67487,
-          "title": "The Tick",
-          "posterPath": "https://image.tmdb.org/t/p/w342/8sngJVF54bugHfCkjJOsY4wx8Hk.jpg",
-          "mediaType": "tv"
+          "id": 523366,
+          "title": "Dragon Rider",
+          "posterPath": "https://image.tmdb.org/t/p/w342/ucDrOXUrVnr9X3ZmXP2Q68HDIHr.jpg",
+          "mediaType": "movie"
         },
         {
-          "id": 75450,
-          "title": "Titans",
-          "posterPath": "https://image.tmdb.org/t/p/w342/8e6QiSexmYKaiHGPvbhaFMmQEhc.jpg",
-          "mediaType": "tv"
+          "id": 1084242,
+          "title": "Zootopia 2",
+          "posterPath": "https://image.tmdb.org/t/p/w342/oJ7g2CifqpStmoYQyaLQgEU32qO.jpg",
+          "mediaType": "movie"
         },
         {
-          "id": 158141,
-          "title": "Supacell",
-          "posterPath": "https://image.tmdb.org/t/p/w342/vHtNgRLWdMk7wIV2WbqkOzU7HHI.jpg",
-          "mediaType": "tv"
+          "id": 227425,
+          "title": "Alpha and Omega 2: A Howl-iday Adventure",
+          "posterPath": "https://image.tmdb.org/t/p/w342/ryyVBJoZCoisC5DAmhFDqF3sqiS.jpg",
+          "mediaType": "movie"
         }
       ],
-      "tmdbId": 76479,
-      "mediaType": "tv",
+      "tmdbId": 1007757,
+      "mediaType": "movie",
       "sources": [
         {
-          "provider": "net52",
-          "id": "0KRGHGZCHKS920ZQGY5LBRF7MA"
+          "provider": "net11",
+          "id": "81749852",
+          "languages": [
+            "English"
+          ]
         }
       ],
       "audioLanguages": [
         "English"
       ],
-      "seasons": [
-        {
-          "season_number": 0,
-          "episode_count": 75,
-          "name": "Specials"
-        },
-        {
-          "season_number": 1,
-          "episode_count": 8,
-          "name": "Season 1",
-          "providerSeasonId": "0KRGHGZCHKS920ZQGY5LBRF7MA"
-        },
-        {
-          "season_number": 2,
-          "episode_count": 8,
-          "name": "Season 2",
-          "providerSeasonId": "0LTURNRIIF1SFJUX32I7XALS8U"
-        },
-        {
-          "season_number": 3,
-          "episode_count": 8,
-          "name": "Season 3",
-          "providerSeasonId": "0HLDL6JTNVIK6GJDH0UIW4TES8"
-        },
-        {
-          "season_number": 4,
-          "episode_count": 8,
-          "name": "Season 4",
-          "providerSeasonId": "0SSV1CIYHPUKDFUE5JOYRDKF06"
-        },
-        {
-          "season_number": 5,
-          "episode_count": 8,
-          "name": "Season 5",
-          "providerSeasonId": "0N9BB22P2FZ8UD2BBLNX07RP22"
-        }
-      ]
+      "seasons": []
     },
-    "expiry": 1780816954437
+    "expiry": 1780837973165
   },
-  "details::tmdb::308014": {
+  "details::net11::81749852": {
     "value": {
-      "id": "82152349",
+      "id": "81749852",
       "provider": "net11",
-      "title": "Berlin and the Lady with an Ermine",
-      "originalTitle": "Berlín y la dama del armiño",
+      "title": "Swapped",
+      "originalTitle": "Swapped",
       "year": "2026",
-      "description": "Hungry for a new heist, Berlin summons the gang to Seville and turns an ambitious duke into the victim of his own plan: to steal a da Vinci masterpiece.",
-      "director": "",
-      "genre": "Drama, Crime, Action & Adventure, Comedy",
+      "description": "A small woodland creature and a majestic bird, two natural sworn enemies of the Valley, magically trade places and set off on an adventure of a lifetime to switch back. Their journey soon uncovers a greater threat—one that could endanger not only their species, but the entire valley they call home.",
+      "director": "Nathan Greno",
+      "genre": "Adventure, Animation, Family, Fantasy",
       "languages": [
         {
-          "l": "Spanish",
-          "s": "es"
+          "l": "English",
+          "s": "en"
         }
       ],
       "cast": [
         {
-          "name": "Pedro Alonso",
-          "character": "Andrés 'Berlín' de Fonollosa",
-          "profilePath": "https://image.tmdb.org/t/p/w185/38HeVKeOBztVYrLJOWzAtEZiB02.jpg"
+          "name": "Michael B. Jordan",
+          "character": "Ollie (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/sMBpav8cK7t7Nk0yf4tuNOqNUyW.jpg"
         },
         {
-          "name": "Michelle Jenner",
-          "character": "Keila",
-          "profilePath": "https://image.tmdb.org/t/p/w185/g3JyHqwBcV7g1ds3dHtWkDXyXqb.jpg"
+          "name": "Juno Temple",
+          "character": "Ivy (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nvsPrM4OKHVCDivgMx4FF6PgE5f.jpg"
         },
         {
-          "name": "Tristán Ulloa",
-          "character": "Damián Vázquez",
-          "profilePath": "https://image.tmdb.org/t/p/w185/sglKcvdU3e8hTy1kOghEbT0GdHS.jpg"
+          "name": "Tracy Morgan",
+          "character": "Boogle / Firewolf (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ec0OJVbs6NZKMbS1yiCAJKjeoJf.jpg"
         },
         {
-          "name": "Begoña Vargas",
-          "character": "Cameron",
-          "profilePath": "https://image.tmdb.org/t/p/w185/zlPlxLsEgbGJwTJcDunqCqBVGVP.jpg"
+          "name": "Cedric the Entertainer",
+          "character": "Caloo (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/s6UrY5uofyxXsU5PydWBoLFReK0.jpg"
         },
         {
-          "name": "Julio Peña",
-          "character": "Roi",
-          "profilePath": "https://image.tmdb.org/t/p/w185/9kXGecZrQp5DKlok1p7N73CmiiB.jpg"
+          "name": "Justina Machado",
+          "character": "Calli (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/j5FaJXoyhMHlqv1l6TBdt1CH1oO.jpg"
         },
         {
-          "name": "Joel Sánchez",
-          "character": "Bruce",
-          "profilePath": "https://image.tmdb.org/t/p/w185/cwXIJIHnBqzwpwvl4Tie4mud02q.jpg"
+          "name": "Nate Torrence",
+          "character": "Lodd (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/yT9o149xPygdY0NsF9sNgiQwuru.jpg"
         },
         {
-          "name": "José Luis García Pérez",
-          "character": "Álvaro Hermoso de Medina, Duke of Málaga",
-          "profilePath": "https://image.tmdb.org/t/p/w185/pszEIxu2skaRTf45YshJ2PTEuTO.jpg"
+          "name": "Camden Brooks",
+          "character": "Young Ollie (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ge9FgIjRERhyylebW2Np9YwkqqR.jpg"
         },
         {
-          "name": "Marta Nieto",
-          "character": "Genoveva Dante, Duchess of Málaga",
-          "profilePath": "https://image.tmdb.org/t/p/w185/59261r4l1nqgdnvRPmmCBa7y98M.jpg"
+          "name": "Táta Vega",
+          "character": "Grandma / Mrs. Dung Beetle (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/9SdaK2vly0Gx5yvI5rrTszh31vt.jpg"
         },
         {
-          "name": "Inma Cuesta",
-          "character": "Candela",
-          "profilePath": "https://image.tmdb.org/t/p/w185/wJrPN5ROu7P7gfDdKEDItzesDeO.jpg"
+          "name": "Ambika Mod",
+          "character": "Violet (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/jN9HhFYPNMYIupFt6GzGnHAW88c.jpg"
+        },
+        {
+          "name": "Lolly Adefope",
+          "character": "Lily (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/qPS57Mw1vjydSSfSYoMw8u81waI.jpg"
         }
       ],
-      "poster": "https://image.tmdb.org/t/p/w500/sTumew0Q01ZHmFneA9cJRi3QUYC.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/ntPgSYKwPg9xKO4VvLJYfInSyZa.jpg",
-      "rating": "TMDB 8.3",
-      "trailer": "https://www.youtube.com/watch?v=Ltrc8z4AXKo",
-      "recommendations": [
-        {
-          "id": 146176,
-          "title": "Berlin",
-          "posterPath": "https://image.tmdb.org/t/p/w342/69YuvoiWTtK6oyYH2Jl4Q6SgZ59.jpg",
-          "mediaType": "tv"
-        },
-        {
-          "id": 156902,
-          "title": "Kaleidoscope",
-          "posterPath": "https://image.tmdb.org/t/p/w342/2nXJoSB5Y6R9ne7pjqL7Cs3zqY1.jpg",
-          "mediaType": "tv"
-        },
-        {
-          "id": 88118,
-          "title": "Blood & Treasure",
-          "posterPath": "https://image.tmdb.org/t/p/w342/xbWqfPKBhqOZQEGq7HdDkX0Bjib.jpg",
-          "mediaType": "tv"
-        },
-        {
-          "id": 236449,
-          "title": "Bank Under Siege",
-          "posterPath": "https://image.tmdb.org/t/p/w342/6QeR0OoO8lqsLG2c6hzVPSu9bVF.jpg",
-          "mediaType": "tv"
-        },
-        {
-          "id": 114922,
-          "title": "Citadel",
-          "posterPath": "https://image.tmdb.org/t/p/w342/5MHtxPEfmN4b0rHzfEZRcm6v9WI.jpg",
-          "mediaType": "tv"
-        },
-        {
-          "id": 218351,
-          "title": "The Gold",
-          "posterPath": "https://image.tmdb.org/t/p/w342/9JY9Gza4HQhXjIPXg9uSy8FeiSM.jpg",
-          "mediaType": "tv"
-        }
-      ],
-      "tmdbId": 308014,
-      "mediaType": "tv",
-      "sources": [
-        {
-          "provider": "net11",
-          "id": "82152349"
-        }
-      ],
-      "audioLanguages": [
-        "Spanish"
-      ],
-      "seasons": [
-        {
-          "season_number": 1,
-          "episode_count": 8,
-          "name": "Limited Series",
-          "providerSeasonId": "81759581"
-        }
-      ]
-    },
-    "expiry": 1780816991646
-  },
-  "details::net11::81765713": {
-    "value": {
-      "id": "81765713",
-      "provider": "net11",
-      "title": "Untitled",
-      "originalTitle": "",
-      "year": "N/A",
-      "description": "No description available.",
-      "director": "",
-      "genre": "",
-      "languages": [],
-      "cast": [],
-      "poster": null,
-      "backdrop": null,
-      "rating": null,
-      "trailer": null,
-      "tmdbId": null,
+      "poster": "https://image.tmdb.org/t/p/w500/tHhxWxge06goXU6ZQH1hj7vK8Hd.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/zMwhWailP1WY7sb6AoE6b8ugoy.jpg",
+      "rating": "TMDB 9.0",
+      "trailer": "https://www.youtube.com/watch?v=glgmAwRDP8s",
+      "tmdbId": 1007757,
       "mediaType": "movie",
       "seasons": [],
       "sources": [
         {
           "provider": "net11",
-          "id": "81765713"
+          "id": "81749852",
+          "languages": [
+            "English"
+          ]
         }
       ],
       "audioLanguages": [
-        "Original Audio"
+        "English"
       ]
     },
-    "expiry": 1780816998413
+    "expiry": 1780838403541
   }
 }

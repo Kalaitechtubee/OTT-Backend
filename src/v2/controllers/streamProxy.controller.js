@@ -169,8 +169,8 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
   // e.g. https://s21.freecdn4.top/files/220884/1080p/1080p.m3u8 â†’ "220884"
   const cdnContentId = (() => {
     const m = playlistBody.match(/\/files\/([^/]+)\/(?:1080p|720p|480p|\d+p)\//i) ||
-              playlistBody.match(/freecdn4\.top\/files\/([^/]+)\//i) ||
-              playlistBody.match(/nm-cdn4\.top\/files\/([^/]+)\//i);
+      playlistBody.match(/freecdn4\.top\/files\/([^/]+)\//i) ||
+      playlistBody.match(/nm-cdn4\.top\/files\/([^/]+)\//i);
     return m ? m[1] : null;
   })();
 
@@ -252,14 +252,14 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
       if (u.hostname && u.hostname !== 'files' && !['net52.cc', 'net11.cc', 'net22.cc'].includes(u.hostname.toLowerCase())) {
         return `https://${u.hostname}`;
       }
-    } catch (_e) {}
+    } catch (_e) { }
     // Check global cache as fallback
     try {
       const movieId = extractMovieId(sourceUrl);
       if (movieId && resolvedCdnHostsCache.has(movieId)) {
         return `https://${resolvedCdnHostsCache.get(movieId)}`;
       }
-    } catch (_e) {}
+    } catch (_e) { }
     return 'https://s21.freecdn4.top';
   })();
 
@@ -279,7 +279,7 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
       // loop (the quality endpoint itself returns a master playlist with hostless URLs).
       if (isProviderSource && providerMovieId && providerBase && sourceToken && !sourceAlreadyHasQuality) {
         const isHostless = /^https?:\/\/\//.test(normalizedUrl) ||
-                           (/\/files\//.test(normalizedUrl) && !/^https?:\/\/[^/]+\//.test(normalizedUrl));
+          (/\/files\//.test(normalizedUrl) && !/^https?:\/\/[^/]+\//.test(normalizedUrl));
         if (isHostless) {
           const qualityMatch = normalizedUrl.match(/\/(1080p|720p|480p|360p|240p)(?:\/|\.m3u8)/i);
           if (qualityMatch) {
@@ -334,7 +334,7 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
         if (cdnContentId && correctMovieId && cdnContentId !== correctMovieId) {
           const absParsed2 = new URL(absolute);
           const isAudioPath = absParsed2.pathname.includes(`/files/${correctMovieId}/a/`) ||
-                              absParsed2.pathname.includes(`/files/${correctMovieId}/audio/`);
+            absParsed2.pathname.includes(`/files/${correctMovieId}/audio/`);
           if (isAudioPath) {
             absParsed2.pathname = absParsed2.pathname.replace(
               `/files/${correctMovieId}/`,
@@ -349,8 +349,10 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
 
       // Only proxy playlists (.m3u8). Video segments (.ts, .jpg), keys, maps, subtitles, etc.
       // can be requested by the browser directly from the CDN to avoid rate limits on the backend server IP.
+      // BUT proxy subtitle files (.vtt, .srt) and paths containing "/subs/" to bypass browser CORS blocks.
       const isPlaylist = /\.m3u8($|\?)/i.test(tokenized);
-      if (!isPlaylist) {
+      const isSubtitle = /\.vtt($|\?)/i.test(tokenized) || /\.srt($|\?)/i.test(tokenized) || tokenized.includes('/subs/');
+      if (!isPlaylist && !isSubtitle) {
         return tokenized;
       }
 
@@ -493,7 +495,7 @@ exports.proxyStream = async (req, res) => {
     }
 
     const upstreamHeaders = buildHeaders(provider, req.headers);
-    
+
     // Forward client IP headers to allow correct dynamic IP-locked token validation on upstream mirrors
     const ipHeaders = {};
     const ipHeaderNames = [
@@ -602,15 +604,17 @@ exports.proxyStream = async (req, res) => {
     }
 
     const contentType = response.headers['content-type'] || '';
-    const proxyBase = `${req.protocol}://${req.get('host')}/api/v2/stream/proxy`;
+    const proxyBase = `${req.protocol}://${req.get('host')}/api/v2/stream/proxy.m3u8`;
 
-    const isSubtitle = /\.srt($|\?)/i.test(parsed.toString()) || parsed.toString().includes('/subs/');
+    const isSubtitle = /\.srt($|\?)/i.test(parsed.toString()) || /\.vtt($|\?)/i.test(parsed.toString()) || parsed.toString().includes('/subs/');
     if (isSubtitle) {
-      const originalSrt = Buffer.from(response.data).toString('utf8');
-      const vttContent = srtToVtt(originalSrt);
+      let content = Buffer.from(response.data).toString('utf8');
+      if (parsed.toString().toLowerCase().includes('.srt') || !content.trimStart().startsWith('WEBVTT')) {
+        content = srtToVtt(content);
+      }
       res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
       res.setHeader('Cache-Control', 'no-store');
-      return res.status(200).send(vttContent);
+      return res.status(200).send(content);
     }
 
     if (isM3u8Content(contentType, parsed.toString())) {

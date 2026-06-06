@@ -1,3 +1,4 @@
 node_modules/
 .env
+data/
 src/data/search-cache.json

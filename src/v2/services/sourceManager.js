@@ -187,7 +187,17 @@ module.exports = {
     }
 
     // 4. Find alternate sources across providers for the same title
-    let sources = [{ provider, id }];
+    let mainLangs = [];
+    if (providerDetails?.title) {
+      mainLangs = extractAudioLanguages(providerDetails.title);
+    }
+    if (mainLangs.length === 0 && tmdbAssets?.languages) {
+      mainLangs = tmdbAssets.languages.map(l => l.l || l.name || l);
+    }
+    if (mainLangs.length === 0) {
+      mainLangs = ['Original Audio'];
+    }
+    let sources = [{ provider, id, languages: mainLangs }];
     let audioLanguages = [];
     if (finalDetails.title) {
       try {
@@ -227,7 +237,14 @@ module.exports = {
         for (const cand of candidates) {
           const item = cand.item;
           if (!sources.some(s => s.provider === item.provider && s.id === item.id)) {
-            sources.push({ provider: item.provider, id: item.id });
+            let itemLangs = extractAudioLanguages(item.title);
+            if (itemLangs.length === 0 && tmdbAssets?.languages) {
+              itemLangs = tmdbAssets.languages.map(l => l.l || l.name || l);
+            }
+            if (itemLangs.length === 0) {
+              itemLangs = ['Original Audio'];
+            }
+            sources.push({ provider: item.provider, id: item.id, languages: itemLangs });
           }
           extractedLangs.push(...extractAudioLanguages(item.title));
         }
@@ -396,7 +413,14 @@ module.exports = {
         for (const cand of candidates) {
           const item = cand.item;
           if (!sources.some(s => s.provider === item.provider && s.id === item.id)) {
-            sources.push({ provider: item.provider, id: item.id });
+            let itemLangs = extractAudioLanguages(item.title);
+            if (itemLangs.length === 0 && tmdbAssets?.languages) {
+              itemLangs = tmdbAssets.languages.map(l => l.l || l.name || l);
+            }
+            if (itemLangs.length === 0) {
+              itemLangs = ['Original Audio'];
+            }
+            sources.push({ provider: item.provider, id: item.id, languages: itemLangs });
           }
           extractedLangs.push(...extractAudioLanguages(item.title));
         }
