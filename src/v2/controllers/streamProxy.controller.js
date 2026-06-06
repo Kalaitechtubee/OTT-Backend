@@ -95,7 +95,7 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
       }
 
       // Fallback: use the play token forwarded from the stream API.
-      // This is the key fix for in=unknown::ni in master → variant playlists.
+      // This is the key fix for in=unknown::ni in master â†’ variant playlists.
       const stripped = String(playToken || '').replace(/^in=/, '');
       if (stripped && stripped !== 'unknown::ni') return stripped.replace(/^in=/, '');
 
@@ -106,7 +106,7 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
   })();
 
   // Extract the canonical movie ID from the source playlist URL
-  // e.g. https://net52.cc/pv/hls/81728596.m3u8 → "81728596"
+  // e.g. https://net52.cc/pv/hls/81728596.m3u8 â†’ "81728596"
   const correctMovieId = (() => {
     try {
       const m = new URL(sourceUrl).pathname.match(/\/(\d+)\.m3u8/);
@@ -119,7 +119,7 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
   // Extract the CDN content ID from variant stream URLs in the playlist body.
   // The CDN uses its own internal ID (e.g. 220884) which is DIFFERENT from the
   // provider movie ID (e.g. 81726031) used in the raw audio track placeholder URL.
-  // e.g. https://s21.freecdn4.top/files/220884/1080p/1080p.m3u8 → "220884"
+  // e.g. https://s21.freecdn4.top/files/220884/1080p/1080p.m3u8 â†’ "220884"
   const cdnContentId = (() => {
     const m = playlistBody.match(/\/files\/([^/]+)\/(?:1080p|720p|480p|\d+p)\//i) ||
               playlistBody.match(/freecdn4\.top\/files\/([^/]+)\//i) ||
@@ -134,9 +134,9 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
     if (!sourceToken) return absoluteUrl;
     try {
       const u = new URL(absoluteUrl);
-      const current = u.searchParams.get('in'); // .get() decodes %3A → :: automatically
+      const current = u.searchParams.get('in'); // .get() decodes %3A â†’ :: automatically
       if (!current || current === 'unknown::ni') {
-        // CRITICAL: Do NOT use u.searchParams.set() — it percent-encodes :: → %3A%3A
+        // CRITICAL: Do NOT use u.searchParams.set() â€” it percent-encodes :: â†’ %3A%3A
         // which then gets double-encoded by encodeURIComponent later.
         // Instead: delete 'in', reconstruct base URL, append raw token as plain string.
         u.searchParams.delete('in');
@@ -144,7 +144,7 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
         const sep = base.includes('?') ? '&' : '?';
         return `${base}${sep}in=${sourceToken.replace(/^in=/, '')}`; // raw :: colons preserved
       }
-      // Has a valid token — still reconstruct with raw token to avoid stale encoding
+      // Has a valid token â€” still reconstruct with raw token to avoid stale encoding
       u.searchParams.delete('in');
       const base = u.toString();
       const sep = base.includes('?') ? '&' : '?';
@@ -170,15 +170,15 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
     try {
       let normalizedUrl = rawUrl;
 
-      // Fix: triple-slash audio track URLs → use CDN host (not provider domain)
-      // https:///files/81728596/a/0/0.m3u8 → https://s21.freecdn4.top/files/81728596/a/0/0.m3u8
+      // Fix: triple-slash audio track URLs â†’ use CDN host (not provider domain)
+      // https:///files/81728596/a/0/0.m3u8 â†’ https://s21.freecdn4.top/files/81728596/a/0/0.m3u8
       if (normalizedUrl.startsWith('https:///files/')) {
         normalizedUrl = `${cdnBase}${normalizedUrl.replace('https://', '')}`;
       } else if (normalizedUrl.startsWith('https:///')) {
         normalizedUrl = normalizedUrl.replace('https:///', '/');
       }
 
-      // Fix: "files" placeholder hostname → CDN host
+      // Fix: "files" placeholder hostname â†’ CDN host
       try {
         const testUrl = new URL(normalizedUrl);
         if (testUrl.hostname === 'files' || testUrl.hostname === '') {
@@ -239,40 +239,86 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
   };
 
   const lines = String(playlistBody).split(/\r?\n/);
+
+  // ── AUDIO TRACK DEFAULT SELECTION ──────────────────────────────────────────
+  // Find all #EXT-X-MEDIA TYPE=AUDIO lines so we can pick a default.
+  // Preference order: Tamil (tam) > Hindi (hin) > first track found.
+  const audioMediaLines = lines.filter(l => /^#EXT-X-MEDIA.*TYPE=AUDIO/i.test(l.trim()));
+  let defaultAudioLang = null;
+  if (audioMediaLines.length > 0) {
+    const preferredLangs = ['tam', 'hin', 'tel', 'mal', 'kan', 'eng'];
+    for (const lang of preferredLangs) {
+      const match = audioMediaLines.find(l => new RegExp(`LANGUAGE="${lang}"`, 'i').test(l));
+      if (match) {
+        // Extract the LANGUAGE value from the matched line
+        const langMatch = match.match(/LANGUAGE="([^"]+)"/i);
+        if (langMatch) { defaultAudioLang = langMatch[1]; break; }
+      }
+    }
+    // Fallback: pick the first audio track's language
+    if (!defaultAudioLang) {
+      const firstLang = audioMediaLines[0].match(/LANGUAGE="([^"]+)"/i);
+      if (firstLang) defaultAudioLang = firstLang[1];
+    }
+  }
+  console.log(`[Stream Proxy] Audio tracks found: ${audioMediaLines.length}, defaulting to LANGUAGE="${defaultAudioLang || 'none'}".`);
+
   const rewritten = lines
-    .filter((line) => {
-      // Drop broken audio track declarations from master playlists.
-      // The CDN doesn't serve separate audio tracks (/files/.../a/0/0.m3u8) —
-      // audio is muxed into the video TS segments. When HLS.js tries to load
-      // this audio track and gets a 404, it stalls and never loads video segments.
-      if (/^#EXT-X-MEDIA.*TYPE=AUDIO/i.test(line.trim())) return false;
-      return true;
-    })
+    .filter(() => true) // keep all lines — audio tracks are now proxied, not dropped
     .map((line) => {
       const trimmed = line.trim();
       if (!trimmed) return line;
 
-      // Also strip AUDIO= attribute from #EXT-X-STREAM-INF lines to avoid
-      // HLS.js complaining about a missing audio group after we removed #EXT-X-MEDIA
-      if (trimmed.startsWith('#EXT-X-STREAM-INF') && /AUDIO=/i.test(trimmed)) {
-        line = line.replace(/,?\bAUDIO="[^"]*"/gi, '');
+      // ── Rewrite #EXT-X-MEDIA TYPE=AUDIO lines ──────────────────────────────
+      // 1. Proxy the URI so audio playlists go through our proxy.
+      // 2. Set DEFAULT=YES / AUTOSELECT=YES on the preferred language track;
+      //    all others get DEFAULT=NO / AUTOSELECT=NO.
+      if (/^#EXT-X-MEDIA.*TYPE=AUDIO/i.test(trimmed)) {
+        const langMatch = trimmed.match(/LANGUAGE="([^"]+)"/i);
+        const thisLang = langMatch ? langMatch[1] : null;
+        const isDefault = defaultAudioLang && thisLang &&
+          thisLang.toLowerCase() === defaultAudioLang.toLowerCase();
+
+        // Rewrite URI through proxy
+        let rewrittenLine = line.replace(/URI="([^"]+)"/g, (_m, uriValue) => `URI="${toProxy(uriValue)}"`);
+
+        // Set DEFAULT / AUTOSELECT flags
+        rewrittenLine = rewrittenLine
+          .replace(/\bDEFAULT=(?:YES|NO)/gi, isDefault ? 'DEFAULT=YES' : 'DEFAULT=NO')
+          .replace(/\bAUTOSELECT=(?:YES|NO)/gi, isDefault ? 'AUTOSELECT=YES' : 'AUTOSELECT=NO');
+
+        // If the line doesn't have AUTOSELECT at all, add it
+        if (!/AUTOSELECT=/i.test(rewrittenLine)) {
+          rewrittenLine = rewrittenLine.replace(/(#EXT-X-MEDIA:[^\n]*)/, `$1,AUTOSELECT=${isDefault ? 'YES' : 'NO'}`);
+        }
+
+        return rewrittenLine;
       }
 
-      // Rewrite URI="..." attributes inside HLS tags such as:
-      // #EXT-X-KEY, #EXT-X-MAP
-    if (trimmed.startsWith('#')) {
-      return line.replace(/URI="([^"]+)"/g, (_m, uriValue) => `URI="${toProxy(uriValue)}"`);
-    }
+      // Rewrite URI="..." attributes inside other HLS tags (#EXT-X-KEY, #EXT-X-MAP)
+      if (trimmed.startsWith('#')) {
+        return line.replace(/URI="([^"]+)"/g, (_m, uriValue) => `URI="${toProxy(uriValue)}"`);
+      }
 
-    // Rewrite plain segment/playlist URLs.
-    return toProxy(trimmed);
-  });
-  return rewritten.join('\n');
+      // Rewrite plain segment/playlist URLs.
+      return toProxy(trimmed);
+    });
+
+  const finalBody = rewritten.join('\n');
+
+  // ── POST-REWRITE DIAGNOSTIC ─────────────────────────────────────────────────
+  if (audioMediaLines.length > 0) {
+    const rewrittenAudioLines = finalBody.split(/\r?\n/).filter(l => /^#EXT-X-MEDIA.*TYPE=AUDIO/i.test(l));
+    console.log('[Stream Proxy] AFTER REWRITE - Audio track lines sent to client:');
+    rewrittenAudioLines.forEach(l => console.log(`  ${l}`));
+  }
+
+  return finalBody;
 }
 
 exports.proxyStream = async (req, res) => {
   let targetUrl = String(req.query.u || '');
-  // Play token forwarded from stream.controller via &tk= — used to fix in=unknown::ni
+  // Play token forwarded from stream.controller via &tk= â€” used to fix in=unknown::ni
   const proxyPlayToken = String(req.query.tk || '');
 
   // Reconstruct flattened query parameters if 'in' token parsed as first-level query param
@@ -376,26 +422,27 @@ exports.proxyStream = async (req, res) => {
       }
       const finalSourceUrl = response.request?.res?.responseUrl || parsed.toString();
 
-      // ─── DIAGNOSTIC: Raw upstream playlist content ───
+      // â”€â”€â”€ DIAGNOSTIC: Raw upstream playlist content â”€â”€â”€
       const playlistLines = originalBody.split(/\r?\n/);
       const variantLines = playlistLines.filter(l =>
         l.includes('#EXT-X-STREAM-INF') || l.includes('freecdn') || l.includes('220884') || l.includes('/files/')
       );
       if (originalBody.includes('220884')) {
-        console.warn(`[Stream Proxy DIAG] ⚠️ Upstream playlist contains files/220884 (anti-abuse)!`);
+        console.warn(`[Stream Proxy DIAG] âš ï¸ Upstream playlist contains files/220884 (anti-abuse)!`);
         console.log(`[Stream Proxy DIAG] Source: ${parsed.toString()}`);
         console.log(`[Stream Proxy DIAG] Video variant lines:`);
         variantLines.forEach(l => console.log(`  ${l}`));
       } else {
-        console.log(`[Stream Proxy DIAG] ✅ Upstream playlist looks clean (no 220884)`);
+        console.log(`[Stream Proxy DIAG] âœ… Upstream playlist looks clean (no 220884)`);
         console.log(`[Stream Proxy DIAG] Video variant lines:`);
         variantLines.forEach(l => console.log(`  ${l}`));
       }
 
       const rewrittenBody = rewritePlaylistBody(originalBody, provider, finalSourceUrl, proxyBase, parsed.toString(), proxyPlayToken);
-      
-      const cacheKey = `${provider}::${source}::${proxyPlayToken}`;
-      setCachedPlaylist(cacheKey, rewrittenBody);
+
+      // Cache the REWRITTEN body (not the original) so cache hits also return audio-rewritten playlists
+      const cacheKey2 = `${provider}::${source}::${proxyPlayToken}`;
+      setCachedPlaylist(cacheKey2, rewrittenBody);
 
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
       res.setHeader('Cache-Control', 'no-store');
