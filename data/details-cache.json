@@ -1,354 +1,4 @@
 {
-  "details::net11::70041963": {
-    "value": {
-      "id": "70041963",
-      "provider": "net11",
-      "title": "Untitled",
-      "originalTitle": "",
-      "year": "N/A",
-      "description": "No description available.",
-      "director": "",
-      "genre": "",
-      "languages": [],
-      "cast": [],
-      "poster": null,
-      "backdrop": null,
-      "rating": null,
-      "trailer": null,
-      "recommendations": [],
-      "tmdbId": null,
-      "mediaType": "movie",
-      "sources": [
-        {
-          "provider": "net11",
-          "id": "70041963"
-        }
-      ],
-      "audioLanguages": [
-        "Original Audio"
-      ]
-    },
-    "expiry": 1780720325881
-  },
-  "details::tmdb::81639323": {
-    "value": {
-      "id": null,
-      "provider": null,
-      "title": "Untitled",
-      "originalTitle": "",
-      "year": "N/A",
-      "description": "No description available.",
-      "director": "",
-      "genre": "",
-      "languages": [],
-      "cast": [],
-      "poster": null,
-      "backdrop": null,
-      "rating": null,
-      "trailer": null,
-      "recommendations": [],
-      "tmdbId": 81639323,
-      "mediaType": "movie",
-      "sources": [],
-      "audioLanguages": [
-        "Original Audio"
-      ]
-    },
-    "expiry": 1780720420299
-  },
-  "details::net11::81728596": {
-    "value": {
-      "id": "81728596",
-      "provider": "net11",
-      "title": "Untitled",
-      "originalTitle": "",
-      "year": "N/A",
-      "description": "No description available.",
-      "director": "",
-      "genre": "",
-      "languages": [],
-      "cast": [],
-      "poster": null,
-      "backdrop": null,
-      "rating": null,
-      "trailer": null,
-      "recommendations": [],
-      "tmdbId": null,
-      "mediaType": "movie",
-      "sources": [
-        {
-          "provider": "net11",
-          "id": "81728596"
-        }
-      ],
-      "audioLanguages": [
-        "Original Audio"
-      ]
-    },
-    "expiry": 1780720485398
-  },
-  "details::tmdb::904557": {
-    "value": {
-      "id": "81644302",
-      "provider": "net11",
-      "title": "Thunivu",
-      "originalTitle": "துணிவு",
-      "year": "2023",
-      "description": "A gang goes to rob a bank only to find that there's already a criminal mastermind holding it for ransom, but his identities and motives behind the heist remains mysterious. As they plan to collect the bounty and disappear without a trace, their crimes and their past slowly catches up with them.",
-      "director": "H. Vinoth",
-      "genre": "Action, Crime, Thriller, Comedy",
-      "languages": [
-        {
-          "l": "Tamil",
-          "s": "ta"
-        }
-      ],
-      "cast": [
-        {
-          "name": "Ajith Kumar",
-          "character": "Dark Devil",
-          "profilePath": "https://image.tmdb.org/t/p/w185/bCS0pp7YNHoXJvHObBLoOJRUUYs.jpg"
-        },
-        {
-          "name": "Manju Warrier",
-          "character": "Kanmani",
-          "profilePath": "https://image.tmdb.org/t/p/w185/7u1WgUHnwIW9mtL6aTdo1cRXmCM.jpg"
-        },
-        {
-          "name": "Samuthirakani",
-          "character": "N. Dhayalan",
-          "profilePath": "https://image.tmdb.org/t/p/w185/hicCPOdDfSRCEYkeb9g53FOY19A.jpg"
-        },
-        {
-          "name": "John Kokken",
-          "character": "Krish",
-          "profilePath": "https://image.tmdb.org/t/p/w185/3dIc5cYnlzLYjaZYTOkrTIAg2D1.jpg"
-        },
-        {
-          "name": "Veera Bahu",
-          "character": "Radha",
-          "profilePath": "https://image.tmdb.org/t/p/w185/8jO9TAQZ9uIo7J32ofqEhEs3KOi.jpg"
-        },
-        {
-          "name": "Prem",
-          "character": "Prem",
-          "profilePath": "https://image.tmdb.org/t/p/w185/41ZntbRg0ObcwLPVBxprp8Kz3Ot.jpg"
-        },
-        {
-          "name": "Ajay",
-          "character": "Ramachandran",
-          "profilePath": "https://image.tmdb.org/t/p/w185/uByCHJa3eaCL0SgFGDYYLlsVggC.jpg"
-        },
-        {
-          "name": "G. M. Sundar",
-          "character": "Muthazhagan",
-          "profilePath": "https://image.tmdb.org/t/p/w185/hMYrf0wmw9XPiICyOWXYmDIucFV.jpg"
-        },
-        {
-          "name": "Bagavathi Perumal",
-          "character": "Rajesh",
-          "profilePath": "https://image.tmdb.org/t/p/w185/ixK5bTpLOIXc8oJVE1IVMzcJrB2.jpg"
-        },
-        {
-          "name": "Mahanadhi Shankar",
-          "character": "Constable Antony 'Anto'",
-          "profilePath": "https://image.tmdb.org/t/p/w185/wt3qjVGqdIKhOch6rB0kjxRFjr0.jpg"
-        }
-      ],
-      "poster": "https://image.tmdb.org/t/p/w500/5Cdi9MFxEGsfphvDxV4TyY4znP6.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/woLEI1MC1Ya4eHrFveUXd60hVU.jpg",
-      "rating": "TMDB 5.8",
-      "trailer": "https://www.youtube.com/watch?v=nI9TBoMlmv4",
-      "recommendations": [
-        {
-          "id": 1001783,
-          "title": "LaRoy, Texas",
-          "posterPath": "https://image.tmdb.org/t/p/w342/fEYfXyWhFJScE0I5rHsS2JxIiPP.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 1115239,
-          "title": "Por Thozhil",
-          "posterPath": "https://image.tmdb.org/t/p/w342/lZ2BbjGBDRW5Q5Q9jgEknuiEQ0f.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 13534,
-          "title": "How to Rob a Bank",
-          "posterPath": "https://image.tmdb.org/t/p/w342/31pWUvnGn8ldxj4O95UuH1SOtLm.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 27590,
-          "title": "Gotcha!",
-          "posterPath": "https://image.tmdb.org/t/p/w342/8qHvL1w0NYemVeppB1UKlAd1pS0.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 14550,
-          "title": "The Dream Team",
-          "posterPath": "https://image.tmdb.org/t/p/w342/lBVjTP8Cb66GBabUBQaBUtV6OqD.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 404733,
-          "title": "Overdrive",
-          "posterPath": "https://image.tmdb.org/t/p/w342/a0hTRjis1cxwmjOuBaS7WdDG3dj.jpg",
-          "mediaType": "movie"
-        }
-      ],
-      "tmdbId": 904557,
-      "mediaType": "movie",
-      "sources": [
-        {
-          "provider": "net11",
-          "id": "81644302"
-        },
-        {
-          "provider": "net11",
-          "id": "81672761"
-        },
-        {
-          "provider": "net11",
-          "id": "81671554"
-        },
-        {
-          "provider": "net11",
-          "id": "81671557"
-        }
-      ],
-      "audioLanguages": [
-        "Hindi",
-        "Kannada",
-        "Malayalam"
-      ]
-    },
-    "expiry": 1780720588419
-  },
-  "details::tmdb::1265827": {
-    "value": {
-      "id": "81902059",
-      "provider": "net11",
-      "title": "Retro",
-      "originalTitle": "ரெட்ரோ",
-      "year": "2025",
-      "description": "A man with a violent past seeks a fresh start, but the life he left behind resurfaces, forcing him to face old conflicts and redefine his future.",
-      "director": "Karthik Subbaraj",
-      "genre": "Romance, Action, Drama, Crime",
-      "languages": [
-        {
-          "l": "Tamil",
-          "s": "ta"
-        }
-      ],
-      "cast": [
-        {
-          "name": "Suriya",
-          "character": "Paarivel Kannan / Jada Muni",
-          "profilePath": "https://image.tmdb.org/t/p/w185/hIFXv3gIjlNS78gJmaguEOxvfPH.jpg"
-        },
-        {
-          "name": "Pooja Hegde",
-          "character": "Rukmani",
-          "profilePath": "https://image.tmdb.org/t/p/w185/2ZxrR6DVIWtDDtmIhJ6i64wwWSU.jpg"
-        },
-        {
-          "name": "Joju George",
-          "character": "Thilagan",
-          "profilePath": "https://image.tmdb.org/t/p/w185/jCObRH5idadzrTvyC9XnlnR8rXH.jpg"
-        },
-        {
-          "name": "Jayaram",
-          "character": "'Chaplin' Lolly",
-          "profilePath": "https://image.tmdb.org/t/p/w185/cc1SfVFctuYH353NgxXNBoAFX2d.jpg"
-        },
-        {
-          "name": "Vidhu",
-          "character": "'King' Michael Mirasu",
-          "profilePath": "https://image.tmdb.org/t/p/w185/jQ5vMhDvI8LovYQy7quFYEy7Rbl.jpg"
-        },
-        {
-          "name": "Nassar",
-          "character": "Rajavel Mirasu",
-          "profilePath": "https://image.tmdb.org/t/p/w185/p3I0tSQY3C5qZW3NzFfbpjKPNL6.jpg"
-        },
-        {
-          "name": "Prakash Raj",
-          "character": "Dharmendran",
-          "profilePath": "https://image.tmdb.org/t/p/w185/dJvFZOXmZdkYCOUcKTXQAhBcAoH.jpg"
-        },
-        {
-          "name": "Sujith Sankar",
-          "character": "Freddie Milton",
-          "profilePath": "https://image.tmdb.org/t/p/w185/n7Z4ezEpDvhG3NyeYN9K1ULjVdW.jpg"
-        },
-        {
-          "name": "Singampuli",
-          "character": "Rukmini's Father",
-          "profilePath": "https://image.tmdb.org/t/p/w185/aB5dVUeJU64IAatguQgbHHbUZsj.jpg"
-        },
-        {
-          "name": "Swasika",
-          "character": "Sandhya",
-          "profilePath": "https://image.tmdb.org/t/p/w185/7LWxyKwGH5S1ZwEEjlbBcDUJKk8.jpg"
-        }
-      ],
-      "poster": "https://image.tmdb.org/t/p/w500/pJPK57REXsaLydpOPgHwWAQMdqz.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/rGcZhLzwOLz3OWWpYrelgP4HUIQ.jpg",
-      "rating": "TMDB 6.4",
-      "trailer": "https://www.youtube.com/watch?v=PxBR17orfRc",
-      "recommendations": [
-        {
-          "id": 253154,
-          "title": "Imperial Dreams",
-          "posterPath": "https://image.tmdb.org/t/p/w342/cEEsrLIH8LsGkuaU2Ql2FksewfT.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 25006,
-          "title": "State Property",
-          "posterPath": "https://image.tmdb.org/t/p/w342/eq8ygk2egSs9QnQfrjqE4fJ44OJ.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 116185,
-          "title": "Billa II",
-          "posterPath": "https://image.tmdb.org/t/p/w342/gADzX6C4pGHneBoU148LXFMDyMr.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 1079346,
-          "title": "5lbs of Pressure",
-          "posterPath": "https://image.tmdb.org/t/p/w342/toEJOPYvM7Na0XwM8exg8aHq553.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 13369,
-          "title": "Empire",
-          "posterPath": "https://image.tmdb.org/t/p/w342/m6XxaRLltWox4C9pykjUILrlGp9.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 14673,
-          "title": "Savage Streets",
-          "posterPath": "https://image.tmdb.org/t/p/w342/bLRqlWUSlz7DJh8AAP9m9ic9fPl.jpg",
-          "mediaType": "movie"
-        }
-      ],
-      "tmdbId": 1265827,
-      "mediaType": "movie",
-      "sources": [
-        {
-          "provider": "net11",
-          "id": "81902059"
-        }
-      ],
-      "audioLanguages": [
-        "Tamil"
-      ]
-    },
-    "expiry": 1780722458981
-  },
   "details::tmdb::51509": {
     "value": {
       "id": null,
@@ -2864,5 +2514,1011 @@
       ]
     },
     "expiry": 1780800572509
+  },
+  "details::tmdb::1358005": {
+    "value": {
+      "id": "81939823",
+      "provider": "net11",
+      "title": "Office Romance",
+      "originalTitle": "Office Romance",
+      "year": "2026",
+      "description": "Jackie, President and CEO of Air Cruz, runs a tight ship in her business, including a rigid anti-fraternization policy for all her employees. When a new sexy lawyer begins working for her, that policy becomes very tested.",
+      "director": "Ol Parker",
+      "genre": "Romance, Comedy",
+      "languages": [
+        {
+          "l": "English",
+          "s": "en"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Jennifer Lopez",
+          "character": "Jackie Cruz",
+          "profilePath": "https://image.tmdb.org/t/p/w185/iDiicDZ6CMib20QSCQYB55iynEk.jpg"
+        },
+        {
+          "name": "Brett Goldstein",
+          "character": "Daniel Blanchflower",
+          "profilePath": "https://image.tmdb.org/t/p/w185/xYdFNE7EkncE8uiPJzT3RrkqcAQ.jpg"
+        },
+        {
+          "name": "Betty Gilpin",
+          "character": "Sydney Bloom",
+          "profilePath": "https://image.tmdb.org/t/p/w185/hBOviIHCVqbWyyPUoIxZohDl5SL.jpg"
+        },
+        {
+          "name": "Edward James Olmos",
+          "character": "Captain Jack Cruz",
+          "profilePath": "https://image.tmdb.org/t/p/w185/mXnilUrQBIMLHSQkPjQk99mX70x.jpg"
+        },
+        {
+          "name": "Bradley Whitford",
+          "character": "Peter Vance",
+          "profilePath": "https://image.tmdb.org/t/p/w185/oeDv2qZWTxELLaNtOIoeG72leNY.jpg"
+        },
+        {
+          "name": "Amy Sedaris",
+          "character": "Julie Schatz",
+          "profilePath": "https://image.tmdb.org/t/p/w185/iQClumvSfTHgysxSofFmcLXmkCc.jpg"
+        },
+        {
+          "name": "Jodie Whittaker",
+          "character": "Lizzy",
+          "profilePath": "https://image.tmdb.org/t/p/w185/zS6EO1GsfOiuyaa66YqmUPWDX78.jpg"
+        },
+        {
+          "name": "Mary Wiseman",
+          "character": "Clair",
+          "profilePath": "https://image.tmdb.org/t/p/w185/85uKEsrzJ0pWMDKKwAQtYdMbnq4.jpg"
+        },
+        {
+          "name": "Tony Hale",
+          "character": "George Dudek",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ar4uapp4w5wMkThZcqWUNMSTO8z.jpg"
+        },
+        {
+          "name": "Tony Plana",
+          "character": "Francisco Alberto",
+          "profilePath": "https://image.tmdb.org/t/p/w185/oiJaRVl9vvq7nqoGDNlymxpvJ0a.jpg"
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/1HRUTqEVDmJC4L6tp6zd85MI6uH.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/erkh3hHfGh06qPQIuFpV0PoQeV8.jpg",
+      "rating": "TMDB 6.6",
+      "trailer": "https://www.youtube.com/watch?v=11gcNa-TBRA",
+      "recommendations": [
+        {
+          "id": 384677,
+          "title": "Set It Up",
+          "posterPath": "https://image.tmdb.org/t/p/w342/7omfwqiiMld9EnUps3Uk9YZLy6g.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 1181678,
+          "title": "¿Quieres ser mi hijo?",
+          "posterPath": "https://image.tmdb.org/t/p/w342/6PQJsmuvSMZQMmlJfTpjIkrizUh.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 706510,
+          "title": "Desperados",
+          "posterPath": "https://image.tmdb.org/t/p/w342/hoUzSMxGu4Bm73EvH6B3iceFwW8.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 1319504,
+          "title": "Boot Camp",
+          "posterPath": "https://image.tmdb.org/t/p/w342/nQ5q2QhlekcUFrU2fWXCGJMVHRO.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 201086,
+          "title": "Cuban Fury",
+          "posterPath": "https://image.tmdb.org/t/p/w342/xuRAyIUJmgXwI1ba06AxYBAQMTc.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 1151344,
+          "title": "The List",
+          "posterPath": "https://image.tmdb.org/t/p/w342/i0MdxxoNAzuANVnZkZcD15W1d5d.jpg",
+          "mediaType": "movie"
+        }
+      ],
+      "tmdbId": 1358005,
+      "mediaType": "movie",
+      "sources": [
+        {
+          "provider": "net11",
+          "id": "81939823"
+        }
+      ],
+      "audioLanguages": [
+        "English"
+      ]
+    },
+    "expiry": 1780807041601
+  },
+  "details::net11::81728596": {
+    "value": {
+      "id": "81728596",
+      "provider": "net11",
+      "title": "Amaran",
+      "originalTitle": "அமரன்",
+      "year": "2024",
+      "description": "A heroic true story of Major Mukund Varadarajan, an Indian Army officer who displayed extraordinary bravery during a counterterrorism mission in Kashmir’s Shopian district. The film captures his courage in protecting his nation and the devotion of his wife Indhu Rebecaa Varghese.",
+      "director": "Rajkumar Periasamy",
+      "genre": "Action, Drama, Adventure, War",
+      "languages": [
+        {
+          "l": "Tamil",
+          "s": "ta"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Sivakarthikeyan",
+          "character": "Major Mukund Varadarajan",
+          "profilePath": "https://image.tmdb.org/t/p/w185/jgy9y3V8QqZmu5r8sMxrGCzXuyp.jpg"
+        },
+        {
+          "name": "Sai Pallavi",
+          "character": "Indhu Rebecca Varghese",
+          "profilePath": "https://image.tmdb.org/t/p/w185/qAPdGKUIUEzLibdgVCey7oKvvME.jpg"
+        },
+        {
+          "name": "Rahul Bose",
+          "character": "Colonel Amit Singh Dabas",
+          "profilePath": "https://image.tmdb.org/t/p/w185/6T0xhsganOB8SI48HCGd99XKj9l.jpg"
+        },
+        {
+          "name": "Bhuvan Arora",
+          "character": "Vikram Singh",
+          "profilePath": "https://image.tmdb.org/t/p/w185/AtEfX9ta8LZTWh7yZ4dVc2wpIRO.jpg"
+        },
+        {
+          "name": "Lallu Prasath",
+          "character": "Ravi Shankar",
+          "profilePath": "https://image.tmdb.org/t/p/w185/f6TVtddrbG1Qk1brFASrpPehpQh.jpg"
+        },
+        {
+          "name": "Shyam Mohan",
+          "character": "Indhu's brother",
+          "profilePath": "https://image.tmdb.org/t/p/w185/wqUndf8mfVUxKtus68hrh7dlBhX.jpg"
+        },
+        {
+          "name": "Mir Salman",
+          "character": "Saifudeen K",
+          "profilePath": null
+        },
+        {
+          "name": "Shyamaprasad",
+          "character": "R. Varadarajan",
+          "profilePath": "https://image.tmdb.org/t/p/w185/7XmS8tF5OGt7y9YdpyySIWBECkH.jpg"
+        },
+        {
+          "name": "Geetha Kailasam",
+          "character": "Geetha Varadarajan",
+          "profilePath": "https://image.tmdb.org/t/p/w185/8hOXtSmjgIVEq2LhSJAxNirTN95.jpg"
+        },
+        {
+          "name": "Gaurav Venkatesh",
+          "character": "Sepoy Venkanna",
+          "profilePath": null
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/eCB06m1KUGilEOlIzb40nkQhVY0.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/7cNE2qydew1c8fqnlhWjkE3DHc2.jpg",
+      "rating": "TMDB 7.3",
+      "trailer": null,
+      "recommendations": [
+        {
+          "id": 370076,
+          "title": "Theri",
+          "posterPath": "https://image.tmdb.org/t/p/w342/gyw2ybu40F7xeoIDLtmz3ABa6fu.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 680652,
+          "title": "Karnan",
+          "posterPath": "https://image.tmdb.org/t/p/w342/z5SxDcVWa9nokynVqBHb2IKk78J.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 978,
+          "title": "Seven Years in Tibet",
+          "posterPath": "https://image.tmdb.org/t/p/w342/qm87HHUew8ICtUCM4asO3gFYvby.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 15927,
+          "title": "A Passage to India",
+          "posterPath": "https://image.tmdb.org/t/p/w342/rvBWlGRKte2U6qElHV13h6JvmSe.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 587030,
+          "title": "Kaithi",
+          "posterPath": "https://image.tmdb.org/t/p/w342/hOF9CgPsy9aLr5GJEBESC8MEXFy.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 43490,
+          "title": "Objective, Burma!",
+          "posterPath": "https://image.tmdb.org/t/p/w342/3hq4VhEMseKMZuNUaSExDyqGhja.jpg",
+          "mediaType": "movie"
+        }
+      ],
+      "tmdbId": 927342,
+      "mediaType": "movie",
+      "sources": [
+        {
+          "provider": "net11",
+          "id": "81728596"
+        }
+      ],
+      "audioLanguages": [
+        "Tamil"
+      ]
+    },
+    "expiry": 1780808450515
+  },
+  "details::tmdb::1007757": {
+    "value": {
+      "id": "81749852",
+      "provider": "net11",
+      "title": "Swapped",
+      "originalTitle": "Swapped",
+      "year": "2026",
+      "description": "A small woodland creature and a majestic bird, two natural sworn enemies of the Valley, magically trade places and set off on an adventure of a lifetime to switch back. Their journey soon uncovers a greater threat—one that could endanger not only their species, but the entire valley they call home.",
+      "director": "Nathan Greno",
+      "genre": "Adventure, Animation, Family, Fantasy",
+      "languages": [
+        {
+          "l": "English",
+          "s": "en"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Michael B. Jordan",
+          "character": "Ollie (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/sMBpav8cK7t7Nk0yf4tuNOqNUyW.jpg"
+        },
+        {
+          "name": "Juno Temple",
+          "character": "Ivy (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nvsPrM4OKHVCDivgMx4FF6PgE5f.jpg"
+        },
+        {
+          "name": "Tracy Morgan",
+          "character": "Boogle / Firewolf (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ec0OJVbs6NZKMbS1yiCAJKjeoJf.jpg"
+        },
+        {
+          "name": "Cedric the Entertainer",
+          "character": "Caloo (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/s6UrY5uofyxXsU5PydWBoLFReK0.jpg"
+        },
+        {
+          "name": "Justina Machado",
+          "character": "Calli (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/j5FaJXoyhMHlqv1l6TBdt1CH1oO.jpg"
+        },
+        {
+          "name": "Nate Torrence",
+          "character": "Lodd (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/yT9o149xPygdY0NsF9sNgiQwuru.jpg"
+        },
+        {
+          "name": "Camden Brooks",
+          "character": "Young Ollie (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ge9FgIjRERhyylebW2Np9YwkqqR.jpg"
+        },
+        {
+          "name": "Táta Vega",
+          "character": "Grandma / Mrs. Dung Beetle (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/9SdaK2vly0Gx5yvI5rrTszh31vt.jpg"
+        },
+        {
+          "name": "Ambika Mod",
+          "character": "Violet (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/jN9HhFYPNMYIupFt6GzGnHAW88c.jpg"
+        },
+        {
+          "name": "Lolly Adefope",
+          "character": "Lily (voice)",
+          "profilePath": "https://image.tmdb.org/t/p/w185/qPS57Mw1vjydSSfSYoMw8u81waI.jpg"
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/tHhxWxge06goXU6ZQH1hj7vK8Hd.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/zMwhWailP1WY7sb6AoE6b8ugoy.jpg",
+      "rating": "TMDB 9.0",
+      "trailer": "https://www.youtube.com/watch?v=glgmAwRDP8s",
+      "recommendations": [
+        {
+          "id": 896536,
+          "title": "The Legend of Ochi",
+          "posterPath": "https://image.tmdb.org/t/p/w342/qYyEelO4JfOwE0Ui5KsrCE0O8UA.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 116711,
+          "title": "Epic",
+          "posterPath": "https://image.tmdb.org/t/p/w342/81cSsWzjTfR3cJSqnTiHwy1eyPK.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 412117,
+          "title": "The Secret Life of Pets 2",
+          "posterPath": "https://image.tmdb.org/t/p/w342/s9xg4V5EDKiphgIksVJ9gewBM11.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 1084242,
+          "title": "Zootopia 2",
+          "posterPath": "https://image.tmdb.org/t/p/w342/oJ7g2CifqpStmoYQyaLQgEU32qO.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 523366,
+          "title": "Dragon Rider",
+          "posterPath": "https://image.tmdb.org/t/p/w342/ucDrOXUrVnr9X3ZmXP2Q68HDIHr.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 420814,
+          "title": "Christopher Robin",
+          "posterPath": "https://image.tmdb.org/t/p/w342/i6Ytex4d3CdfIKJFxB5v5vh24vb.jpg",
+          "mediaType": "movie"
+        }
+      ],
+      "tmdbId": 1007757,
+      "mediaType": "movie",
+      "sources": [
+        {
+          "provider": "net11",
+          "id": "81749852"
+        }
+      ],
+      "audioLanguages": [
+        "English"
+      ]
+    },
+    "expiry": 1780809296652
+  },
+  "details::tmdb::904557": {
+    "value": {
+      "id": "81644302",
+      "provider": "net11",
+      "title": "Thunivu",
+      "originalTitle": "துணிவு",
+      "year": "2023",
+      "description": "A gang goes to rob a bank only to find that there's already a criminal mastermind holding it for ransom, but his identities and motives behind the heist remains mysterious. As they plan to collect the bounty and disappear without a trace, their crimes and their past slowly catches up with them.",
+      "director": "H. Vinoth",
+      "genre": "Action, Crime, Thriller, Comedy",
+      "languages": [
+        {
+          "l": "Tamil",
+          "s": "ta"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Ajith Kumar",
+          "character": "Dark Devil",
+          "profilePath": "https://image.tmdb.org/t/p/w185/bCS0pp7YNHoXJvHObBLoOJRUUYs.jpg"
+        },
+        {
+          "name": "Manju Warrier",
+          "character": "Kanmani",
+          "profilePath": "https://image.tmdb.org/t/p/w185/7u1WgUHnwIW9mtL6aTdo1cRXmCM.jpg"
+        },
+        {
+          "name": "Samuthirakani",
+          "character": "N. Dhayalan",
+          "profilePath": "https://image.tmdb.org/t/p/w185/hicCPOdDfSRCEYkeb9g53FOY19A.jpg"
+        },
+        {
+          "name": "John Kokken",
+          "character": "Krish",
+          "profilePath": "https://image.tmdb.org/t/p/w185/3dIc5cYnlzLYjaZYTOkrTIAg2D1.jpg"
+        },
+        {
+          "name": "Veera Bahu",
+          "character": "Radha",
+          "profilePath": "https://image.tmdb.org/t/p/w185/8jO9TAQZ9uIo7J32ofqEhEs3KOi.jpg"
+        },
+        {
+          "name": "Prem",
+          "character": "Prem",
+          "profilePath": "https://image.tmdb.org/t/p/w185/41ZntbRg0ObcwLPVBxprp8Kz3Ot.jpg"
+        },
+        {
+          "name": "Ajay",
+          "character": "Ramachandran",
+          "profilePath": "https://image.tmdb.org/t/p/w185/uByCHJa3eaCL0SgFGDYYLlsVggC.jpg"
+        },
+        {
+          "name": "G. M. Sundar",
+          "character": "Muthazhagan",
+          "profilePath": "https://image.tmdb.org/t/p/w185/hMYrf0wmw9XPiICyOWXYmDIucFV.jpg"
+        },
+        {
+          "name": "Bagavathi Perumal",
+          "character": "Rajesh",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ixK5bTpLOIXc8oJVE1IVMzcJrB2.jpg"
+        },
+        {
+          "name": "Mahanadhi Shankar",
+          "character": "Constable Antony 'Anto'",
+          "profilePath": "https://image.tmdb.org/t/p/w185/wt3qjVGqdIKhOch6rB0kjxRFjr0.jpg"
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/5Cdi9MFxEGsfphvDxV4TyY4znP6.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/woLEI1MC1Ya4eHrFveUXd60hVU.jpg",
+      "rating": "TMDB 5.8",
+      "trailer": "https://www.youtube.com/watch?v=nI9TBoMlmv4",
+      "recommendations": [
+        {
+          "id": 1001783,
+          "title": "LaRoy, Texas",
+          "posterPath": "https://image.tmdb.org/t/p/w342/fEYfXyWhFJScE0I5rHsS2JxIiPP.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 1115239,
+          "title": "Por Thozhil",
+          "posterPath": "https://image.tmdb.org/t/p/w342/lZ2BbjGBDRW5Q5Q9jgEknuiEQ0f.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 13534,
+          "title": "How to Rob a Bank",
+          "posterPath": "https://image.tmdb.org/t/p/w342/31pWUvnGn8ldxj4O95UuH1SOtLm.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 27590,
+          "title": "Gotcha!",
+          "posterPath": "https://image.tmdb.org/t/p/w342/8qHvL1w0NYemVeppB1UKlAd1pS0.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 404733,
+          "title": "Overdrive",
+          "posterPath": "https://image.tmdb.org/t/p/w342/a0hTRjis1cxwmjOuBaS7WdDG3dj.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 937020,
+          "title": "Jailer",
+          "posterPath": "https://image.tmdb.org/t/p/w342/pTmMxAHqX4vsIDE6HPPxOR0Q6TN.jpg",
+          "mediaType": "movie"
+        }
+      ],
+      "tmdbId": 904557,
+      "mediaType": "movie",
+      "sources": [
+        {
+          "provider": "net11",
+          "id": "81644302"
+        },
+        {
+          "provider": "net11",
+          "id": "81672761"
+        },
+        {
+          "provider": "net11",
+          "id": "81671554"
+        },
+        {
+          "provider": "net11",
+          "id": "81671557"
+        }
+      ],
+      "audioLanguages": [
+        "Hindi",
+        "Kannada",
+        "Malayalam"
+      ]
+    },
+    "expiry": 1780809702201
+  },
+  "details::tmdb::1265827": {
+    "value": {
+      "id": "81902059",
+      "provider": "net11",
+      "title": "Retro",
+      "originalTitle": "ரெட்ரோ",
+      "year": "2025",
+      "description": "A man with a violent past seeks a fresh start, but the life he left behind resurfaces, forcing him to face old conflicts and redefine his future.",
+      "director": "Karthik Subbaraj",
+      "genre": "Romance, Action, Drama, Crime",
+      "languages": [
+        {
+          "l": "Tamil",
+          "s": "ta"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Suriya",
+          "character": "Paarivel Kannan / Jada Muni",
+          "profilePath": "https://image.tmdb.org/t/p/w185/hIFXv3gIjlNS78gJmaguEOxvfPH.jpg"
+        },
+        {
+          "name": "Pooja Hegde",
+          "character": "Rukmani",
+          "profilePath": "https://image.tmdb.org/t/p/w185/2ZxrR6DVIWtDDtmIhJ6i64wwWSU.jpg"
+        },
+        {
+          "name": "Joju George",
+          "character": "Thilagan",
+          "profilePath": "https://image.tmdb.org/t/p/w185/jCObRH5idadzrTvyC9XnlnR8rXH.jpg"
+        },
+        {
+          "name": "Jayaram",
+          "character": "'Chaplin' Lolly",
+          "profilePath": "https://image.tmdb.org/t/p/w185/cc1SfVFctuYH353NgxXNBoAFX2d.jpg"
+        },
+        {
+          "name": "Vidhu",
+          "character": "'King' Michael Mirasu",
+          "profilePath": "https://image.tmdb.org/t/p/w185/jQ5vMhDvI8LovYQy7quFYEy7Rbl.jpg"
+        },
+        {
+          "name": "Nassar",
+          "character": "Rajavel Mirasu",
+          "profilePath": "https://image.tmdb.org/t/p/w185/p3I0tSQY3C5qZW3NzFfbpjKPNL6.jpg"
+        },
+        {
+          "name": "Prakash Raj",
+          "character": "Dharmendran",
+          "profilePath": "https://image.tmdb.org/t/p/w185/dJvFZOXmZdkYCOUcKTXQAhBcAoH.jpg"
+        },
+        {
+          "name": "Sujith Sankar",
+          "character": "Freddie Milton",
+          "profilePath": "https://image.tmdb.org/t/p/w185/n7Z4ezEpDvhG3NyeYN9K1ULjVdW.jpg"
+        },
+        {
+          "name": "Singampuli",
+          "character": "Rukmini's Father",
+          "profilePath": "https://image.tmdb.org/t/p/w185/aB5dVUeJU64IAatguQgbHHbUZsj.jpg"
+        },
+        {
+          "name": "Swasika",
+          "character": "Sandhya",
+          "profilePath": "https://image.tmdb.org/t/p/w185/7LWxyKwGH5S1ZwEEjlbBcDUJKk8.jpg"
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/pJPK57REXsaLydpOPgHwWAQMdqz.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/rGcZhLzwOLz3OWWpYrelgP4HUIQ.jpg",
+      "rating": "TMDB 6.4",
+      "trailer": "https://www.youtube.com/watch?v=PxBR17orfRc",
+      "recommendations": [
+        {
+          "id": 25006,
+          "title": "State Property",
+          "posterPath": "https://image.tmdb.org/t/p/w342/eq8ygk2egSs9QnQfrjqE4fJ44OJ.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 116185,
+          "title": "Billa II",
+          "posterPath": "https://image.tmdb.org/t/p/w342/gADzX6C4pGHneBoU148LXFMDyMr.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 253154,
+          "title": "Imperial Dreams",
+          "posterPath": "https://image.tmdb.org/t/p/w342/cEEsrLIH8LsGkuaU2Ql2FksewfT.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 79026,
+          "title": "El padrino: The Latin Godfather",
+          "posterPath": "https://image.tmdb.org/t/p/w342/10J7EQ8WvMYku8lcZrLewV2Ko4I.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 13369,
+          "title": "Empire",
+          "posterPath": "https://image.tmdb.org/t/p/w342/m6XxaRLltWox4C9pykjUILrlGp9.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 14673,
+          "title": "Savage Streets",
+          "posterPath": "https://image.tmdb.org/t/p/w342/bLRqlWUSlz7DJh8AAP9m9ic9fPl.jpg",
+          "mediaType": "movie"
+        }
+      ],
+      "tmdbId": 1265827,
+      "mediaType": "movie",
+      "sources": [
+        {
+          "provider": "net11",
+          "id": "81902059"
+        }
+      ],
+      "audioLanguages": [
+        "Tamil"
+      ]
+    },
+    "expiry": 1780810291388
+  },
+  "details::tmdb::1556783": {
+    "value": {
+      "id": "0M3OYRQGQDDOK9MIQA4INCUUIM",
+      "provider": "net52",
+      "title": "TN 2026",
+      "originalTitle": "TN 2026",
+      "year": "2026",
+      "description": "Set in Pollachi, the story follows a powerful landlord, Sivalingam Mandradiyar, who becomes obsessed with a rising actor, Kukanth Kumar, believing he is the next M.G.R. He pours his wealth into shaping the actor's career and political future. But as ambition and fame grow, so does the risk of downfall. Will it lead to power or ruin?",
+      "director": "Umapathy Ramaiah",
+      "genre": "Comedy, Drama",
+      "languages": [
+        {
+          "l": "Tamil",
+          "s": "ta"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Natarajan Subramaniam",
+          "character": "\"Golden Star\" Kulkanth Kumar",
+          "profilePath": "https://image.tmdb.org/t/p/w185/1sKmgVKSw8qJUzBTJGvL45wlDss.jpg"
+        },
+        {
+          "name": "Thambi Ramaiah",
+          "character": "Sivalinga Mandradiyar",
+          "profilePath": "https://image.tmdb.org/t/p/w185/murNGZdySdA7uKgLBeMwOK4wEdg.jpg"
+        },
+        {
+          "name": "M. S. Bhaskar",
+          "character": "",
+          "profilePath": "https://image.tmdb.org/t/p/w185/jyamX33xAwz2ZWCgh29qkg9exb8.jpg"
+        },
+        {
+          "name": "Ilavarasu",
+          "character": "",
+          "profilePath": "https://image.tmdb.org/t/p/w185/gWCREhajMvlOE49g79zyvwdpf5E.jpg"
+        },
+        {
+          "name": "Shrita Rao",
+          "character": "Madhavi Devanand",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ac1kGlZsLQb8Td2aLIp0Ubfndmo.jpg"
+        },
+        {
+          "name": "Yashika Anand",
+          "character": "",
+          "profilePath": "https://image.tmdb.org/t/p/w185/v87gVYiHc0vXJ50aNGIakGJvrHz.jpg"
+        },
+        {
+          "name": "Chandhini Tamilarasan",
+          "character": "Thailashree",
+          "profilePath": "https://image.tmdb.org/t/p/w185/gagKU6nnLytGhtdpfUquNq7CdaN.jpg"
+        },
+        {
+          "name": "Redin Kingsley",
+          "character": "",
+          "profilePath": "https://image.tmdb.org/t/p/w185/JX9ukTnXCNBlsbQeHGY85qf3du.jpg"
+        },
+        {
+          "name": "Viji Chandrasekhar",
+          "character": "",
+          "profilePath": "https://image.tmdb.org/t/p/w185/aErRKX7Z6iS6kwFxVQhXxd3OQIr.jpg"
+        },
+        {
+          "name": "Vadivukarasi",
+          "character": "",
+          "profilePath": "https://image.tmdb.org/t/p/w185/cGfFXJ20h1KECAzSPfo7zURtdqI.jpg"
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/mAX1ujOROXtKsOuIg5MbJbotOyD.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/hlTs5C7zQ7TrH7REWOkSXzi67p7.jpg",
+      "rating": null,
+      "trailer": "https://www.youtube.com/watch?v=0QMMB3DpbQg",
+      "recommendations": [
+        {
+          "id": 28059,
+          "title": "SubUrbia",
+          "posterPath": "https://image.tmdb.org/t/p/w342/7PdRbG09K9JHYyOwwCSn3OdJb0N.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 673159,
+          "title": "Hooking Up",
+          "posterPath": "https://image.tmdb.org/t/p/w342/y5QXP7qdwtPRiZy6cQTjRoaTXuW.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 356298,
+          "title": "Don't Think Twice",
+          "posterPath": "https://image.tmdb.org/t/p/w342/f8PuoewhI3qeROdfXSw2Utjf1On.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 43609,
+          "title": "My Own Love Song",
+          "posterPath": "https://image.tmdb.org/t/p/w342/aO4tSR7YdVUhM7QyXMRlNWNYGcg.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 406992,
+          "title": "Wild Oats",
+          "posterPath": "https://image.tmdb.org/t/p/w342/aRHfKgRaLmnWInSRsaPcx4bWEzR.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 41496,
+          "title": "A Dog Year",
+          "posterPath": "https://image.tmdb.org/t/p/w342/gHV1B2wNGahuMCH7ST3osXGs2Cf.jpg",
+          "mediaType": "movie"
+        }
+      ],
+      "tmdbId": 1556783,
+      "mediaType": "movie",
+      "sources": [
+        {
+          "provider": "net52",
+          "id": "0M3OYRQGQDDOK9MIQA4INCUUIM"
+        }
+      ],
+      "audioLanguages": [
+        "Tamil"
+      ]
+    },
+    "expiry": 1780810597722
+  },
+  "details::net52::0KRGHGZCHKS920ZQGY5LBRF7MA": {
+    "value": {
+      "id": "0KRGHGZCHKS920ZQGY5LBRF7MA",
+      "provider": "net52",
+      "title": "The Boys",
+      "originalTitle": "The Boys",
+      "year": "2019",
+      "description": "A group of vigilantes known informally as “The Boys” set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
+      "director": "Dan Trachtenberg, Matt Shakman, Phil Sgriccia, Fred Toye, Stefan Schwartz, Jennifer Phang, Dan Attias, Eric Kripke",
+      "genre": "Sci-Fi & Fantasy, Action & Adventure",
+      "languages": [
+        {
+          "l": "English",
+          "s": "en"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Karl Urban",
+          "character": "Billy Butcher",
+          "profilePath": "https://image.tmdb.org/t/p/w185/6CkZLwEJxfqqcJHyeXegMAvOlPh.jpg"
+        },
+        {
+          "name": "Jack Quaid",
+          "character": "Hugh 'Hughie' Campbell",
+          "profilePath": "https://image.tmdb.org/t/p/w185/320qW5yEbxpmyxQ3evmClJbtKag.jpg"
+        },
+        {
+          "name": "Antony Starr",
+          "character": "Homelander",
+          "profilePath": "https://image.tmdb.org/t/p/w185/b0T56GMrHM24hDDjJ4DNPJcEUp6.jpg"
+        },
+        {
+          "name": "Erin Moriarty",
+          "character": "Annie January / Starlight",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nA2HsETMzIUAau5XDERIxfSdc5y.jpg"
+        },
+        {
+          "name": "Laz Alonso",
+          "character": "Marvin T. 'Mother's Milk' Milk / M.M.",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nmgOd3X2Xn3jIp9OLCRJzLExRWN.jpg"
+        },
+        {
+          "name": "Chace Crawford",
+          "character": "Kevin Moskowitz / The Deep",
+          "profilePath": "https://image.tmdb.org/t/p/w185/wz7s1JT3bYi2vd4fWwmLT809cnT.jpg"
+        },
+        {
+          "name": "Tomer Capone",
+          "character": "Serge / Frenchie",
+          "profilePath": "https://image.tmdb.org/t/p/w185/3IhYEhV3Tmx2CawG5DvcWQyephv.jpg"
+        },
+        {
+          "name": "Karen Fukuhara",
+          "character": "Kimiko Miyashiro",
+          "profilePath": "https://image.tmdb.org/t/p/w185/sG6CWLdENCtzukNFkFYyPxqyRmS.jpg"
+        },
+        {
+          "name": "Nathan Mitchell",
+          "character": "Justin / Black Noir II",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ivaVpN1bU2HzKmncuf1IAG6ohlb.jpg"
+        },
+        {
+          "name": "Colby Minifie",
+          "character": "Ashley Barrett",
+          "profilePath": "https://image.tmdb.org/t/p/w185/56FVZRFdctYhZI8zHNbegkKMwl3.jpg"
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
+      "rating": "TMDB 8.5",
+      "trailer": "https://www.youtube.com/watch?v=tcrNsIaQkb4",
+      "recommendations": [
+        {
+          "id": 1403,
+          "title": "Marvel's Agents of S.H.I.E.L.D.",
+          "posterPath": "https://image.tmdb.org/t/p/w342/gHUCCMy1vvj58tzE3dZqeC9SXus.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 90228,
+          "title": "Dune: Prophecy",
+          "posterPath": "https://image.tmdb.org/t/p/w342/oWVohNsxkxA3u92EzRo8fTuXIS0.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 128839,
+          "title": "La Brea",
+          "posterPath": "https://image.tmdb.org/t/p/w342/wEo5pzSZ3MF4EzNvY2R1OZNX266.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 67487,
+          "title": "The Tick",
+          "posterPath": "https://image.tmdb.org/t/p/w342/8sngJVF54bugHfCkjJOsY4wx8Hk.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 75450,
+          "title": "Titans",
+          "posterPath": "https://image.tmdb.org/t/p/w342/8e6QiSexmYKaiHGPvbhaFMmQEhc.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 158141,
+          "title": "Supacell",
+          "posterPath": "https://image.tmdb.org/t/p/w342/vHtNgRLWdMk7wIV2WbqkOzU7HHI.jpg",
+          "mediaType": "tv"
+        }
+      ],
+      "tmdbId": 76479,
+      "mediaType": "tv",
+      "sources": [
+        {
+          "provider": "net52",
+          "id": "0KRGHGZCHKS920ZQGY5LBRF7MA"
+        }
+      ],
+      "audioLanguages": [
+        "English"
+      ]
+    },
+    "expiry": 1780810613420
+  },
+  "details::tmdb::1431071": {
+    "value": {
+      "id": "0U55OBF4TFZAEIX99KQO3ULIWS",
+      "provider": "net52",
+      "title": "System",
+      "originalTitle": "सिस्टम",
+      "year": "2026",
+      "description": "When Neha Rajvansh, a privileged public prosecutor, meets Sarika Rawat, a courtroom stenographer from a humble background, their lives are thrown into upheaval where power defines truth, blurring the system and raising a question of what justice truly means to them.",
+      "director": "Ashwiny Iyer Tiwari",
+      "genre": "Thriller",
+      "languages": [
+        {
+          "l": "Hindi",
+          "s": "hi"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Sonakshi Sinha",
+          "character": "Neha Rajvansh",
+          "profilePath": "https://image.tmdb.org/t/p/w185/7HaI5owaKzOb6Qdtwifp29uhHk2.jpg"
+        },
+        {
+          "name": "Jyothika",
+          "character": "Sarika Rawat",
+          "profilePath": "https://image.tmdb.org/t/p/w185/9rcFS99kwlSiQdY5Iv9YctJKh1F.jpg"
+        },
+        {
+          "name": "Ashutosh Gowariker",
+          "character": "Ravi Rajvansh",
+          "profilePath": "https://image.tmdb.org/t/p/w185/s48qPtQJVXdwrVfezMIiyowl3eT.jpg"
+        },
+        {
+          "name": "Adinath Kothare",
+          "character": "Alok Rajvansh",
+          "profilePath": "https://image.tmdb.org/t/p/w185/5mpunA4RSLJhtkYHTB6UMvOfrV5.jpg"
+        },
+        {
+          "name": "Aashriya Mishra",
+          "character": "Kusum Rawat",
+          "profilePath": null
+        },
+        {
+          "name": "Gaurav Pandey",
+          "character": "Akshay Rao",
+          "profilePath": "https://image.tmdb.org/t/p/w185/rH9haKecOQsjMP7BC9XRi1kl5uF.jpg"
+        },
+        {
+          "name": "Sayandeep Gupta",
+          "character": "Raghav Shrivastav",
+          "profilePath": null
+        },
+        {
+          "name": "Preeti Agarwal Mehta",
+          "character": "",
+          "profilePath": null
+        },
+        {
+          "name": "Vijayant Kohli",
+          "character": "Vikram Bajral",
+          "profilePath": "https://image.tmdb.org/t/p/w185/dzzewlf0Z5dEkVxu4QkH86xUEx4.jpg"
+        },
+        {
+          "name": "Diwanshu Gambhir",
+          "character": "Juggi",
+          "profilePath": null
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/ddSTqsxOoXs77xnKpP7XBPqiero.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/7f9ZaTwyqQOJtNWUS7xZgWQOzSt.jpg",
+      "rating": "TMDB 7.5",
+      "trailer": "https://www.youtube.com/watch?v=AdZ_I4ySZoI",
+      "recommendations": [
+        {
+          "id": 17443,
+          "title": "...And Justice for All",
+          "posterPath": "https://image.tmdb.org/t/p/w342/32NmJn0p4o9BdWVpEhuyxzwsqhL.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 415358,
+          "title": "Pink",
+          "posterPath": "https://image.tmdb.org/t/p/w342/6xNhnyKm2M5FEOY7xv5iKiQ5P3.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 99749,
+          "title": "Rampage",
+          "posterPath": "https://image.tmdb.org/t/p/w342/oW6HqRb2DiyptApYUn527FkpgMw.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 253279,
+          "title": "The Trials of Cate McCall",
+          "posterPath": "https://image.tmdb.org/t/p/w342/2u9raM4MWJTtGVQ7MeYwfgGouRl.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 13571,
+          "title": "True Colors",
+          "posterPath": "https://image.tmdb.org/t/p/w342/iRchyRu07YagzHv9bQ7Jfz1CsAc.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 240916,
+          "title": "Reasonable Doubt",
+          "posterPath": "https://image.tmdb.org/t/p/w342/n0BUpxa6E8PYoZWbx5g6CxbdalX.jpg",
+          "mediaType": "movie"
+        }
+      ],
+      "tmdbId": 1431071,
+      "mediaType": "movie",
+      "sources": [
+        {
+          "provider": "net52",
+          "id": "0U55OBF4TFZAEIX99KQO3ULIWS"
+        }
+      ],
+      "audioLanguages": [
+        "Hindi"
+      ]
+    },
+    "expiry": 1780810763759
   }
 }

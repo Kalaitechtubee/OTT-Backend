@@ -156,9 +156,9 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
 
 
   // Determine the CDN base from the source playlist URL's CDN lines
-  // We scan the raw playlist for the first freecdn4.top host to use as CDN base
+  // We scan the raw playlist for the first freecdn host to use as CDN base
   const cdnBase = (() => {
-    const m = playlistBody.match(/https:\/\/(s\d+\.freecdn[14]\.top|s\d+\.nm-cdn4\.top|[^/]+\.nfmirrorcdn\.top)/);
+    const m = playlistBody.match(/https:\/\/(s\d+\.freecdn\d+\.top|s\d+\.nm-cdn\d+\.top|[^/]+\.nfmirrorcdn\.top)/);
     return m ? `https://${m[1]}` : 'https://s21.freecdn4.top';
   })();
 
@@ -170,15 +170,15 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
     try {
       let normalizedUrl = rawUrl;
 
-      // Fix: triple-slash audio track URLs â†’ use CDN host (not provider domain)
-      // https:///files/81728596/a/0/0.m3u8 â†’ https://s21.freecdn4.top/files/81728596/a/0/0.m3u8
-      if (normalizedUrl.startsWith('https:///files/')) {
-        normalizedUrl = `${cdnBase}${normalizedUrl.replace('https://', '')}`;
+      // Fix: triple-slash audio track URLs → use CDN host (not provider domain)
+      // https:///files/81728596/a/0/0.m3u8 → https://s21.freecdn4.top/files/81728596/a/0/0.m3u8
+      if (/^https:\/+\/?files\//i.test(normalizedUrl)) {
+        normalizedUrl = normalizedUrl.replace(/^https:\/+\/?files\//i, `${cdnBase}/files/`);
       } else if (normalizedUrl.startsWith('https:///')) {
         normalizedUrl = normalizedUrl.replace('https:///', '/');
       }
 
-      // Fix: "files" placeholder hostname â†’ CDN host
+      // Fix: "files" placeholder hostname → CDN host
       try {
         const testUrl = new URL(normalizedUrl);
         if (testUrl.hostname === 'files' || testUrl.hostname === '') {
@@ -192,13 +192,14 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
 
       let absolute = new URL(normalizedUrl, sourceUrl).toString();
 
-      // Fix: if absolute still resolved to provider domain (net52.cc/net11.cc) for a /files/ path
+      // Fix: if absolute still resolved to provider domain (net52.cc/net11.cc) or the placeholder "files" hostname for a /files/ path
       // redirect it to the CDN host since /files/ are served there, not on the provider
       try {
         const absParsed = new URL(absolute);
         const isProviderHost = ['net52.cc', 'net11.cc', 'net22.cc'].includes(absParsed.hostname);
+        const isFilesHost = absParsed.hostname === 'files' || absParsed.hostname === '';
         const isFilesPath = absParsed.pathname.startsWith('/files/');
-        if (isProviderHost && isFilesPath) {
+        if (isFilesHost || (isProviderHost && isFilesPath)) {
           const cdnParsed = new URL(cdnBase);
           absParsed.protocol = cdnParsed.protocol;
           absParsed.hostname = cdnParsed.hostname;
@@ -325,6 +326,13 @@ exports.proxyStream = async (req, res) => {
   if (req.query.in && !targetUrl.includes('in=')) {
     const separator = targetUrl.includes('?') ? '&' : '?';
     targetUrl = `${targetUrl}${separator}in=${req.query.in}`;
+  }
+
+  // Sanitization fallback: If target URL has a triple-slash files path or hostname "files"
+  if (/^https:\/+\/?files\//i.test(targetUrl)) {
+    targetUrl = targetUrl.replace(/^https:\/+\/?files\//i, 'https://s21.freecdn4.top/files/');
+  } else if (targetUrl.includes('://files/')) {
+    targetUrl = targetUrl.replace('://files/', '://s21.freecdn4.top/files/');
   }
 
   try {

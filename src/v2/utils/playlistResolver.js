@@ -113,6 +113,14 @@ async function expandMasterPlaylist(streams, headers = {}) {
       return streams;
     }
 
+    const cdnBase = (() => {
+      if (typeof body === 'string') {
+        const m = body.match(/https:\/\/(s\d+\.freecdn\d+\.top|s\d+\.nm-cdn\d+\.top|[^/]+\.nfmirrorcdn\.top|[^/]+\.freecdn\d+\.top)/i);
+        if (m) return `https://${m[1]}`;
+      }
+      return 'https://s21.freecdn4.top';
+    })();
+
     const lines = body.split(/\r?\n/);
     const expanded = [
       {
@@ -135,7 +143,9 @@ async function expandMasterPlaylist(streams, headers = {}) {
         currentBandwidth = bwMatch ? bwMatch[1] : '';
       } else if (line && !line.startsWith('#')) {
         let variantUrl = line;
-        if (!/^https?:\/\//i.test(variantUrl)) {
+        if (/^https:\/+\/?files\//i.test(variantUrl)) {
+          variantUrl = variantUrl.replace(/^https:\/+\/?files\//i, `${cdnBase}/files/`);
+        } else if (!/^https?:\/\//i.test(variantUrl)) {
           variantUrl = new URL(variantUrl, primaryStream.url).toString();
         }
 
