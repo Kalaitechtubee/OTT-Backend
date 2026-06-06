@@ -2864,5 +2864,129 @@
       ]
     },
     "expiry": 1780800572509
+  },
+  "details::net52::0KRGHGZCHKS920ZQGY5LBRF7MA": {
+    "value": {
+      "id": "0KRGHGZCHKS920ZQGY5LBRF7MA",
+      "provider": "net52",
+      "title": "The Boys",
+      "originalTitle": "The Boys",
+      "year": "2019",
+      "description": "A group of vigilantes known informally as “The Boys” set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
+      "director": "Dan Trachtenberg, Matt Shakman, Phil Sgriccia, Fred Toye, Stefan Schwartz, Jennifer Phang, Dan Attias, Eric Kripke",
+      "genre": "Sci-Fi & Fantasy, Action & Adventure",
+      "languages": [
+        {
+          "l": "English",
+          "s": "en"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Karl Urban",
+          "character": "Billy Butcher",
+          "profilePath": "https://image.tmdb.org/t/p/w185/6CkZLwEJxfqqcJHyeXegMAvOlPh.jpg"
+        },
+        {
+          "name": "Jack Quaid",
+          "character": "Hugh 'Hughie' Campbell",
+          "profilePath": "https://image.tmdb.org/t/p/w185/320qW5yEbxpmyxQ3evmClJbtKag.jpg"
+        },
+        {
+          "name": "Antony Starr",
+          "character": "Homelander",
+          "profilePath": "https://image.tmdb.org/t/p/w185/b0T56GMrHM24hDDjJ4DNPJcEUp6.jpg"
+        },
+        {
+          "name": "Erin Moriarty",
+          "character": "Annie January / Starlight",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nA2HsETMzIUAau5XDERIxfSdc5y.jpg"
+        },
+        {
+          "name": "Laz Alonso",
+          "character": "Marvin T. 'Mother's Milk' Milk / M.M.",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nmgOd3X2Xn3jIp9OLCRJzLExRWN.jpg"
+        },
+        {
+          "name": "Chace Crawford",
+          "character": "Kevin Moskowitz / The Deep",
+          "profilePath": "https://image.tmdb.org/t/p/w185/wz7s1JT3bYi2vd4fWwmLT809cnT.jpg"
+        },
+        {
+          "name": "Tomer Capone",
+          "character": "Serge / Frenchie",
+          "profilePath": "https://image.tmdb.org/t/p/w185/3IhYEhV3Tmx2CawG5DvcWQyephv.jpg"
+        },
+        {
+          "name": "Karen Fukuhara",
+          "character": "Kimiko Miyashiro",
+          "profilePath": "https://image.tmdb.org/t/p/w185/sG6CWLdENCtzukNFkFYyPxqyRmS.jpg"
+        },
+        {
+          "name": "Nathan Mitchell",
+          "character": "Justin / Black Noir II",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ivaVpN1bU2HzKmncuf1IAG6ohlb.jpg"
+        },
+        {
+          "name": "Colby Minifie",
+          "character": "Ashley Barrett",
+          "profilePath": "https://image.tmdb.org/t/p/w185/56FVZRFdctYhZI8zHNbegkKMwl3.jpg"
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
+      "rating": "TMDB 8.5",
+      "trailer": "https://www.youtube.com/watch?v=tcrNsIaQkb4",
+      "recommendations": [
+        {
+          "id": 1403,
+          "title": "Marvel's Agents of S.H.I.E.L.D.",
+          "posterPath": "https://image.tmdb.org/t/p/w342/gHUCCMy1vvj58tzE3dZqeC9SXus.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 90228,
+          "title": "Dune: Prophecy",
+          "posterPath": "https://image.tmdb.org/t/p/w342/oWVohNsxkxA3u92EzRo8fTuXIS0.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 128839,
+          "title": "La Brea",
+          "posterPath": "https://image.tmdb.org/t/p/w342/wEo5pzSZ3MF4EzNvY2R1OZNX266.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 67487,
+          "title": "The Tick",
+          "posterPath": "https://image.tmdb.org/t/p/w342/8sngJVF54bugHfCkjJOsY4wx8Hk.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 75450,
+          "title": "Titans",
+          "posterPath": "https://image.tmdb.org/t/p/w342/8e6QiSexmYKaiHGPvbhaFMmQEhc.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 158141,
+          "title": "Supacell",
+          "posterPath": "https://image.tmdb.org/t/p/w342/vHtNgRLWdMk7wIV2WbqkOzU7HHI.jpg",
+          "mediaType": "tv"
+        }
+      ],
+      "tmdbId": 76479,
+      "mediaType": "tv",
+      "sources": [
+        {
+          "provider": "net52",
+          "id": "0KRGHGZCHKS920ZQGY5LBRF7MA"
+        }
+      ],
+      "audioLanguages": [
+        "English"
+      ]
+    },
+    "expiry": 1780803630699
   }
 }
