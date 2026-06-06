@@ -135,6 +135,14 @@ async function expandMasterPlaylist(streams, headers = {}) {
         currentBandwidth = bwMatch ? bwMatch[1] : '';
       } else if (line && !line.startsWith('#')) {
         let variantUrl = line;
+
+        // Normalize triple-slash URLs: https:///files/... → /files/...
+        // These appear in net52 PV playlists where the CDN host is omitted.
+        // new URL('https:///files/...') has an empty host and breaks host-validation.
+        if (/^https?:\/\/\//.test(variantUrl)) {
+          variantUrl = variantUrl.replace(/^https?:\/\//, ''); // → /files/...
+        }
+
         if (!/^https?:\/\//i.test(variantUrl)) {
           variantUrl = new URL(variantUrl, primaryStream.url).toString();
         }

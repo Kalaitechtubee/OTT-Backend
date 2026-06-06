@@ -62,7 +62,11 @@ exports.getStream = async (req, res) => {
       });
     }
 
-    const proxyBase = `${req.protocol}://${req.get('host')}/api/v2/stream/proxy`;
+    // Use BACKEND_URL env var if set (required for production/VPS where req.host = localhost)
+    const backendBase = process.env.BACKEND_URL
+      ? process.env.BACKEND_URL.replace(/\/$/, '')
+      : `${req.protocol}://${req.get('host')}`;
+    const proxyBase = `${backendBase}/api/v2/stream/proxy`;
     const mergedStreams = [];
     const mergedSubtitles = [];
     let title = '';
@@ -81,7 +85,8 @@ exports.getStream = async (req, res) => {
 
       const inferProxyProvider = (rawUrl) => {
         try {
-          const host = new URL(rawUrl).host.toLowerCase();
+          const parsed = new URL(rawUrl);
+          const host = (parsed.host || '').toLowerCase();
           if (host.includes('net52.cc') || host.includes('net22.cc')) return 'net52';
           if (host.includes('net11.cc')) return 'net11';
         } catch (_err) {}
