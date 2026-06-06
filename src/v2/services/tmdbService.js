@@ -227,7 +227,8 @@ async function getAssets(tmdbId, mediaType) {
     posterPath: null,
     backdropPath: null,
     rating: null,
-    year: ''
+    year: '',
+    seasons: []
   };
 
   try {
@@ -285,6 +286,13 @@ async function getAssets(tmdbId, mediaType) {
         assets.languages = d.spoken_languages.map(l => ({
           l: l.english_name || l.name || '',
           s: l.iso_639_1 || ''
+        }));
+      }
+      if (d.seasons) {
+        assets.seasons = d.seasons.map(s => ({
+          season_number: s.season_number,
+          episode_count: s.episode_count,
+          name: s.name || `Season ${s.season_number}`
         }));
       }
     }
@@ -376,4 +384,28 @@ async function searchTmdb(query, page = 1) {
   }
 }
 
-module.exports = { findMatch, getAssets, fetchTmdbList, searchTmdb };
+async function getSeasonEpisodes(tmdbId, seasonNumber) {
+  if (!TMDB_API_KEY || !tmdbId) return [];
+  if (isCircuitOpen()) return [];
+
+  const typePath = 'tv';
+  try {
+    const res = await client.get(`/${typePath}/${tmdbId}/season/${seasonNumber}`);
+    recordSuccess();
+    const episodes = res.data?.episodes || [];
+    return episodes.map(ep => ({
+      episode_number: ep.episode_number,
+      name: ep.name || `Episode ${ep.episode_number}`,
+      overview: ep.overview || '',
+      still_path: ep.still_path ? `https://image.tmdb.org/t/p/w342${ep.still_path}` : null,
+      runtime: ep.runtime || 0,
+      air_date: ep.air_date || ''
+    }));
+  } catch (err) {
+    logTmdbError(`season/${tmdbId}/${seasonNumber}`, err);
+    recordFailure(err.code || err.message);
+    return [];
+  }
+}
+
+module.exports = { findMatch, getAssets, fetchTmdbList, searchTmdb, getSeasonEpisodes };

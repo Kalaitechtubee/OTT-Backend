@@ -98,3 +98,25 @@ exports.getDetailsByTmdbId = async (req, res) => {
     res.status(500).json({ success: false, error: 'An error occurred while fetching details.' });
   }
 };
+
+exports.getSeasonEpisodes = async (req, res) => {
+  try {
+    const { tmdbId, seasonNumber } = req.params;
+    const { provider, seriesId, seasonId } = req.query;
+    if (!tmdbId || !seasonNumber) {
+      return res.status(400).json({ success: false, error: 'Missing tmdbId or seasonNumber parameter' });
+    }
+    const episodes = await sourceManager.getSeasonEpisodes(
+      tmdbId,
+      seasonNumber,
+      provider,
+      seriesId,
+      seasonId,
+      req.headers
+    );
+    res.json({ success: true, results: episodes });
+  } catch (err) {
+    console.error('[TMDB Controller] Season Episodes Error:', err.message);
+    res.status(500).json({ success: false, error: 'An error occurred while fetching season episodes.' });
+  }
+};
