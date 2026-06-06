@@ -136,11 +136,12 @@ async function expandMasterPlaylist(streams, headers = {}) {
       } else if (line && !line.startsWith('#')) {
         let variantUrl = line;
 
-        // Normalize triple-slash URLs: https:///files/... → /files/...
-        // These appear in net52 PV playlists where the CDN host is omitted.
-        // new URL('https:///files/...') has an empty host and breaks host-validation.
+        // net52 PV playlists sometimes emit URLs with no CDN host: https:///files/ID/720p/720p.m3u8
+        // /^https?:\/\// matches this (only checks two slashes), treating it as absolute — wrong!
+        // Strip the bogus scheme+empty-host prefix so it becomes a root-relative path (/files/...)
+        // which then gets correctly resolved against the master playlist URL below.
         if (/^https?:\/\/\//.test(variantUrl)) {
-          variantUrl = variantUrl.replace(/^https?:\/\//, ''); // → /files/...
+          variantUrl = variantUrl.replace(/^https?:\/\//, ''); // https:///files/... → /files/...
         }
 
         if (!/^https?:\/\//i.test(variantUrl)) {
