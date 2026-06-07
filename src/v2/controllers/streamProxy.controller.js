@@ -451,7 +451,7 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
 
 exports.proxyStream = async (req, res) => {
   let targetUrl = String(req.query.u || '');
-  // Play token forwarded from stream.controller via &tk= â€” used to fix in=unknown::ni
+  // Play token forwarded from stream.controller via &tk= — used to fix in=unknown::ni
   const proxyPlayToken = String(req.query.tk || '');
 
   // Reconstruct flattened query parameters if 'in' token parsed as first-level query param
@@ -488,7 +488,17 @@ exports.proxyStream = async (req, res) => {
     }
 
     const domain = provider === 'net52' ? await getNet52Domain() : await getNet11Domain();
-    const parsed = new URL(source);
+
+    // ── Normalize triple-slash URLs ────────────────────────────────────────────
+    // net52 PV playlists sometimes emit https:///files/... (no CDN hostname).
+    // Resolve them against the provider domain so URL parsing and host-validation work.
+    let normalizedSource = source;
+    if (/^https?:\/\/\//.test(normalizedSource)) {
+      normalizedSource = normalizedSource.replace(/^https?:\/\/\//, `${domain}/`);
+      console.log(`[Stream Proxy] Normalized triple-slash URL: ${normalizedSource.split('?')[0]}`);
+    }
+
+    const parsed = new URL(normalizedSource);
     const allowedHost = new URL(domain).host;
     if (!isAllowedSourceHost(provider, parsed.host, allowedHost)) {
       return res.status(403).json({ success: false, error: 'Blocked host' });

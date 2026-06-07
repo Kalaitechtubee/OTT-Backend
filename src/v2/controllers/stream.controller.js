@@ -91,7 +91,8 @@ exports.getStream = async (req, res) => {
 
       const inferProxyProvider = (rawUrl) => {
         try {
-          const host = new URL(rawUrl).host.toLowerCase();
+          const parsed = new URL(rawUrl);
+          const host = (parsed.host || '').toLowerCase();
           if (host.includes('net52.cc') || host.includes('net22.cc')) return 'net52';
           if (host.includes('net11.cc')) return 'net11';
         } catch (_err) {}
