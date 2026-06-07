@@ -39,6 +39,16 @@ exports.getStream = async (req, res) => {
       }
     }
 
+    // If dub is requested, prioritize it to the front of candidate sources
+    const dubParam = req.query.dub || '';
+    if (dubParam) {
+      const dubIdx = sources.findIndex(s => s.id === dubParam);
+      if (dubIdx !== -1) {
+        const [dubSource] = sources.splice(dubIdx, 1);
+        sources.unshift(dubSource);
+      }
+    }
+
     // Resolve streams sequentially to avoid provider rate limiting.
     // Try the best match (sources[0]) first, and only fall back to others if it fails.
     const validResults = [];
@@ -62,11 +72,7 @@ exports.getStream = async (req, res) => {
       });
     }
 
-    // Use BACKEND_URL env var if set (required for production/VPS where req.host = localhost)
-    const backendBase = process.env.BACKEND_URL
-      ? process.env.BACKEND_URL.replace(/\/$/, '')
-      : `${req.protocol}://${req.get('host')}`;
-    const proxyBase = `${backendBase}/api/v2/stream/proxy`;
+    const proxyBase = `${req.protocol}://${req.get('host')}/api/v2/stream/proxy.m3u8`;
     const mergedStreams = [];
     const mergedSubtitles = [];
     let title = '';
@@ -137,6 +143,7 @@ exports.getStream = async (req, res) => {
     res.json({
       success: true,
       provider: normalizedProvider,
+      subjectId: validResults[0].id,
       title: title || '',
       poster: poster || null,
       thumbnails: thumbnails || null,

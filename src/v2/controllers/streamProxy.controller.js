@@ -9,6 +9,53 @@ const {
 const playlistCache = new Map();
 const PLAYLIST_CACHE_TTL = 60 * 1000; // 60 seconds
 
+const resolvedCdnHostsCache = global.resolvedCdnHostsCache || new Map();
+global.resolvedCdnHostsCache = resolvedCdnHostsCache;
+
+const CDN_CANDIDATES = [
+  's13.freecdn2.top',
+  's14.freecdn2.top',
+  's21.freecdn4.top',
+  's20.freecdn1.top',
+  's25.freecdn4.top',
+  's12.freecdn2.top',
+  's23.freecdn4.top',
+  's15.freecdn2.top',
+  's22.freecdn4.top',
+  's24.freecdn4.top',
+  's16.freecdn2.top',
+  's17.freecdn2.top',
+  's18.freecdn2.top',
+  's19.freecdn2.top'
+];
+
+function extractMovieId(urlStr) {
+  if (!urlStr) return null;
+  const match = urlStr.match(/\/files\/([^/]+)/i) || urlStr.match(/\/hls\/([^/.]+)/i);
+  return match ? match[1] : null;
+}
+
+function replaceHost(urlStr, newHost) {
+  try {
+    const u = new URL(urlStr);
+    u.hostname = newHost;
+    u.port = '';
+    return u.toString();
+  } catch (_e) {
+    return urlStr.replace(/(https?:\/\/)[^/]+/, `$1${newHost}`);
+  }
+}
+
+function srtToVtt(srtString) {
+  let vtt = srtString.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2');
+  vtt = vtt.trim();
+  if (!vtt.startsWith('WEBVTT')) {
+    vtt = 'WEBVTT\n\n' + vtt;
+  }
+  return vtt;
+}
+
+
 function getCachedPlaylist(key) {
   const entry = playlistCache.get(key);
   if (!entry) return null;
@@ -122,33 +169,73 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
   // e.g. https://s21.freecdn4.top/files/220884/1080p/1080p.m3u8 â†’ "220884"
   const cdnContentId = (() => {
     const m = playlistBody.match(/\/files\/([^/]+)\/(?:1080p|720p|480p|\d+p)\//i) ||
-              playlistBody.match(/freecdn4\.top\/files\/([^/]+)\//i) ||
-              playlistBody.match(/nm-cdn4\.top\/files\/([^/]+)\//i);
+      playlistBody.match(/freecdn4\.top\/files\/([^/]+)\//i) ||
+      playlistBody.match(/nm-cdn4\.top\/files\/([^/]+)\//i);
     return m ? m[1] : null;
   })();
 
-  // The known CDN hostname that serves /files/ segments
-  const CDN_HOSTS = ['s21.freecdn4.top', 's20.freecdn1.top', 'nm-cdn4.top', 'nfmirrorcdn.top', 'freecdn4.top', 'freecdn1.top'];
+  // Detect if source URL is from a provider domain (net52.cc / net11.cc)
+  // Used to route hostless variant URLs through the provider's quality endpoint
+  const PROVIDER_DOMAINS = ['net52.cc', 'net11.cc', 'net22.cc'];
+  const isProviderSource = (() => {
+    try { return PROVIDER_DOMAINS.includes(new URL(sourceUrl).hostname.toLowerCase()); }
+    catch (_e) { return false; }
+  })();
+
+  // Extract movie ID from provider source URL — e.g. /pv/hls/0KRGHGZCHKS920ZQGY5LBRF7MA.m3u8 → "0KRGHGZCHKS920ZQGY5LBRF7MA"
+  const providerMovieId = (() => {
+    try {
+      const m = new URL(sourceUrl).pathname.match(/\/(?:pv\/)?hls\/([^/?]+)\.m3u8/i);
+      return m ? m[1] : null;
+    } catch (_e) { return null; }
+  })();
+
+  // Provider base URL (protocol + hostname) — e.g. "https://net52.cc"
+  const providerBase = (() => {
+    try {
+      const u = new URL(sourceUrl);
+      return `${u.protocol}//${u.hostname}`;
+    } catch (_e) { return null; }
+  })();
+
+  // Whether the provider uses the /pv/ path prefix (net52 /pv/hls/) vs root (/hls/)
+  const providerHlsPrefix = (() => {
+    try {
+      return new URL(sourceUrl).pathname.startsWith('/pv/') ? '/pv' : '';
+    } catch (_e) { return ''; }
+  })();
+
+  // Detect if this proxy hop is ALREADY at a quality endpoint (?q=720p etc.)
+  // If so, skip hostless→quality routing to avoid infinite loop:
+  // net52.cc/pv/hls/ID.m3u8?q=720p also returns a master playlist with hostless
+  // variant URLs — re-routing them back to ?q=720p would loop forever.
+  const sourceAlreadyHasQuality = (() => {
+    try { return !!new URL(sourceUrl).searchParams.get('q'); }
+    catch (_e) { return false; }
+  })();
+
+  // When source is a provider quality endpoint, determine if ALL non-comment
+  // variant URLs in the playlist body are hostless. Used to suppress unresolvable audio tracks.
+  const allVariantsHostless = (() => {
+    const variantLines = String(playlistBody).split(/\r?\n/)
+      .filter(l => { const t = l.trim(); return t && !t.startsWith('#'); });
+    if (!variantLines.length) return false;
+    return variantLines.every(l => /^https?:\/\/\//.test(l) || (/\/files\//.test(l) && !/^https?:\/\/[^/]+\//.test(l)));
+  })();
+
 
   const normalizeToken = (absoluteUrl) => {
-    if (!sourceToken) return absoluteUrl;
     try {
       const u = new URL(absoluteUrl);
-      const current = u.searchParams.get('in'); // .get() decodes %3A â†’ :: automatically
-      if (!current || current === 'unknown::ni') {
-        // CRITICAL: Do NOT use u.searchParams.set() â€” it percent-encodes :: â†’ %3A%3A
-        // which then gets double-encoded by encodeURIComponent later.
-        // Instead: delete 'in', reconstruct base URL, append raw token as plain string.
-        u.searchParams.delete('in');
-        const base = u.toString(); // other params (if any) are fine to encode normally
-        const sep = base.includes('?') ? '&' : '?';
-        return `${base}${sep}in=${sourceToken.replace(/^in=/, '')}`; // raw :: colons preserved
+      const existingToken = u.searchParams.get('in');
+      if (existingToken && existingToken !== 'unknown' && existingToken !== 'unknown::ni') {
+        return absoluteUrl;
       }
-      // Has a valid token â€” still reconstruct with raw token to avoid stale encoding
+      if (!sourceToken) return absoluteUrl;
       u.searchParams.delete('in');
       const base = u.toString();
       const sep = base.includes('?') ? '&' : '?';
-      return `${base}${sep}in=${current.replace(/^in=/, '')}`; // current is already decoded by .get()
+      return `${base}${sep}in=${sourceToken.replace(/^in=/, '')}`;
     } catch (_err) {
       return absoluteUrl;
     }
@@ -156,10 +243,24 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
 
 
   // Determine the CDN base from the source playlist URL's CDN lines
-  // We scan the raw playlist for the first freecdn4.top host to use as CDN base
+  // We scan the raw playlist for the first freecdn host to use as CDN base
   const cdnBase = (() => {
-    const m = playlistBody.match(/https:\/\/(s\d+\.freecdn[14]\.top|s\d+\.nm-cdn4\.top|[^/]+\.nfmirrorcdn\.top)/);
-    return m ? `https://${m[1]}` : 'https://s21.freecdn4.top';
+    const m = playlistBody.match(/https:\/\/(s\d+\.freecdn\d+\.top|s\d+\.nm-cdn\d+\.top|[^/]+\.nfmirrorcdn\.top|[^/]+\.freecdn\d+\.top)/i);
+    if (m) return `https://${m[1]}`;
+    try {
+      const u = new URL(sourceUrl);
+      if (u.hostname && u.hostname !== 'files' && !['net52.cc', 'net11.cc', 'net22.cc'].includes(u.hostname.toLowerCase())) {
+        return `https://${u.hostname}`;
+      }
+    } catch (_e) { }
+    // Check global cache as fallback
+    try {
+      const movieId = extractMovieId(sourceUrl);
+      if (movieId && resolvedCdnHostsCache.has(movieId)) {
+        return `https://${resolvedCdnHostsCache.get(movieId)}`;
+      }
+    } catch (_e) { }
+    return 'https://s21.freecdn4.top';
   })();
 
   // Propagate the play token into every rewritten sub-URL (variant playlists,
@@ -170,15 +271,35 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
     try {
       let normalizedUrl = rawUrl;
 
-      // Fix: triple-slash audio track URLs â†’ use CDN host (not provider domain)
-      // https:///files/81728596/a/0/0.m3u8 â†’ https://s21.freecdn4.top/files/81728596/a/0/0.m3u8
-      if (normalizedUrl.startsWith('https:///files/')) {
-        normalizedUrl = `${cdnBase}${normalizedUrl.replace('https://', '')}`;
+      // ── EARLY INTERCEPT: hostless/triple-slash variant URLs from provider master playlists ──
+      // When net52.cc returns `https:///files/MOVIEID/720p/720p.m3u8` (no CDN host),
+      // instead of guessing a CDN hostname (which may 404), route the request back through
+      // the provider's own quality endpoint: /pv/hls/MOVIEID.m3u8?q=720p&in=TOKEN
+      // GUARD: Only do this if we are NOT already at a quality endpoint — otherwise we
+      // loop (the quality endpoint itself returns a master playlist with hostless URLs).
+      if (isProviderSource && providerMovieId && providerBase && sourceToken && !sourceAlreadyHasQuality) {
+        const isHostless = /^https?:\/\/\//.test(normalizedUrl) ||
+          (/\/files\//.test(normalizedUrl) && !/^https?:\/\/[^/]+\//.test(normalizedUrl));
+        if (isHostless) {
+          const qualityMatch = normalizedUrl.match(/\/(1080p|720p|480p|360p|240p)(?:\/|\.m3u8)/i);
+          if (qualityMatch) {
+            const quality = qualityMatch[1].toLowerCase();
+            const qualityUrl = `${providerBase}${providerHlsPrefix}/hls/${providerMovieId}.m3u8?q=${quality}&in=${sourceToken}`;
+            console.log(`[Stream Proxy] Hostless variant → provider quality endpoint: ${qualityUrl.split('?')[0]}?q=${quality}`);
+            return `${proxyBase}?provider=${encodeURIComponent(provider)}&u=${encodeURIComponent(qualityUrl)}${tkParam}`;
+          }
+        }
+      }
+
+      // Fix: triple-slash audio track URLs → use CDN host (not provider domain)
+      // https:///files/81728596/a/0/0.m3u8 → https://s21.freecdn4.top/files/81728596/a/0/0.m3u8
+      if (/^https:\/+\/?files\//i.test(normalizedUrl)) {
+        normalizedUrl = normalizedUrl.replace(/^https:\/+\/?files\//i, `${cdnBase}/files/`);
       } else if (normalizedUrl.startsWith('https:///')) {
         normalizedUrl = normalizedUrl.replace('https:///', '/');
       }
 
-      // Fix: "files" placeholder hostname â†’ CDN host
+      // Fix: "files" placeholder hostname → CDN host
       try {
         const testUrl = new URL(normalizedUrl);
         if (testUrl.hostname === 'files' || testUrl.hostname === '') {
@@ -192,13 +313,14 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
 
       let absolute = new URL(normalizedUrl, sourceUrl).toString();
 
-      // Fix: if absolute still resolved to provider domain (net52.cc/net11.cc) for a /files/ path
+      // Fix: if absolute still resolved to provider domain (net52.cc/net11.cc) or the placeholder "files" hostname for a /files/ path
       // redirect it to the CDN host since /files/ are served there, not on the provider
       try {
         const absParsed = new URL(absolute);
         const isProviderHost = ['net52.cc', 'net11.cc', 'net22.cc'].includes(absParsed.hostname);
+        const isFilesHost = absParsed.hostname === 'files' || absParsed.hostname === '';
         const isFilesPath = absParsed.pathname.startsWith('/files/');
-        if (isProviderHost && isFilesPath) {
+        if (isFilesHost || (isProviderHost && isFilesPath)) {
           const cdnParsed = new URL(cdnBase);
           absParsed.protocol = cdnParsed.protocol;
           absParsed.hostname = cdnParsed.hostname;
@@ -212,7 +334,7 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
         if (cdnContentId && correctMovieId && cdnContentId !== correctMovieId) {
           const absParsed2 = new URL(absolute);
           const isAudioPath = absParsed2.pathname.includes(`/files/${correctMovieId}/a/`) ||
-                              absParsed2.pathname.includes(`/files/${correctMovieId}/audio/`);
+            absParsed2.pathname.includes(`/files/${correctMovieId}/audio/`);
           if (isAudioPath) {
             absParsed2.pathname = absParsed2.pathname.replace(
               `/files/${correctMovieId}/`,
@@ -227,8 +349,10 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
 
       // Only proxy playlists (.m3u8). Video segments (.ts, .jpg), keys, maps, subtitles, etc.
       // can be requested by the browser directly from the CDN to avoid rate limits on the backend server IP.
+      // BUT proxy subtitle files (.vtt, .srt) and paths containing "/subs/" to bypass browser CORS blocks.
       const isPlaylist = /\.m3u8($|\?)/i.test(tokenized);
-      if (!isPlaylist) {
+      const isSubtitle = /\.vtt($|\?)/i.test(tokenized) || /\.srt($|\?)/i.test(tokenized) || tokenized.includes('/subs/');
+      if (!isPlaylist && !isSubtitle) {
         return tokenized;
       }
 
@@ -273,7 +397,15 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
       // 1. Proxy the URI so audio playlists go through our proxy.
       // 2. Set DEFAULT=YES / AUTOSELECT=YES on the preferred language track;
       //    all others get DEFAULT=NO / AUTOSELECT=NO.
+      // 3. If all variants in the playlist are hostless/unresolvable (e.g. content
+      //    with no CDN hostname in the master), DROP audio tracks entirely to prevent
+      //    a 502 storm from HLS.js audio track retry loops.
       if (/^#EXT-X-MEDIA.*TYPE=AUDIO/i.test(trimmed)) {
+        if (sourceAlreadyHasQuality && allVariantsHostless) {
+          // Suppress audio track — URI would resolve to a wrong CDN (404/502) and
+          // cause HLS.js to enter a fatal audioTrackLoadError retry loop.
+          return null;
+        }
         const langMatch = trimmed.match(/LANGUAGE="([^"]+)"/i);
         const thisLang = langMatch ? langMatch[1] : null;
         const isDefault = defaultAudioLang && thisLang &&
@@ -302,7 +434,8 @@ function rewritePlaylistBody(playlistBody, provider, sourceUrl, proxyBase, origi
 
       // Rewrite plain segment/playlist URLs.
       return toProxy(trimmed);
-    });
+    })
+    .filter(line => line !== null); // remove suppressed audio track lines
 
   const finalBody = rewritten.join('\n');
 
@@ -325,6 +458,13 @@ exports.proxyStream = async (req, res) => {
   if (req.query.in && !targetUrl.includes('in=')) {
     const separator = targetUrl.includes('?') ? '&' : '?';
     targetUrl = `${targetUrl}${separator}in=${req.query.in}`;
+  }
+
+  // Sanitization fallback: If target URL has a triple-slash files path or hostname "files"
+  if (/^https:\/+\/?files\//i.test(targetUrl)) {
+    targetUrl = targetUrl.replace(/^https:\/+\/?files\//i, 'https://s21.freecdn4.top/files/');
+  } else if (targetUrl.includes('://files/')) {
+    targetUrl = targetUrl.replace('://files/', '://s21.freecdn4.top/files/');
   }
 
   try {
@@ -365,7 +505,7 @@ exports.proxyStream = async (req, res) => {
     }
 
     const upstreamHeaders = buildHeaders(provider, req.headers);
-    
+
     // Forward client IP headers to allow correct dynamic IP-locked token validation on upstream mirrors
     const ipHeaders = {};
     const ipHeaderNames = [
@@ -386,34 +526,106 @@ exports.proxyStream = async (req, res) => {
     }
 
     const rangeHeader = req.headers.range || req.headers.Range;
-    const response = await axios({
-      method: 'GET',
-      url: parsed.toString(),
-      responseType: 'arraybuffer',
-      headers: {
-        'User-Agent': USER_AGENT,
-        'Accept': '*/*',
-        'Referer': `${domain}/`,
-        'Origin': domain,
-        // Browser-like headers to avoid anti-scraper detection
-        'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'cross-site',
-        ...(rangeHeader ? { Range: rangeHeader } : {}),
-        ...(upstreamHeaders.Cookie ? { Cookie: upstreamHeaders.Cookie } : {}),
-        ...ipHeaders
-      },
-      timeout: 15000
-    });
+
+    const doFetch = async (urlObj) => {
+      return await axios({
+        method: 'GET',
+        url: urlObj.toString(),
+        responseType: 'arraybuffer',
+        headers: {
+          'User-Agent': USER_AGENT,
+          'Accept': '*/*',
+          'Referer': `${domain}/`,
+          'Origin': domain,
+          // Browser-like headers to avoid anti-scraper detection
+          'sec-ch-ua': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
+          'sec-ch-ua-mobile': '?0',
+          'sec-ch-ua-platform': '"Windows"',
+          'Sec-Fetch-Dest': 'empty',
+          'Sec-Fetch-Mode': 'cors',
+          'Sec-Fetch-Site': 'cross-site',
+          ...(rangeHeader ? { Range: rangeHeader } : {}),
+          ...(upstreamHeaders.Cookie ? { Cookie: upstreamHeaders.Cookie } : {}),
+          ...ipHeaders
+        },
+        timeout: 15000
+      });
+    };
+
+    let response;
+    let success = false;
+    const isCdnRequest = source.includes('/files/');
+    const movieId = isCdnRequest ? extractMovieId(source) : null;
+    const originalHost = parsed.hostname;
+
+    if (movieId && resolvedCdnHostsCache.has(movieId)) {
+      const cachedHost = resolvedCdnHostsCache.get(movieId);
+      parsed.hostname = cachedHost;
+      parsed.port = '';
+      console.log(`[Stream Proxy] Using cached CDN host ${cachedHost} for movie ${movieId}`);
+    }
+
+    try {
+      response = await doFetch(parsed);
+      if (response && response.status === 200) {
+        const bodyStr = Buffer.from(response.data).toString('utf8');
+        if (!bodyStr.includes('Video File Not Found.')) {
+          success = true;
+        } else {
+          console.warn(`[Stream Proxy] Target ${parsed.toString()} returned 200 but body contains "Video File Not Found."`);
+        }
+      }
+    } catch (err) {
+      console.log(`[Stream Proxy] Initial fetch failed for ${parsed.toString()}: ${err.message}`);
+    }
+
+    if (!success && isCdnRequest) {
+      console.log(`[Stream Proxy] Initiating CDN retry loop for ${source}`);
+      for (const candidate of CDN_CANDIDATES) {
+        if (candidate === originalHost) continue;
+
+        parsed.hostname = candidate;
+        parsed.port = '';
+        try {
+          console.log(`[Stream Proxy] Probing candidate CDN: ${candidate}`);
+          const probeResponse = await doFetch(parsed);
+          if (probeResponse && probeResponse.status === 200) {
+            const bodyStr = Buffer.from(probeResponse.data).toString('utf8');
+            if (!bodyStr.includes('Video File Not Found.')) {
+              response = probeResponse;
+              success = true;
+              if (movieId) {
+                resolvedCdnHostsCache.set(movieId, candidate);
+                console.log(`[Stream Proxy] Resolved and cached CDN host ${candidate} for movie ${movieId}`);
+              }
+              break;
+            }
+          }
+        } catch (probeErr) {
+          console.log(`[Stream Proxy] Probe failed for candidate ${candidate}: ${probeErr.message}`, probeErr.response?.status);
+          // Reset hostname back to original host if this candidate fails
+          parsed.hostname = originalHost;
+        }
+      }
+    }
+
+    if (!success || !response) {
+      throw new Error(response ? `Upstream returned error status ${response.status}` : 'All CDN candidates failed');
+    }
 
     const contentType = response.headers['content-type'] || '';
-    const backendBase = process.env.BACKEND_URL
-      ? process.env.BACKEND_URL.replace(/\/$/, '')
-      : `${req.protocol}://${req.get('host')}`;
-    const proxyBase = `${backendBase}/api/v2/stream/proxy`;
+    const proxyBase = `${req.protocol}://${req.get('host')}/api/v2/stream/proxy.m3u8`;
+
+    const isSubtitle = /\.srt($|\?)/i.test(parsed.toString()) || /\.vtt($|\?)/i.test(parsed.toString()) || parsed.toString().includes('/subs/');
+    if (isSubtitle) {
+      let content = Buffer.from(response.data).toString('utf8');
+      if (parsed.toString().toLowerCase().includes('.srt') || !content.trimStart().startsWith('WEBVTT')) {
+        content = srtToVtt(content);
+      }
+      res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).send(content);
+    }
 
     if (isM3u8Content(contentType, parsed.toString())) {
       const originalBody = Buffer.from(response.data).toString('utf8');

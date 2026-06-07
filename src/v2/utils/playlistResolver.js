@@ -113,6 +113,54 @@ async function expandMasterPlaylist(streams, headers = {}) {
       return streams;
     }
 
+    const resolvedCdnHostsCache = global.resolvedCdnHostsCache || new Map();
+    const movieId = (() => {
+      const match = primaryStream.url.match(/\/hls\/([^/.]+)/i) || body.match(/\/files\/([^/]+)/i);
+      return match ? match[1] : null;
+    })();
+
+    const cdnBase = (() => {
+      if (movieId && resolvedCdnHostsCache.has(movieId)) {
+        console.log(`[PlaylistResolver] Using cached CDN base host ${resolvedCdnHostsCache.get(movieId)} for movie ${movieId}`);
+        return `https://${resolvedCdnHostsCache.get(movieId)}`;
+      }
+      if (typeof body === 'string') {
+        const m = body.match(/https:\/\/(s\d+\.freecdn\d+\.top|s\d+\.nm-cdn\d+\.top|[^/]+\.nfmirrorcdn\.top|[^/]+\.freecdn\d+\.top)/i);
+        if (m) return `https://${m[1]}`;
+      }
+      return 'https://s21.freecdn4.top';
+    })();
+
+    // Detect if primary stream comes from a provider domain and extract its movie ID
+    const PROVIDER_DOMAINS_RE = /^(?:net52|net11|net22)\.cc$/i;
+    const isProviderPrimaryStream = (() => {
+      try { return PROVIDER_DOMAINS_RE.test(new URL(primaryStream.url).hostname); }
+      catch (_e) { return false; }
+    })();
+    const providerStreamMovieId = (() => {
+      try {
+        const m = new URL(primaryStream.url).pathname.match(/\/(?:pv\/)?hls\/([^/?]+)\.m3u8/i);
+        return m ? m[1] : null;
+      } catch (_e) { return null; }
+    })();
+    const providerStreamBase = (() => {
+      try {
+        const u = new URL(primaryStream.url);
+        return `${u.protocol}//${u.hostname}`;
+      } catch (_e) { return null; }
+    })();
+    const providerStreamHlsPrefix = (() => {
+      try { return new URL(primaryStream.url).pathname.startsWith('/pv/') ? '/pv' : ''; }
+      catch (_e) { return ''; }
+    })();
+    // Extract the in= token from the primary stream URL
+    const providerStreamToken = (() => {
+      try {
+        const t = new URL(primaryStream.url).searchParams.get('in') || '';
+        return t.replace(/^in=/, '');
+      } catch (_e) { return ''; }
+    })();
+
     const lines = body.split(/\r?\n/);
     const expanded = [
       {
@@ -135,6 +183,24 @@ async function expandMasterPlaylist(streams, headers = {}) {
         currentBandwidth = bwMatch ? bwMatch[1] : '';
       } else if (line && !line.startsWith('#')) {
         let variantUrl = line;
+        const isHostlessVariant = /^https?:\/\/\//.test(variantUrl) ||
+                                  (/\/files\//.test(variantUrl) && !/^https?:\/\/[^/]+\//.test(variantUrl));
+
+        if (isHostlessVariant && isProviderPrimaryStream && providerStreamMovieId && providerStreamBase) {
+          // Route through provider quality endpoint instead of guessing CDN host
+          const qualityMatch = variantUrl.match(/\/(1080p|720p|480p|360p|240p)(?:\/|\.m3u8)/i);
+          if (qualityMatch) {
+            const q = qualityMatch[1].toLowerCase();
+            const tokenSuffix = providerStreamToken ? `&in=${providerStreamToken}` : '';
+            variantUrl = `${providerStreamBase}${providerStreamHlsPrefix}/hls/${providerStreamMovieId}.m3u8?q=${q}${tokenSuffix}`;
+            console.log(`[PlaylistResolver] Hostless variant → provider quality URL: ?q=${q}`);
+          } else {
+            // Fallback for unrecognized quality paths: use cdnBase
+            variantUrl = variantUrl.replace(/^https?:\/+\/?files\//i, `${cdnBase}/files/`);
+          }
+        } else if (/^https:\/+\/?files\//i.test(variantUrl)) {
+          variantUrl = variantUrl.replace(/^https:\/+\/?files\//i, `${cdnBase}/files/`);
+        } else if (!/^https?:\/\//i.test(variantUrl)) {
 
         // net52 PV playlists sometimes emit URLs with no CDN host: https:///files/ID/720p/720p.m3u8
         // /^https?:\/\// matches this (only checks two slashes), treating it as absolute — wrong!

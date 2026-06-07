@@ -30,6 +30,11 @@ app.use(express.json());
 // API Routes
 app.use('/api/v2', apiV2Router);
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ name: 'MovieZon API', status: 'healthy', version: 'v2.0', timestamp: new Date() });
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', version: 'v2.0', timestamp: new Date() });
@@ -45,3 +50,4 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`  - Stream:  http://localhost:${PORT}/api/v2/stream/:provider/:id`);
 });
 
+// Reload trigger 5

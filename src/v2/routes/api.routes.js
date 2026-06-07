@@ -11,6 +11,7 @@ router.get('/search', searchController.search);
 router.get('/details/tmdb/:tmdbId', tmdbController.getDetailsByTmdbId);
 router.get('/details/:provider/:id', detailsController.getDetails);
 router.get('/stream/proxy', streamProxyController.proxyStream);
+router.get('/stream/proxy.m3u8', streamProxyController.proxyStream);
 router.get('/stream/:provider/:id', streamController.getStream);
 
 // TMDB List Proxies
@@ -20,6 +21,7 @@ router.get('/tmdb/top_rated', tmdbController.getTopRated);
 router.get('/tmdb/upcoming', tmdbController.getUpcoming);
 router.get('/tmdb/popular_tv', tmdbController.getPopularTv);
 router.get('/tmdb/discover', tmdbController.discover);
+router.get('/tmdb/season/:tmdbId/:seasonNumber', tmdbController.getSeasonEpisodes);
 
 // ─── Debug / Diagnostics ────────────────────────────────────────────────────
 // GET /api/v2/debug/tmdb?q=Leo  — live TMDB search test

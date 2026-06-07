@@ -100,7 +100,9 @@ module.exports = {
         runtime: data.runtime || '',
         cast: data.cast || '',
         languages: data.lang || [],
-        provider: 'net11'
+        provider: 'net11',
+        mediaType: data.type === 't' ? 'tv' : 'movie',
+        seasons: data.season || null
       };
     } catch (err) {
       console.error(`[Net11 Provider] Details failed for ID ${id}:`, err.message);
@@ -282,6 +284,26 @@ module.exports = {
     } catch (err) {
       console.error(`[Net11 Provider] Stream failed for ID ${id}:`, err.message);
       return { success: false, streams: [], subtitles: [] };
+    }
+  },
+
+  async getEpisodes(seasonId, seriesId, clientHeaders = {}) {
+    try {
+      const isNumeric = /^\d+$/.test(seasonId);
+      const url = isNumeric ? '/episodes.php' : '/pv/episodes.php';
+      const res = await net11Request({
+        method: 'GET',
+        url,
+        params: {
+          s: seasonId,
+          series: seriesId,
+          page: 1
+        }
+      }, clientHeaders);
+      return res.data?.episodes || [];
+    } catch (err) {
+      console.error(`[Net11 Provider] getEpisodes failed for season ${seasonId}:`, err.message);
+      return [];
     }
   }
 };
