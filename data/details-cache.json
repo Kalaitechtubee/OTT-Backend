@@ -24,7 +24,7 @@
         {
           "name": "Juno Temple",
           "character": "Ivy (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/nvsPrM4OKHVCDivgMx4FF6PgE5f.jpg"
+          "profilePath": "https://image.tmdb.org/t/p/w185/n20TNExAma6q9iVcWtPRxLl7pEc.jpg"
         },
         {
           "name": "Tracy Morgan",
@@ -79,6 +79,12 @@
           "mediaType": "movie"
         },
         {
+          "id": 1084242,
+          "title": "Zootopia 2",
+          "posterPath": "https://image.tmdb.org/t/p/w342/oJ7g2CifqpStmoYQyaLQgEU32qO.jpg",
+          "mediaType": "movie"
+        },
+        {
           "id": 116711,
           "title": "Epic",
           "posterPath": "https://image.tmdb.org/t/p/w342/81cSsWzjTfR3cJSqnTiHwy1eyPK.jpg",
@@ -91,15 +97,9 @@
           "mediaType": "movie"
         },
         {
-          "id": 523366,
-          "title": "Dragon Rider",
-          "posterPath": "https://image.tmdb.org/t/p/w342/ucDrOXUrVnr9X3ZmXP2Q68HDIHr.jpg",
-          "mediaType": "movie"
-        },
-        {
-          "id": 1084242,
-          "title": "Zootopia 2",
-          "posterPath": "https://image.tmdb.org/t/p/w342/oJ7g2CifqpStmoYQyaLQgEU32qO.jpg",
+          "id": 420814,
+          "title": "Christopher Robin",
+          "posterPath": "https://image.tmdb.org/t/p/w342/i6Ytex4d3CdfIKJFxB5v5vh24vb.jpg",
           "mediaType": "movie"
         },
         {
@@ -123,20 +123,50 @@
       "audioLanguages": [
         "English"
       ],
-      "seasons": []
+      "seasons": [],
+      "movie": {
+        "tmdbId": 1007757,
+        "title": "Swapped",
+        "year": 2026,
+        "poster": "https://image.tmdb.org/t/p/w500/tHhxWxge06goXU6ZQH1hj7vK8Hd.jpg",
+        "backdrop": "https://image.tmdb.org/t/p/original/zMwhWailP1WY7sb6AoE6b8ugoy.jpg",
+        "description": "A small woodland creature and a majestic bird, two natural sworn enemies of the Valley, magically trade places and set off on an adventure of a lifetime to switch back. Their journey soon uncovers a greater threat—one that could endanger not only their species, but the entire valley they call home.",
+        "rating": 9
+      },
+      "providers": [
+        {
+          "provider": "net11",
+          "available": true,
+          "id": "81749852",
+          "audioLanguages": [
+            "English"
+          ],
+          "qualities": [
+            "1080p",
+            "720p"
+          ]
+        },
+        {
+          "provider": "net52",
+          "available": false,
+          "id": null,
+          "audioLanguages": [],
+          "qualities": []
+        }
+      ]
     },
-    "expiry": 1780837973165
+    "expiry": 1781263610918
   },
-  "details::net11::81749852": {
+  "details::tmdb::76479": {
     "value": {
-      "id": "81749852",
-      "provider": "net11",
-      "title": "Swapped",
-      "originalTitle": "Swapped",
-      "year": "2026",
-      "description": "A small woodland creature and a majestic bird, two natural sworn enemies of the Valley, magically trade places and set off on an adventure of a lifetime to switch back. Their journey soon uncovers a greater threat—one that could endanger not only their species, but the entire valley they call home.",
-      "director": "Nathan Greno",
-      "genre": "Adventure, Animation, Family, Fantasy",
+      "id": "0KRGHGZCHKS920ZQGY5LBRF7MA",
+      "provider": "net52",
+      "title": "The Boys",
+      "originalTitle": "The Boys",
+      "year": "2019",
+      "description": "A group of vigilantes known informally as “The Boys” set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
+      "director": "",
+      "genre": "Sci-Fi & Fantasy, Action & Adventure",
       "languages": [
         {
           "l": "English",
@@ -145,67 +175,104 @@
       ],
       "cast": [
         {
-          "name": "Michael B. Jordan",
-          "character": "Ollie (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/sMBpav8cK7t7Nk0yf4tuNOqNUyW.jpg"
+          "name": "Karl Urban",
+          "character": "Billy Butcher",
+          "profilePath": "https://image.tmdb.org/t/p/w185/6CkZLwEJxfqqcJHyeXegMAvOlPh.jpg"
         },
         {
-          "name": "Juno Temple",
-          "character": "Ivy (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/nvsPrM4OKHVCDivgMx4FF6PgE5f.jpg"
+          "name": "Jack Quaid",
+          "character": "Hugh 'Hughie' Campbell",
+          "profilePath": "https://image.tmdb.org/t/p/w185/320qW5yEbxpmyxQ3evmClJbtKag.jpg"
         },
         {
-          "name": "Tracy Morgan",
-          "character": "Boogle / Firewolf (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/ec0OJVbs6NZKMbS1yiCAJKjeoJf.jpg"
+          "name": "Antony Starr",
+          "character": "Homelander",
+          "profilePath": "https://image.tmdb.org/t/p/w185/b0T56GMrHM24hDDjJ4DNPJcEUp6.jpg"
         },
         {
-          "name": "Cedric the Entertainer",
-          "character": "Caloo (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/s6UrY5uofyxXsU5PydWBoLFReK0.jpg"
+          "name": "Erin Moriarty",
+          "character": "Annie January / Starlight",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nA2HsETMzIUAau5XDERIxfSdc5y.jpg"
         },
         {
-          "name": "Justina Machado",
-          "character": "Calli (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/j5FaJXoyhMHlqv1l6TBdt1CH1oO.jpg"
+          "name": "Laz Alonso",
+          "character": "Marvin T. 'Mother's Milk' Milk / M.M.",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nmgOd3X2Xn3jIp9OLCRJzLExRWN.jpg"
         },
         {
-          "name": "Nate Torrence",
-          "character": "Lodd (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/yT9o149xPygdY0NsF9sNgiQwuru.jpg"
+          "name": "Chace Crawford",
+          "character": "Kevin Moskowitz / The Deep",
+          "profilePath": "https://image.tmdb.org/t/p/w185/wz7s1JT3bYi2vd4fWwmLT809cnT.jpg"
         },
         {
-          "name": "Camden Brooks",
-          "character": "Young Ollie (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/ge9FgIjRERhyylebW2Np9YwkqqR.jpg"
+          "name": "Tomer Capone",
+          "character": "Serge / Frenchie",
+          "profilePath": "https://image.tmdb.org/t/p/w185/3IhYEhV3Tmx2CawG5DvcWQyephv.jpg"
         },
         {
-          "name": "Táta Vega",
-          "character": "Grandma / Mrs. Dung Beetle (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/9SdaK2vly0Gx5yvI5rrTszh31vt.jpg"
+          "name": "Karen Fukuhara",
+          "character": "Kimiko Miyashiro",
+          "profilePath": "https://image.tmdb.org/t/p/w185/sG6CWLdENCtzukNFkFYyPxqyRmS.jpg"
         },
         {
-          "name": "Ambika Mod",
-          "character": "Violet (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/jN9HhFYPNMYIupFt6GzGnHAW88c.jpg"
+          "name": "Nathan Mitchell",
+          "character": "Justin / Black Noir II",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ivaVpN1bU2HzKmncuf1IAG6ohlb.jpg"
         },
         {
-          "name": "Lolly Adefope",
-          "character": "Lily (voice)",
-          "profilePath": "https://image.tmdb.org/t/p/w185/qPS57Mw1vjydSSfSYoMw8u81waI.jpg"
+          "name": "Colby Minifie",
+          "character": "Ashley Barrett",
+          "profilePath": "https://image.tmdb.org/t/p/w185/56FVZRFdctYhZI8zHNbegkKMwl3.jpg"
         }
       ],
-      "poster": "https://image.tmdb.org/t/p/w500/tHhxWxge06goXU6ZQH1hj7vK8Hd.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/zMwhWailP1WY7sb6AoE6b8ugoy.jpg",
-      "rating": "TMDB 9.0",
-      "trailer": "https://www.youtube.com/watch?v=glgmAwRDP8s",
-      "tmdbId": 1007757,
-      "mediaType": "movie",
-      "seasons": [],
+      "poster": "https://image.tmdb.org/t/p/w500/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
+      "rating": "TMDB 8.5",
+      "trailer": "https://www.youtube.com/watch?v=tcrNsIaQkb4",
+      "recommendations": [
+        {
+          "id": 1403,
+          "title": "Marvel's Agents of S.H.I.E.L.D.",
+          "posterPath": "https://image.tmdb.org/t/p/w342/gHUCCMy1vvj58tzE3dZqeC9SXus.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 90228,
+          "title": "Dune: Prophecy",
+          "posterPath": "https://image.tmdb.org/t/p/w342/oWVohNsxkxA3u92EzRo8fTuXIS0.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 128839,
+          "title": "La Brea",
+          "posterPath": "https://image.tmdb.org/t/p/w342/wEo5pzSZ3MF4EzNvY2R1OZNX266.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 67487,
+          "title": "The Tick",
+          "posterPath": "https://image.tmdb.org/t/p/w342/8sngJVF54bugHfCkjJOsY4wx8Hk.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 75450,
+          "title": "Titans",
+          "posterPath": "https://image.tmdb.org/t/p/w342/8e6QiSexmYKaiHGPvbhaFMmQEhc.jpg",
+          "mediaType": "tv"
+        },
+        {
+          "id": 158141,
+          "title": "Supacell",
+          "posterPath": "https://image.tmdb.org/t/p/w342/vHtNgRLWdMk7wIV2WbqkOzU7HHI.jpg",
+          "mediaType": "tv"
+        }
+      ],
+      "tmdbId": 76479,
+      "mediaType": "tv",
       "sources": [
         {
-          "provider": "net11",
-          "id": "81749852",
+          "provider": "net52",
+          "id": "0KRGHGZCHKS920ZQGY5LBRF7MA",
           "languages": [
             "English"
           ]
@@ -213,8 +280,410 @@
       ],
       "audioLanguages": [
         "English"
+      ],
+      "seasons": [
+        {
+          "season_number": 0,
+          "episode_count": 75,
+          "name": "Specials"
+        },
+        {
+          "season_number": 1,
+          "episode_count": 8,
+          "name": "Season 1",
+          "providerSeasonId": "0KRGHGZCHKS920ZQGY5LBRF7MA"
+        },
+        {
+          "season_number": 2,
+          "episode_count": 8,
+          "name": "Season 2",
+          "providerSeasonId": "0LTURNRIIF1SFJUX32I7XALS8U"
+        },
+        {
+          "season_number": 3,
+          "episode_count": 8,
+          "name": "Season 3",
+          "providerSeasonId": "0HLDL6JTNVIK6GJDH0UIW4TES8"
+        },
+        {
+          "season_number": 4,
+          "episode_count": 8,
+          "name": "Season 4",
+          "providerSeasonId": "0SSV1CIYHPUKDFUE5JOYRDKF06"
+        },
+        {
+          "season_number": 5,
+          "episode_count": 8,
+          "name": "Season 5",
+          "providerSeasonId": "0N9BB22P2FZ8UD2BBLNX07RP22"
+        }
+      ],
+      "movie": {
+        "tmdbId": 76479,
+        "title": "The Boys",
+        "year": 2019,
+        "poster": "https://image.tmdb.org/t/p/w500/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
+        "backdrop": "https://image.tmdb.org/t/p/original/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
+        "description": "A group of vigilantes known informally as “The Boys” set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
+        "rating": 8.5
+      },
+      "providers": [
+        {
+          "provider": "net11",
+          "available": false,
+          "id": null,
+          "audioLanguages": [],
+          "qualities": []
+        },
+        {
+          "provider": "net52",
+          "available": true,
+          "id": "0KRGHGZCHKS920ZQGY5LBRF7MA",
+          "audioLanguages": [
+            "English"
+          ],
+          "qualities": [
+            "1080p",
+            "720p"
+          ]
+        }
       ]
     },
-    "expiry": 1780838403541
+    "expiry": 1781263963637
+  },
+  "details::net52::0KRGHGZCHKS920ZQGY5LBRF7MA": {
+    "value": {
+      "id": "0KRGHGZCHKS920ZQGY5LBRF7MA",
+      "provider": "net52",
+      "title": "The Boys",
+      "originalTitle": "The Boys",
+      "year": "2019",
+      "description": "A group of vigilantes known informally as “The Boys” set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
+      "director": "Dan Trachtenberg, Matt Shakman, Phil Sgriccia, Fred Toye, Stefan Schwartz, Jennifer Phang, Dan Attias, Eric Kripke",
+      "genre": "Sci-Fi & Fantasy, Action & Adventure",
+      "languages": [
+        {
+          "l": "English",
+          "s": "en"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Karl Urban",
+          "character": "Billy Butcher",
+          "profilePath": "https://image.tmdb.org/t/p/w185/6CkZLwEJxfqqcJHyeXegMAvOlPh.jpg"
+        },
+        {
+          "name": "Jack Quaid",
+          "character": "Hugh 'Hughie' Campbell",
+          "profilePath": "https://image.tmdb.org/t/p/w185/320qW5yEbxpmyxQ3evmClJbtKag.jpg"
+        },
+        {
+          "name": "Antony Starr",
+          "character": "Homelander",
+          "profilePath": "https://image.tmdb.org/t/p/w185/b0T56GMrHM24hDDjJ4DNPJcEUp6.jpg"
+        },
+        {
+          "name": "Erin Moriarty",
+          "character": "Annie January / Starlight",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nA2HsETMzIUAau5XDERIxfSdc5y.jpg"
+        },
+        {
+          "name": "Laz Alonso",
+          "character": "Marvin T. 'Mother's Milk' Milk / M.M.",
+          "profilePath": "https://image.tmdb.org/t/p/w185/nmgOd3X2Xn3jIp9OLCRJzLExRWN.jpg"
+        },
+        {
+          "name": "Chace Crawford",
+          "character": "Kevin Moskowitz / The Deep",
+          "profilePath": "https://image.tmdb.org/t/p/w185/wz7s1JT3bYi2vd4fWwmLT809cnT.jpg"
+        },
+        {
+          "name": "Tomer Capone",
+          "character": "Serge / Frenchie",
+          "profilePath": "https://image.tmdb.org/t/p/w185/3IhYEhV3Tmx2CawG5DvcWQyephv.jpg"
+        },
+        {
+          "name": "Karen Fukuhara",
+          "character": "Kimiko Miyashiro",
+          "profilePath": "https://image.tmdb.org/t/p/w185/sG6CWLdENCtzukNFkFYyPxqyRmS.jpg"
+        },
+        {
+          "name": "Nathan Mitchell",
+          "character": "Justin / Black Noir II",
+          "profilePath": "https://image.tmdb.org/t/p/w185/ivaVpN1bU2HzKmncuf1IAG6ohlb.jpg"
+        },
+        {
+          "name": "Colby Minifie",
+          "character": "Ashley Barrett",
+          "profilePath": "https://image.tmdb.org/t/p/w185/56FVZRFdctYhZI8zHNbegkKMwl3.jpg"
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
+      "rating": "TMDB 8.5",
+      "trailer": "https://www.youtube.com/watch?v=tcrNsIaQkb4",
+      "tmdbId": 76479,
+      "mediaType": "tv",
+      "seasons": [
+        {
+          "season_number": 0,
+          "episode_count": 75,
+          "name": "Specials"
+        },
+        {
+          "season_number": 1,
+          "episode_count": 8,
+          "name": "Season 1",
+          "providerSeasonId": "0KRGHGZCHKS920ZQGY5LBRF7MA"
+        },
+        {
+          "season_number": 2,
+          "episode_count": 8,
+          "name": "Season 2",
+          "providerSeasonId": "0LTURNRIIF1SFJUX32I7XALS8U"
+        },
+        {
+          "season_number": 3,
+          "episode_count": 8,
+          "name": "Season 3",
+          "providerSeasonId": "0HLDL6JTNVIK6GJDH0UIW4TES8"
+        },
+        {
+          "season_number": 4,
+          "episode_count": 8,
+          "name": "Season 4",
+          "providerSeasonId": "0SSV1CIYHPUKDFUE5JOYRDKF06"
+        },
+        {
+          "season_number": 5,
+          "episode_count": 8,
+          "name": "Season 5",
+          "providerSeasonId": "0N9BB22P2FZ8UD2BBLNX07RP22"
+        }
+      ],
+      "sources": [
+        {
+          "provider": "net52",
+          "id": "0KRGHGZCHKS920ZQGY5LBRF7MA",
+          "languages": [
+            "English"
+          ],
+          "qualities": [
+            "1080p",
+            "720p"
+          ]
+        }
+      ],
+      "audioLanguages": [
+        "English"
+      ],
+      "movie": {
+        "tmdbId": 76479,
+        "title": "The Boys",
+        "year": 2019,
+        "poster": "https://image.tmdb.org/t/p/w500/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
+        "backdrop": "https://image.tmdb.org/t/p/original/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
+        "description": "A group of vigilantes known informally as “The Boys” set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
+        "rating": 8.5
+      },
+      "providers": [
+        {
+          "provider": "net11",
+          "available": false,
+          "id": null,
+          "audioLanguages": [],
+          "qualities": []
+        },
+        {
+          "provider": "net52",
+          "available": true,
+          "id": "0KRGHGZCHKS920ZQGY5LBRF7MA",
+          "audioLanguages": [
+            "English"
+          ],
+          "qualities": [
+            "1080p",
+            "720p"
+          ]
+        }
+      ]
+    },
+    "expiry": 1781329836884
+  },
+  "details::tmdb::949229": {
+    "value": {
+      "id": "81218917",
+      "provider": "net11",
+      "title": "Leo",
+      "originalTitle": "லியோ",
+      "year": "2023",
+      "description": "Parthiban, a cafe owner, lives with his family in Himachal Pradesh. Things take an absurd turn for him when he gets in the way of a drug cartel.",
+      "director": "Lokesh Kanagaraj",
+      "genre": "Action, Crime, Thriller",
+      "languages": [
+        {
+          "l": "Tamil",
+          "s": "ta"
+        }
+      ],
+      "cast": [
+        {
+          "name": "Vijay",
+          "character": "Parthiban / Leo Das",
+          "profilePath": "https://image.tmdb.org/t/p/w185/zbQ1sDRVRHkroWwvrnqYKMerl66.jpg"
+        },
+        {
+          "name": "Sanjay Dutt",
+          "character": "Antony Das",
+          "profilePath": "https://image.tmdb.org/t/p/w185/oq4pnvWhl1HxKpp0KVlSfAr3Tiu.jpg"
+        },
+        {
+          "name": "Arjun Sarja",
+          "character": "Harold Das",
+          "profilePath": "https://image.tmdb.org/t/p/w185/fQ0yTvyDdykFxfHNYKNfRKzlCyz.jpg"
+        },
+        {
+          "name": "Trisha Krishnan",
+          "character": "Sathya",
+          "profilePath": "https://image.tmdb.org/t/p/w185/jfeAV0VeAQhKONzIv1UEYbklJGn.jpg"
+        },
+        {
+          "name": "Madonna Sebastian",
+          "character": "Elisa Das",
+          "profilePath": "https://image.tmdb.org/t/p/w185/2mC5mrsWPHVBXG5UvbHy4pOmdh1.jpg"
+        },
+        {
+          "name": "Gautham Vasudev Menon",
+          "character": "Joshy Andrews",
+          "profilePath": "https://image.tmdb.org/t/p/w185/qOFycWPpr3Hi4kVXKWnTTKCAnGk.jpg"
+        },
+        {
+          "name": "Baby Iyal",
+          "character": "Mathi 'Chintu'",
+          "profilePath": null
+        },
+        {
+          "name": "Mathew Thomas",
+          "character": "Siddharth 'Siddhu'",
+          "profilePath": "https://image.tmdb.org/t/p/w185/tynqqZ6LXz6TCDUWMG0xR4pNDkw.jpg"
+        },
+        {
+          "name": "George Mariyan",
+          "character": "Napoleon",
+          "profilePath": "https://image.tmdb.org/t/p/w185/izpHGWpHeMeOV7mXlhF19Hu7IER.jpg"
+        },
+        {
+          "name": "Priya Anand",
+          "character": "Deepa Andrews",
+          "profilePath": "https://image.tmdb.org/t/p/w185/aU4yM8ioCg50GWlK39XT1AF65nk.jpg"
+        }
+      ],
+      "poster": "https://image.tmdb.org/t/p/w500/2XUHC4lp3tDsgfFLFygNZ2x2Um9.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/MSNYxWe4u4en9vQ3oZIKQWKYHu.jpg",
+      "rating": "TMDB 6.9",
+      "trailer": "https://www.youtube.com/watch?v=FZYhL_bVQUQ",
+      "recommendations": [
+        {
+          "id": 587030,
+          "title": "Kaithi",
+          "posterPath": "https://image.tmdb.org/t/p/w342/hOF9CgPsy9aLr5GJEBESC8MEXFy.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 1115239,
+          "title": "Por Thozhil",
+          "posterPath": "https://image.tmdb.org/t/p/w342/lZ2BbjGBDRW5Q5Q9jgEknuiEQ0f.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 370076,
+          "title": "Theri",
+          "posterPath": "https://image.tmdb.org/t/p/w342/gyw2ybu40F7xeoIDLtmz3ABa6fu.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 594139,
+          "title": "Darbar",
+          "posterPath": "https://image.tmdb.org/t/p/w342/39kVh9CWrY8cE6rIzRqwo6Dn1cZ.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 1118224,
+          "title": "Maharaja",
+          "posterPath": "https://image.tmdb.org/t/p/w342/s0m4TM1XRAftQStgKpw024RvkJo.jpg",
+          "mediaType": "movie"
+        },
+        {
+          "id": 300983,
+          "title": "Yennai Arindhaal",
+          "posterPath": "https://image.tmdb.org/t/p/w342/hGQYVXiB16I7pPqQVSGqvgWIMkQ.jpg",
+          "mediaType": "movie"
+        }
+      ],
+      "tmdbId": 949229,
+      "mediaType": "movie",
+      "sources": [
+        {
+          "provider": "net11",
+          "id": "81218917",
+          "languages": [
+            "Tamil"
+          ]
+        },
+        {
+          "provider": "net11",
+          "id": "81639320",
+          "languages": [
+            "Telugu"
+          ]
+        },
+        {
+          "provider": "net11",
+          "id": "81639319",
+          "languages": [
+            "Tamil"
+          ]
+        },
+        {
+          "provider": "net11",
+          "id": "81639323",
+          "languages": [
+            "Hindi"
+          ]
+        },
+        {
+          "provider": "net11",
+          "id": "81639322",
+          "languages": [
+            "Kannada"
+          ]
+        },
+        {
+          "provider": "net11",
+          "id": "81639321",
+          "languages": [
+            "Malayalam"
+          ]
+        },
+        {
+          "provider": "net11",
+          "id": "81742215",
+          "languages": [
+            "English"
+          ]
+        }
+      ],
+      "audioLanguages": [
+        "Telugu",
+        "Tamil",
+        "Hindi",
+        "Kannada",
+        "Malayalam",
+        "English"
+      ],
+      "seasons": []
+    },
+    "expiry": 1781332602019
   }
 }
