@@ -133,13 +133,27 @@ module.exports = {
       ...(config.headers || {})
     };
 
-    console.log(`[Net11 Client] ${config.method || 'GET'} ${url}`);
-    return axios({
+    const requestConfig = {
       ...config,
       url,
       headers,
       timeout: 12000
-    });
+    };
+
+    const proxyUrl = process.env.PROVIDER_PROXY || process.env.TMDB_PROXY || '';
+    if (proxyUrl) {
+      try {
+        const u = new URL(proxyUrl);
+        requestConfig.proxy = {
+          protocol: u.protocol.replace(':', ''),
+          host: u.hostname,
+          port: parseInt(u.port, 10) || (u.protocol === 'https:' ? 443 : 80)
+        };
+      } catch (_) {}
+    }
+
+    console.log(`[Net11 Client] ${config.method || 'GET'} ${url}`);
+    return axios(requestConfig);
   },
 
   async net52Request(config, clientHeaders = {}) {
@@ -150,12 +164,26 @@ module.exports = {
       ...(config.headers || {})
     };
 
-    console.log(`[Net52 Client] ${config.method || 'GET'} ${url}`);
-    return axios({
+    const requestConfig = {
       ...config,
       url,
       headers,
       timeout: 12000
-    });
+    };
+
+    const proxyUrl = process.env.PROVIDER_PROXY || process.env.TMDB_PROXY || '';
+    if (proxyUrl) {
+      try {
+        const u = new URL(proxyUrl);
+        requestConfig.proxy = {
+          protocol: u.protocol.replace(':', ''),
+          host: u.hostname,
+          port: parseInt(u.port, 10) || (u.protocol === 'https:' ? 443 : 80)
+        };
+      } catch (_) {}
+    }
+
+    console.log(`[Net52 Client] ${config.method || 'GET'} ${url}`);
+    return axios(requestConfig);
   }
 };
